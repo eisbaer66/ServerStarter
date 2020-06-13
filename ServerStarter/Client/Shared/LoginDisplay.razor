@@ -1,0 +1,36 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using ServerStarter.Server
+
+@inject NavigationManager Navigation
+@inject SignOutSessionStateManager SignOutManager
+
+@code {
+    private AuthenticationState context;
+}
+
+<AuthorizeView>
+    <Authorized>
+        <a href="authentication/profile">Hello, <img src="@GetAvatarUrl(context)" /> @context.User.Identity.Name!</a>
+        <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
+    </Authorized>
+    <NotAuthorized>
+        <a href="authentication/register">Register</a>
+        <a href="authentication/login">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code{
+    private async Task BeginSignOut(MouseEventArgs args)
+    {
+        await SignOutManager.SetSignOutState();
+        Navigation.NavigateTo("authentication/logout");
+    }
+
+    private string GetAvatarUrl(AuthenticationState state)
+    {
+        var claim = state.User.Claims.FirstOrDefault(c => c.Type == IcebearClaimTypes.Avatar);
+
+        return claim?.Value;
+    }
+}
