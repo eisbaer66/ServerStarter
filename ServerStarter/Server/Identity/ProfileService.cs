@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
 using IdentityServer4.AspNetIdentity;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +27,9 @@ namespace ServerStarter.Server.Identity
 
             var avatarClaims = context.Subject.FindAll(IcebearClaimTypes.Avatar);
             context.IssuedClaims.AddRange(avatarClaims);
+
+            var nameClaims = context.Subject.FindAll(ClaimTypes.Name);
+            context.IssuedClaims.AddRange(nameClaims);
         }
     }
 }

@@ -1,11 +1,18 @@
 @page "/communities"
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.AspNetCore.Http.Connections.Client
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.DependencyInjection
 @using ServerStarter.Shared
+@using ServerStarter.Client.Components
 @attribute [Authorize]
+@implements IDisposable
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IAccessTokenProvider AccessTokenProvider
 
-    <h1>Communities</h1>
+<h1>Communities</h1>
 
 @if (communities == null)
 {
@@ -15,40 +22,27 @@ else
 {
     <table class="table">
         <thead>
-        <tr>
-            <th>Name</th>
-            <th>CurrentPlayers</th>
-            <th>WaitingPlayers</th>
-            <th>MinimumPlayers</th>
-            <th>Servers</th>
-        </tr>
+            <tr>
+                <th>Name</th>
+                <th>CurrentPlayers</th>
+                <th>WaitingPlayers</th>
+                <th>MinimumPlayers</th>
+                <th>Servers</th>
+                <th></th>
+            </tr>
         </thead>
         <tbody>
-        @foreach (var community in communities)
-        {
-            <tr>
-                <td>@community.Name</td>
-                <td>@community.CurrentPlayers</td>
-                <td>@community.WaitingPlayers</td>
-                <td>@community.MinimumPlayers</td>
-                <td>
-                    <ul>
-                        @foreach (var server in community.Servers)
-                        {
-                            <li>
-                                @server.Name (<a href="steam://connect/@server.Ip">@server.Ip</a>): @server.CurrentPlayers
-                            </li>
-                        }
-                    </ul>
-                </td>
-            </tr>
-        }
+            @foreach (var community in communities)
+            {
+                <CommunityComponent Community="community" HubConnection="HubConnection"></CommunityComponent>
+            }
         </tbody>
     </table>
 }
 
 @code {
     private Community[] communities;
+    private HubConnection HubConnection;
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,6 +54,35 @@ else
         {
             exception.Redirect();
         }
+
+
+        Action<HttpConnectionOptions> ConfigureHttpConnection()
+        {
+            return options =>
+                   {
+                       options.AccessTokenProvider = async () =>
+                                                           {
+                                                               var result = await AccessTokenProvider.RequestAccessToken();
+                                                               AccessToken token;
+                                                               bool tryGetToken = result.TryGetToken(out token);
+                                                               if (!tryGetToken)
+                                                                   return null;
+                                                               return token.Value;
+                                                           };
+                   };
+        }
+
+        HubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager
+                         .ToAbsoluteUri("/hubs/communities"), ConfigureHttpConnection())
+            .Build();
+        await HubConnection.StartAsync();
+    }
+
+    public void Dispose()
+    {
+        if (HubConnection != null)
+            _ = HubConnection.DisposeAsync();
     }
 
 }

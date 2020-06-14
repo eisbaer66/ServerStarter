@@ -22,6 +22,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using ServerStarter.Server.Data;
 using ServerStarter.Server.Data.Repositories;
+using ServerStarter.Server.Hubs;
 using ServerStarter.Server.Identity;
 using ServerStarter.Server.Models;
 using ServerStarter.Server.Services;
@@ -54,6 +55,11 @@ namespace ServerStarter.Server
             services.AddIdentityServer()
                 .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
+
+            services.Configure<IdentityOptions>(options =>
+                                                {
+                                                    options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name;
+                                                });
             services.AddAuthentication()
                 .AddIdentityServerJwt()
                 .AddSteam(options =>
@@ -87,8 +93,15 @@ namespace ServerStarter.Server
                           });
             services.AddTransient<IProfileService, ProfileService>();
 
+            services.AddSignalR();
+
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            services.AddResponseCompression(opts =>
+                                            {
+                                                opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+                                            });
 
 
             services.AddTransient<ICommunityRepository, CommunityRepository>();
@@ -105,6 +118,7 @@ namespace ServerStarter.Server
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseAllElasticApm(Configuration);
+            app.UseResponseCompression();
 
             if (env.IsDevelopment())
             {
@@ -135,6 +149,7 @@ namespace ServerStarter.Server
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
+                endpoints.MapHub<CommunitiesHub>("/hubs/communities");
                 endpoints.MapFallbackToFile("index.html");
             });
         }

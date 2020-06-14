@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using ServerStarter.Server;
@@ -14,5 +15,8 @@ namespace ServerStarter.Client
 
         [JsonPropertyName(IcebearClaimTypes.Avatar)]
         public string AvatarUrl { get; set; }
+
+        [JsonPropertyName(ClaimTypes.Name)]
+        public string Name { get; set; }
     }
 }

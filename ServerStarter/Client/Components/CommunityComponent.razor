@@ -1,0 +1,147 @@
+﻿@using Microsoft.AspNetCore.SignalR.Client
+@using ServerStarter.Shared
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
+@implements IDisposable
+
+<tr>
+    <td>@Community.Name</td>
+    <td>@Community.CurrentPlayers</td>
+    <td>@Community.WaitingPlayers</td>
+    <td>@Community.MinimumPlayers</td>
+    <td>
+        <ul>
+            @foreach (var server in Community.Servers)
+            {
+                <li>
+                    @server.Name (<a href="steam://connect/@server.Ip">@server.Ip</a>): @server.CurrentPlayers
+                </li>
+            }
+        </ul>
+    </td>
+    <td>
+        @if (joined)
+        {
+            <button @onclick="LeaveQueue" disabled="@(!IsConnected)">Leave</button>
+        }
+        else
+        {
+            <button @onclick="JoinQueue" disabled="@(!IsConnected)">Join</button>
+        }
+    </td>
+</tr>
+@if (joined)
+{
+    <tr>
+        <td colspan="6">
+            <ul id="messagesList">
+                @foreach (var message in messages)
+                {
+                    <li>@message</li>
+                }
+            </ul>
+
+            <hr>
+            <div class="form-group">
+                <label>
+                    Message:
+                    <input @ref="messageInputReference" @bind="messageInput" size="50" @onkeyup="KeyUp" />
+                </label>
+            </div>
+            <button @onclick="Send" disabled="@(!IsConnected)">Send</button>
+        </td>
+    </tr>
+}
+
+@code {
+    [Parameter]
+    public Community Community { get; set; }
+
+    [Parameter]
+    public HubConnection HubConnection { get; set; }
+
+    ElementReference messageInputReference;
+
+    private readonly List<string> messages = new List<string>();
+    private readonly List<IDisposable> groupSubscription = new List<IDisposable>();
+    private bool joined = false;
+    private string messageInput;
+
+    async Task JoinQueue()
+    {
+        await HubConnection.InvokeAsync("JoinGroup", Community.Id);
+
+
+        groupSubscription.Add(HubConnection.On<string, string, string>("MessageReceived", (communityId, user, message) =>
+        {
+            if (communityId != Community.Id.ToString())
+                return;
+
+            var encodedMsg = $"{user}: {message}";
+            AddMessage(encodedMsg);
+        }));
+
+        groupSubscription.Add(HubConnection.On<string, string>("UserJoined", (communityId, user) =>
+        {
+            if (communityId != Community.Id.ToString())
+                return;
+
+            var encodedMsg = $"{user} joined the queue";
+            AddMessage(encodedMsg);
+        }));
+
+        groupSubscription.Add(HubConnection.On<string, string>("UserLeft", (communityId, user) =>
+        {
+            if (communityId != Community.Id.ToString())
+                return;
+
+            var encodedMsg = $"{user} left the queue";
+            AddMessage(encodedMsg);
+        }));
+
+        joined = true;
+    }
+
+    async void AddMessage(string msg)
+    {
+        messages.Add("[" + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + "] " + msg);
+        StateHasChanged();
+    }
+    async Task LeaveQueue()
+    {
+        await HubConnection.InvokeAsync("LeaveGroup", Community.Id);
+
+        foreach (var subscription in groupSubscription)
+        {
+            subscription.Dispose();
+        }
+        groupSubscription.Clear();
+
+        messages.Clear();
+        messageInput = string.Empty;
+        joined = false;
+    }
+
+    async Task Send()
+    {
+        await HubConnection.SendAsync("SendMessage", Community.Id, messageInput);
+        messageInput = string.Empty;
+
+        await JsRuntime.InvokeVoidAsync("uiFunctions.focusElement", messageInputReference);
+    }
+
+    async Task KeyUp(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+            await Send();
+    }
+
+    public bool IsConnected =>
+        HubConnection.State == HubConnectionState.Connected;
+
+    public void Dispose()
+    {
+        LeaveQueue().Wait();
+    }
+
+}

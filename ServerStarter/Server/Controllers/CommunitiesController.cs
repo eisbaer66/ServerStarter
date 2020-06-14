@@ -58,6 +58,7 @@ namespace ServerStarter.Server.Controllers
 
             return new Community
                    {
+                       Id             = community.Id,
                        Name           = community.Name,
                        MinimumPlayers = community.MinimumPlayers,
                        CurrentPlayers = servers.Select(s => s.CurrentPlayers).Max(),

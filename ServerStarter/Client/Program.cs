@@ -1,8 +1,7 @@
 using System;
 using System.Net.Http;
-using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Text;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +27,7 @@ namespace ServerStarter.Client
             builder.Services.AddOidcAuthentication<RemoteAuthenticationState, UserAccount>(options =>
                                                    {
                                                        builder.Configuration.Bind("Local", options.ProviderOptions);
+                                                       options.UserOptions.NameClaim = ClaimTypes.Name;
                                                    })
                    .AddAccountClaimsPrincipalFactory<RemoteAuthenticationState, UserAccount, CustomAccountClaimsPrincipalFactory>();
 

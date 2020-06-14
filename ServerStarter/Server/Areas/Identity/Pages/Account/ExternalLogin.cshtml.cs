@@ -148,7 +148,8 @@ namespace ServerStarter.Server.Areas.Identity.Pages.Account
 
                 var user = new ApplicationUser
                            {
-                               UserName = name, 
+                               UserName = name,
+                               Name = name, 
                                Email = Input.Email,
                                SteamId = steamId,
                                AvatarUrl = avatar,

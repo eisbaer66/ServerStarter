@@ -18,6 +18,7 @@ namespace ServerStarter.Server.Identity
 
             if (identity.IsAuthenticated)
             {
+                identity.AddClaim(new Claim(ClaimTypes.Name,           user.Name));
                 identity.AddClaim(new Claim(IcebearClaimTypes.SteamId, user.SteamId));
                 identity.AddClaim(new Claim(IcebearClaimTypes.Avatar,  user.AvatarUrl));
             }

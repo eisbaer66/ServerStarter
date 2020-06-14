@@ -32,6 +32,11 @@ namespace ServerStarter.Client
                     ((ClaimsIdentity)principal.Identity).AddClaim(new Claim(IcebearClaimTypes.SteamId, account.SteamId));
                 if (!string.IsNullOrEmpty(account.AvatarUrl))
                     ((ClaimsIdentity)principal.Identity).AddClaim(new Claim(IcebearClaimTypes.Avatar, account.AvatarUrl));
+                if (!string.IsNullOrEmpty(account.Name))
+                {
+                    ((ClaimsIdentity)principal.Identity).AddClaim(new Claim(ClaimTypes.Name, account.Name));
+                    ((ClaimsIdentity)principal.Identity).AddClaim(new Claim("name", account.Name));
+                }
             }
 
             return principal;

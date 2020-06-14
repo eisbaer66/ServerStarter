@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace ServerStarter.Shared
 {
     public class Community
     {
+        public Guid                   Id             { get; set; }
         public string                 Name           { get; set; }
         public int                    CurrentPlayers { get; set; }
         public int                    WaitingPlayers { get; set; }
