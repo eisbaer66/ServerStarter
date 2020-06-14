@@ -1,0 +1,65 @@
+@page "/communities"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using ServerStarter.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+
+    <h1>Communities</h1>
+
+@if (communities == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>CurrentPlayers</th>
+            <th>WaitingPlayers</th>
+            <th>MinimumPlayers</th>
+            <th>Servers</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var community in communities)
+        {
+            <tr>
+                <td>@community.Name</td>
+                <td>@community.CurrentPlayers</td>
+                <td>@community.WaitingPlayers</td>
+                <td>@community.MinimumPlayers</td>
+                <td>
+                    <ul>
+                        @foreach (var server in community.Servers)
+                        {
+                            <li>
+                                @server.Name (<a href="steam://connect/@server.Ip">@server.Ip</a>): @server.CurrentPlayers
+                            </li>
+                        }
+                    </ul>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Community[] communities;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            communities = await Http.GetFromJsonAsync<Community[]>("Communities");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+}

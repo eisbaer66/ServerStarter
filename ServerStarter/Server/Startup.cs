@@ -14,10 +14,18 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
 using AspNet.Security.OpenId.Steam;
+using Elastic.Apm.AspNetCore;
+using Elastic.Apm.NetCoreAll;
 using IdentityServer4.Hosting.LocalApiAuthentication;
 using IdentityServer4.Services;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using ServerStarter.Server.Data;
+using ServerStarter.Server.Data.Repositories;
+using ServerStarter.Server.Identity;
 using ServerStarter.Server.Models;
+using ServerStarter.Server.Services;
+using ServerStarter.Server.SteamQueryNetAdapters;
 
 namespace ServerStarter.Server
 {
@@ -81,11 +89,23 @@ namespace ServerStarter.Server
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+
+            services.AddTransient<ICommunityRepository, CommunityRepository>();
+            services.AddTransient<ServerInfoService>();
+            services.AddTransient<IServerInfoService>(c =>
+                                                      {
+                                                          var logger = c.GetService<ILogger<ServerInfoServiceElasticApmWrapper>>();
+                                                          var service = c.GetService<ServerInfoService>();
+                                                          return new ServerInfoServiceElasticApmWrapper(logger, service);
+                                                      });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseAllElasticApm(Configuration);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -98,6 +118,8 @@ namespace ServerStarter.Server
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseSerilogRequestLogging();
 
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
