@@ -1,5 +1,7 @@
-﻿@using Microsoft.AspNetCore.SignalR.Client
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.AspNetCore.SignalR.Client
 @using ServerStarter.Shared
+@inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
 @implements IDisposable
@@ -63,15 +65,37 @@
     ElementReference messageInputReference;
 
     private readonly List<string> messages = new List<string>();
+    private readonly List<IDisposable> subscription = new List<IDisposable>();
     private readonly List<IDisposable> groupSubscription = new List<IDisposable>();
     private bool joined = false;
     private string messageInput;
 
+    protected override async Task OnInitializedAsync()
+    {
+        subscription.Add(HubConnection.On<string>("Changed", async (communityId) =>
+        {
+            if (communityId != Community.Id.ToString())
+                return;
+
+            await LoadCommunity();
+        }));
+    }
+
+    private async Task LoadCommunity()
+    {
+        try
+        {
+            Community = await Http.GetFromJsonAsync<Community>("Communities/" + Community.Id);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        StateHasChanged();
+    }
+
     async Task JoinQueue()
     {
-        await HubConnection.InvokeAsync("JoinGroup", Community.Id);
-
-
         groupSubscription.Add(HubConnection.On<string, string, string>("MessageReceived", (communityId, user, message) =>
         {
             if (communityId != Community.Id.ToString())
@@ -99,6 +123,7 @@
             AddMessage(encodedMsg);
         }));
 
+        await HubConnection.InvokeAsync("JoinGroup", Community.Id);
         joined = true;
     }
 
@@ -141,7 +166,13 @@
 
     public void Dispose()
     {
-        LeaveQueue().Wait();
+        foreach (var s in subscription)
+        {
+            s.Dispose();
+        }
+        subscription.Clear();
+
+        LeaveQueue();
     }
 
 }

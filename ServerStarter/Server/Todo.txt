@@ -1,5 +1,24 @@
-﻿!Queueing!
+﻿dummy zarlo-api
+background updates
+ notify clients
+ thow out inactive connections? timeout?
+
+!Start server!
+
+error handling!
+
+login vereinfachen!
+ remember
+ direkt steam (und icon)
+ email needed?
+ 
+/api
+signal reconnect?
+
+ui!
 
 Cache
+guid needed?!
 chat auth
+
 ?Prios?

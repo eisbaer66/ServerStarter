@@ -128,10 +128,19 @@ namespace ServerStarter.Server.Areas.Identity.Pages.Account
                     givenName = info.Principal.FindFirst(ClaimTypes.GivenName).Value;
                 }
 
-                string steamId = string.Empty;
+                long steamId = 0;
                 if (info.Principal.HasClaim(c => c.Type == IcebearClaimTypes.SteamId))
                 {
-                    steamId = info.Principal.FindFirst(IcebearClaimTypes.SteamId).Value;
+                    string steamIdRaw = info.Principal.FindFirst(IcebearClaimTypes.SteamId).Value;
+                    if (!long.TryParse(steamIdRaw, out steamId))
+                    {
+                        _logger.LogError("couldn't read {SteamId} as long", steamIdRaw);
+
+                        ModelState.AddModelError(string.Empty, "invalid steamid");
+                        ProviderDisplayName = info.ProviderDisplayName;
+                        ReturnUrl           = returnUrl;
+                        return Page();
+                    }
                 }
 
                 string avatar = string.Empty;

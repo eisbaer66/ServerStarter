@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
 using AspNet.Security.OpenId.Steam;
@@ -26,7 +28,8 @@ using ServerStarter.Server.Hubs;
 using ServerStarter.Server.Identity;
 using ServerStarter.Server.Models;
 using ServerStarter.Server.Services;
-using ServerStarter.Server.SteamQueryNetAdapters;
+using ServerStarter.Server.ZarloAdapter;
+using Zarlo.Stats;
 
 namespace ServerStarter.Server
 {
@@ -43,9 +46,9 @@ namespace ServerStarter.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
+                                                                                        Configuration.GetConnectionString("DefaultConnection")));
+            services.AddTransient<DbSet<ApplicationUser>>(c => c.GetService<ApplicationDbContext>().Users);
 
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                     
@@ -104,14 +107,15 @@ namespace ServerStarter.Server
                                             });
 
 
+            services.AddSingleton<HttpClient>(c => new HttpClient()
+                                                   {
+                                                       BaseAddress = new Uri("https://dev-8888.balancemod.tf/"),
+                                                   });
+            services.AddSingleton<ICommunityQueue, InMemoryCommunityQueue>();
+
             services.AddTransient<ICommunityRepository, CommunityRepository>();
-            services.AddTransient<ServerInfoService>();
-            services.AddTransient<IServerInfoService>(c =>
-                                                      {
-                                                          var logger = c.GetService<ILogger<ServerInfoServiceElasticApmWrapper>>();
-                                                          var service = c.GetService<ServerInfoService>();
-                                                          return new ServerInfoServiceElasticApmWrapper(logger, service);
-                                                      });
+            services.AddTransient<IServerInfoService, ServerInfoService>();
+            services.AddTransient<IServerInfoQueries, ServerInfoQueries>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

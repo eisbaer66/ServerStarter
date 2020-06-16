@@ -15,7 +15,7 @@ namespace ServerStarter.Server.Models
         public string Name { get; set; }
 
         [JsonPropertyName(IcebearClaimTypes.SteamId)]
-        public string SteamId { get; set; }
+        public long SteamId { get; set; }
 
         [JsonPropertyName(IcebearClaimTypes.Avatar)]
         public string AvatarUrl { get; set; }

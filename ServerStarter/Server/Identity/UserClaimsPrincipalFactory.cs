@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Globalization;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -19,7 +20,7 @@ namespace ServerStarter.Server.Identity
             if (identity.IsAuthenticated)
             {
                 identity.AddClaim(new Claim(ClaimTypes.Name,           user.Name));
-                identity.AddClaim(new Claim(IcebearClaimTypes.SteamId, user.SteamId));
+                identity.AddClaim(new Claim(IcebearClaimTypes.SteamId, user.SteamId.ToString(CultureInfo.InvariantCulture)));
                 identity.AddClaim(new Claim(IcebearClaimTypes.Avatar,  user.AvatarUrl));
             }
 

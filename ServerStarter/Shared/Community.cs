@@ -19,5 +19,11 @@ namespace ServerStarter.Shared
         public string Name           { get; set; }
         public string Ip             { get; set; }
         public int    CurrentPlayers { get; set; }
+        public IList<ServerPlayer> Players { get; set; }
+    }
+
+    public class ServerPlayer
+    {
+        public long SteamId { get; set; }
     }
 }
