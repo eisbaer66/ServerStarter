@@ -61,6 +61,7 @@ namespace ServerStarter.Server
 
             services.Configure<IdentityOptions>(options =>
                                                 {
+                                                    options.SignIn.RequireConfirmedEmail = false;
                                                     options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name;
                                                 });
             services.AddAuthentication()
