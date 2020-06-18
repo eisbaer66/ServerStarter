@@ -1,0 +1,84 @@
+{
+  "Servers": [
+    {
+      "serverId": 15,
+      "address": "200.98.168.253",
+      "tracked": true,
+      "max_players": 24,
+      "act_players": 3,
+      "act_map": "koth_king",
+      "name": "Aww Yeaa Balancemod Brazil",
+      "publicaddress": "200.98.168.253:27016"
+    },
+    {
+      "serverId": 6,
+      "address": "64.140.150.232",
+      "tracked": true,
+      "max_players": 24,
+      "act_players": 4,
+      "act_map": "cp_badlands",
+      "name": "Creators.TF | Balance Mod Server #1 | Washington",
+      "publicaddress": "64.140.150.232:27015"
+    },
+    {
+      "serverId": 12,
+      "address": "64.140.150.232",
+      "tracked": true,
+      "max_players": 24,
+      "act_players": 24,
+      "act_map": "cp_process_final",
+      "name": "Creators.TF | Balance Mod Server #2 | Washington",
+      "publicaddress": "64.140.150.232:27025"
+    },
+    {
+      "serverId": 13,
+      "address": "64.140.150.232",
+      "tracked": true,
+      "max_players": 24,
+      "act_players": 0,
+      "act_map": "koth_harvestalpine_v3b",
+      "name": "Creators.TF | Balance Mod Server #3 | Washington",
+      "publicaddress": "64.140.150.232:27035"
+    },
+    {
+      "serverId": 5,
+      "address": "206.189.81.187",
+      "tracked": true,
+      "max_players": 24,
+      "act_players": 0,
+      "act_map": "pl_fifthcurve_rc1",
+      "name": "Creators.TF | Balance Mod Server | Singapore",
+      "publicaddress": "206.189.81.187:27015"
+    },
+    {
+      "serverId": 4,
+      "address": "212.129.60.25",
+      "tracked": true,
+      "max_players": 24,
+      "act_players": 0,
+      "act_map": "koth_harvestalpine_v3b",
+      "name": "Creators.TF | EU Balance Mod Server #1 | NL",
+      "publicaddress": "212.129.60.25:27015"
+    },
+    {
+      "serverId": 11,
+      "address": "212.129.60.25",
+      "tracked": true,
+      "max_players": 24,
+      "act_players": 21,
+      "act_map": "cp_badlands",
+      "name": "Creators.TF | EU Balance Mod Server #2 | NL",
+      "publicaddress": "212.129.60.25:27025"
+    },
+    {
+      "serverId": 14,
+      "address": "212.129.60.25",
+      "tracked": true,
+      "max_players": 24,
+      "act_players": 0,
+      "act_map": "cp_granary",
+      "name": "Creators.TF | EU Balance Mod Server #3 | NL",
+      "publicaddress": "212.129.60.25:27035"
+    }
+  ]
+}

@@ -1,23 +1,22 @@
-﻿dummy zarlo-api
-background updates
+﻿background updates
  notify clients
  thow out inactive connections? timeout?
 
 !Start server!
 
 error handling!
-
-login vereinfachen!
- remember
- direkt steam (und icon)
- email needed?
  
 /api
 signal reconnect?
 
 ui!
+profil daten
+personal data
+ invitation accepted/declined
 
 Cache
+
+
 guid needed?!
 chat auth
 

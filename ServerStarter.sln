@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerStarter.Shared", "Ser
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zarlo.Stats", "Zarlo.Stats\Zarlo.Stats.csproj", "{3C6F63E2-96FE-4BE4-9EDF-3037096E30C2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zarlo.Stats.DummyApi", "Zarlo.Stats.DummyApi\Zarlo.Stats.DummyApi.csproj", "{970A1D57-4332-438B-903F-806924F4A191}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{3C6F63E2-96FE-4BE4-9EDF-3037096E30C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C6F63E2-96FE-4BE4-9EDF-3037096E30C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C6F63E2-96FE-4BE4-9EDF-3037096E30C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{970A1D57-4332-438B-903F-806924F4A191}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{970A1D57-4332-438B-903F-806924F4A191}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{970A1D57-4332-438B-903F-806924F4A191}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{970A1D57-4332-438B-903F-806924F4A191}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

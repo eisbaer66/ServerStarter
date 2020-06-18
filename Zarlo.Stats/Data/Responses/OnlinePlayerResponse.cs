@@ -2,7 +2,7 @@
 
 namespace Zarlo.Stats.Data.Responses
 {
-    internal class OnlinePlayerResponse
+    public class OnlinePlayerResponse
     {
         [JsonProperty("Users")]
         public OnlinePlayerInfo[] Users { get; set; }
