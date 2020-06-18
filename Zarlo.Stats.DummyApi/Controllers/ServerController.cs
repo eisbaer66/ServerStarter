@@ -15,12 +15,10 @@ namespace Zarlo.Stats.DummyApi.Controllers
     {
 
         private readonly ILogger<ServerController> _logger;
-        private readonly IServerService _service;
 
-        public ServerController(ILogger<ServerController> logger, IServerService service)
+        public ServerController(ILogger<ServerController> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         [HttpGet("[action]")]
@@ -36,12 +34,10 @@ namespace Zarlo.Stats.DummyApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
-        private readonly IServerService _service;
 
-        public UserController(ILogger<UserController> logger, IServerService service)
+        public UserController(ILogger<UserController> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         [HttpGet("[action]")]
