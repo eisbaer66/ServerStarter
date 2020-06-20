@@ -9,5 +9,8 @@ namespace ServerStarter.Server.Services
         void Leave(Guid communityId, Guid userId);
         IEnumerable<Guid> GetWaitingPlayers(Guid communityId, IList<Guid> playingUserIds);
         IEnumerable<Guid> GetWaitingCommunityIds();
+        void LeaveAllQueues(Guid userId);
+        event EventHandler<UserJoinedEventArgs> UserJoined;
+        event EventHandler<UserLeftEventArgs> UserLeft;
     }
 }
