@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using ServerStarter.Server.Hubs;
 using ServerStarter.Server.Models;
-using ServerStarter.Server.Services;
 using ServerStarter.Server.util;
 using Community = ServerStarter.Shared.Community;
 using CommunityServer = ServerStarter.Shared.CommunityServer;
 
-namespace ServerStarter.Server.Controllers
+namespace ServerStarter.Server.Services
 {
     public interface ICommunityService
     {
-        Task<Community> UpdateCommunity(Models.Community community);
+        Task<Community> UpdateCommunity(Models.Community community, CancellationToken cancellationToken);
     }
 
     public class CommunityService : ICommunityService
@@ -35,21 +34,21 @@ namespace ServerStarter.Server.Controllers
             _state             = state             ?? throw new ArgumentNullException(nameof(state));
         }
 
-        public async Task<Community> UpdateCommunity(Models.Community community)
+        public async Task<Community> UpdateCommunity(Models.Community community, CancellationToken cancellationToken)
         {
-            Community updatedCommunity = await CreateUpdatedCommunity(community);
+            Community updatedCommunity = await CreateUpdatedCommunity(community, cancellationToken);
 
             await _state.UpdateLastCommunities(updatedCommunity);
 
             return updatedCommunity;
         }
 
-        private async Task<Community> CreateUpdatedCommunity(Models.Community community)
+        private async Task<Community> CreateUpdatedCommunity(Models.Community community, CancellationToken cancellationToken)
         {
             var servers = await community.Servers
                                          .Select(async s =>
                                                  {
-                                                     var players = await _serverInfoService.GetPlayersAsync(s.Ip);
+                                                     var players = await _serverInfoService.GetPlayersAsync(s.Ip, cancellationToken);
                                                      return new CommunityServer
                                                             {
                                                                 Name           = s.Name,

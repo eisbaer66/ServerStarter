@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -19,19 +20,20 @@ namespace Zarlo.Stats
             _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
-        public async Task<Server[]> GetServers()
+        public async Task<Server[]> GetServers(CancellationToken cancellationToken)
         {
-            return (await GetJson<ServersResponse>("api/server/list")).Servers;
+            return (await GetJson<ServersResponse>("api/server/list", cancellationToken)).Servers;
         }
 
-        public async Task<OnlinePlayerInfo[]> GetOnlinePlayers()
+        public async Task<OnlinePlayerInfo[]> GetOnlinePlayers(CancellationToken cancellationToken)
         {
-            return (await GetJson<OnlinePlayerResponse>("api/user/online")).Users;
+            return (await GetJson<OnlinePlayerResponse>("api/user/online", cancellationToken)).Users;
         }
 
-        public async Task<T> GetJson<T>(string url)
+        public async Task<T> GetJson<T>(string url, CancellationToken cancellationToken)
         {
-            string json = await _client.GetStringAsync(url);
+            var response = await _client.GetAsync(url, cancellationToken);
+            string json = await response.Content.ReadAsStringAsync();
             _logger.LogTrace("received {RawJson} from GET {Url} with {BaseAddress}", json, url, _client.BaseAddress);
             return JsonConvert.DeserializeObject<T>(json);
         }

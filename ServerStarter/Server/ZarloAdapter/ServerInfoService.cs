@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ServerStarter.Server.Services;
@@ -20,9 +21,9 @@ namespace ServerStarter.Server.ZarloAdapter
             _queries = queries ?? throw new ArgumentNullException(nameof(queries));
         }
 
-        public async Task<IList<ServerPlayer>> GetPlayersAsync(string ipAndPort)
+        public async Task<IList<ServerPlayer>> GetPlayersAsync(string ipAndPort, CancellationToken cancellationToken)
         {
-            var server = (await _queries.GetServers())
+            var server = (await _queries.GetServers(cancellationToken))
                 .FirstOrDefault(s => s.PublicAddress == ipAndPort);
             if (server == null)
             {
@@ -32,7 +33,7 @@ namespace ServerStarter.Server.ZarloAdapter
 
             int serverId = server.Id;
 
-            return (await _queries.GetOnlinePlayers())
+            return (await _queries.GetOnlinePlayers(cancellationToken))
                    .Where(p => p.ServerId == serverId)
                    .Select(p => new ServerPlayer
                                 {

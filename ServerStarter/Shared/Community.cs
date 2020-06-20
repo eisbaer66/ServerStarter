@@ -20,7 +20,7 @@ namespace ServerStarter.Shared
                    CurrentPlayers == other.CurrentPlayers &&
                    WaitingPlayers == other.WaitingPlayers &&
                    MinimumPlayers == other.MinimumPlayers &&
-                   Equals(Servers, other.Servers);
+                   Servers.EqualsByIndex(other.Servers);
         }
 
         public override bool Equals(object obj)
@@ -49,7 +49,7 @@ namespace ServerStarter.Shared
             return Name           == other.Name           &&
                    Ip             == other.Ip             &&
                    CurrentPlayers == other.CurrentPlayers &&
-                   Equals(Players, other.Players);
+                   Players.EqualsByIndex(other.Players);
         }
 
         public override bool Equals(object obj)

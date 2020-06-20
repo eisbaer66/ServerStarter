@@ -20,6 +20,7 @@ using Elastic.Apm.AspNetCore;
 using Elastic.Apm.NetCoreAll;
 using IdentityServer4.Hosting.LocalApiAuthentication;
 using IdentityServer4.Services;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using ServerStarter.Server.Controllers;
@@ -111,6 +112,10 @@ namespace ServerStarter.Server
                                             });
 
 
+            TimingSettings timingSettings = new TimingSettings();
+            Configuration.Bind("ServerStarters:Timings", timingSettings);
+            services.AddSingleton<ITimingSettings>(timingSettings);
+
             services.AddSingleton<HttpClient>(c => new HttpClient()
                                                    {
                                                        BaseAddress = new Uri(Configuration["ServerStarters:ServerInfoBaseAddress"]),
@@ -119,13 +124,23 @@ namespace ServerStarter.Server
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddSingleton<ICommunityState, CommunityState>();
             services.AddSingleton<ICommunityQueue, InMemoryCommunityQueue>();
+            services.AddSingleton<CachingServerInfoQueries>(c =>
+                                                      {
+                                                          IMemoryCache cache = c.GetRequiredService<IMemoryCache>();
+                                                          ITimingSettings settings = c.GetRequiredService<ITimingSettings>();
+                                                          IServerInfoQueries queries = c.GetRequiredService<ServerInfoQueries>();
+                                                          ILogger<CachingServerInfoQueries> logger = c.GetRequiredService<ILogger<CachingServerInfoQueries>>();
+                                                          return new CachingServerInfoQueries(cache, settings, queries, logger);
+                                                      });
+            services.AddSingleton<IServerInfoQueries>(c => c.GetRequiredService<CachingServerInfoQueries>());
+            services.AddSingleton<IServerInfoCache, CachingServerInfoQueries>();
             services.AddHostedService<CommunityQueueUpdate>();
             services.AddHostedService<QueuedHostedService>();
 
             services.AddTransient<ICommunityRepository, CommunityRepository>();
             services.AddTransient<ICommunityService, CommunityService>();
             services.AddTransient<IServerInfoService, ServerInfoService>();
-            services.AddTransient<IServerInfoQueries, ServerInfoQueries>();
+            services.AddTransient<ServerInfoQueries>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -9,8 +9,9 @@ namespace ServerStarter.Server.WorkerServices
     public abstract class TimedHostedService : IHostedService, IDisposable
     {
         private readonly ILogger<TimedHostedService> _logger;
-        private readonly TimeSpan _interval;
+        private readonly TimeSpan                    _interval;
         private          Timer                       _timer;
+        protected        CancellationToken           StoppingToken;
 
         public TimedHostedService(ILogger<TimedHostedService> logger, TimeSpan interval)
         {
@@ -22,7 +23,7 @@ namespace ServerStarter.Server.WorkerServices
         {
             _logger.LogInformation("Timed Hosted Service running.");
 
-            
+            StoppingToken = stoppingToken;
             _timer = new Timer(DoWork, null, TimeSpan.Zero,
                                _interval);
 
