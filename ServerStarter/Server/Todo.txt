@@ -1,6 +1,8 @@
 ﻿background updates
- notify clients
  thow out inactive connections? timeout?
+ 
+auto join
+
 
 !Start server!
 

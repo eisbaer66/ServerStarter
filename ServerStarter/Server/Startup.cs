@@ -22,12 +22,14 @@ using IdentityServer4.Hosting.LocalApiAuthentication;
 using IdentityServer4.Services;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using ServerStarter.Server.Controllers;
 using ServerStarter.Server.Data;
 using ServerStarter.Server.Data.Repositories;
 using ServerStarter.Server.Hubs;
 using ServerStarter.Server.Identity;
 using ServerStarter.Server.Models;
 using ServerStarter.Server.Services;
+using ServerStarter.Server.WorkerServices;
 using ServerStarter.Server.ZarloAdapter;
 using Zarlo.Stats;
 
@@ -61,6 +63,7 @@ namespace ServerStarter.Server
 
             services.Configure<IdentityOptions>(options =>
                                                 {
+                                                    options.SignIn.RequireConfirmedAccount = false;
                                                     options.SignIn.RequireConfirmedEmail = false;
                                                     options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name;
                                                 });
@@ -110,11 +113,17 @@ namespace ServerStarter.Server
 
             services.AddSingleton<HttpClient>(c => new HttpClient()
                                                    {
-                                                       BaseAddress = new Uri("https://dev-8888.balancemod.tf/"),
+                                                       BaseAddress = new Uri(Configuration["ServerStarters:ServerInfoBaseAddress"]),
                                                    });
+            services.AddSingleton<CommunitiesHub>();
+            services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+            services.AddSingleton<ICommunityState, CommunityState>();
             services.AddSingleton<ICommunityQueue, InMemoryCommunityQueue>();
+            services.AddHostedService<CommunityQueueUpdate>();
+            services.AddHostedService<QueuedHostedService>();
 
             services.AddTransient<ICommunityRepository, CommunityRepository>();
+            services.AddTransient<ICommunityService, CommunityService>();
             services.AddTransient<IServerInfoService, ServerInfoService>();
             services.AddTransient<IServerInfoQueries, ServerInfoQueries>();
         }

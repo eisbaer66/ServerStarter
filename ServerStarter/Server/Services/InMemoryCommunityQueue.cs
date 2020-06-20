@@ -55,5 +55,11 @@ namespace ServerStarter.Server.Services
                 yield return queuedId;
             }
         }
+
+        public IEnumerable<Guid> GetWaitingCommunityIds()
+        {
+            return _queues.Where(p => p.Value.Count > 0)
+                          .Select(p => p.Key);
+        }
     }
 }

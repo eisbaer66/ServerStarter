@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using IdentityModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using ServerStarter.Server.Data.Repositories;
 using ServerStarter.Server.Services;
 
 namespace ServerStarter.Server.Hubs
@@ -35,7 +30,7 @@ namespace ServerStarter.Server.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
 
             await Clients.Group(groupName).SendAsync("UserJoined", groupName, Context.User.GetName());
-            await Clients.All.SendAsync("Changed", groupName);
+            await Clients.NotifyCommunityChange(groupName);
         }
 
         public async Task LeaveGroup(string groupName)
@@ -47,7 +42,7 @@ namespace ServerStarter.Server.Hubs
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
 
             await Clients.Group(groupName).SendAsync("UserLeft", groupName, Context.User.GetName());
-            await Clients.All.SendAsync("Changed", groupName);
+            await Clients.NotifyCommunityChange(groupName);
         }
     }
 }

@@ -8,5 +8,6 @@ namespace ServerStarter.Server.Services
         void Join(Guid communityId, Guid userId);
         void Leave(Guid communityId, Guid userId);
         IEnumerable<Guid> GetWaitingPlayers(Guid communityId, IList<Guid> playingUserIds);
+        IEnumerable<Guid> GetWaitingCommunityIds();
     }
 }
