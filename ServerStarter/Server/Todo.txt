@@ -1,11 +1,6 @@
 ﻿background updates
  thow out inactive connections? timeout?
  
-auto join
-
-
-!Start server!
-
 error handling!
  
 /api
@@ -16,10 +11,22 @@ profil daten
 personal data
  invitation accepted/declined
 
+not enough servers
+multi tab
+ auto join
+
+update server db from api
+ 
 cancellationToken
-
-
 guid needed?!
 chat auth
 
 ?Prios?
+
+
+
+
+zarlo api 
+ callback (not enough server)
+ update aus api or filter?
+  active servers?

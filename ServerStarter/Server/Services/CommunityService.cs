@@ -48,25 +48,29 @@ namespace ServerStarter.Server.Services
             var servers = await community.Servers
                                          .Select(async s =>
                                                  {
-                                                     var players = await _serverInfoService.GetPlayersAsync(s.Ip, cancellationToken);
+                                                     var info = await _serverInfoService.GetPlayersAsync(s.Ip, cancellationToken);
                                                      return new CommunityServer
                                                             {
                                                                 Name           = s.Name,
                                                                 Ip             = s.Ip,
-                                                                CurrentPlayers = players.Count,
-                                                                Players        = players,
+                                                                MaxPlayers     = info.MaxPlayers,
+                                                                CurrentPlayers = info.Players.Count,
+                                                                Players        = info.Players,
                                                             };
                                                  })
                                          .WhenAllList();
 
             var waitingPlayers = await GetWaitingPlayers(community, servers);
 
+            var currentPlayers = servers.Where(s => s.CurrentPlayers < community.MaximumPlayers)
+                                        .Select(s => s.CurrentPlayers)
+                                        .Max();
             return new Community
                    {
                        Id             = community.Id,
                        Name           = community.Name,
                        MinimumPlayers = community.MinimumPlayers,
-                       CurrentPlayers = servers.Select(s => s.CurrentPlayers).Max(),
+                       CurrentPlayers = currentPlayers,
                        WaitingPlayers = waitingPlayers.Count,
                        Servers        = servers.ToList(),
                    };

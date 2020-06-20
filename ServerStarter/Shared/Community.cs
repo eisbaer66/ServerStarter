@@ -39,16 +39,18 @@ namespace ServerStarter.Shared
 
     public class CommunityServer
     {
-        public string Name           { get; set; }
-        public string Ip             { get; set; }
-        public int    CurrentPlayers { get; set; }
-        public IList<ServerPlayer> Players { get; set; }
+        public string              Name           { get; set; }
+        public string              Ip             { get; set; }
+        public int                 CurrentPlayers { get; set; }
+        public IList<ServerPlayer> Players        { get; set; }
+        public int                 MaxPlayers     { get; set; }
 
         protected bool Equals(CommunityServer other)
         {
             return Name           == other.Name           &&
                    Ip             == other.Ip             &&
                    CurrentPlayers == other.CurrentPlayers &&
+                   MaxPlayers == other.MaxPlayers &&
                    Players.EqualsByIndex(other.Players);
         }
 
@@ -62,7 +64,7 @@ namespace ServerStarter.Shared
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Name, Ip, CurrentPlayers, Players);
+            return HashCode.Combine(Name, Ip, CurrentPlayers, Players, MaxPlayers);
         }
     }
 

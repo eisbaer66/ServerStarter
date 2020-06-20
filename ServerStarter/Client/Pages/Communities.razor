@@ -20,6 +20,7 @@
 }
 else
 {
+    <label><input type="checkbox" @bind="playsounds" /> Play sounds</label>
     <table class="table">
         <thead>
             <tr>
@@ -34,13 +35,14 @@ else
         <tbody>
             @foreach (var community in communities)
             {
-                <CommunityComponent Community="community" HubConnection="HubConnection"></CommunityComponent>
+                <CommunityComponent Community="community" HubConnection="HubConnection" @bind-PlaySounds="playsounds"></CommunityComponent>
             }
         </tbody>
     </table>
 }
 
 @code {
+    private bool playsounds = true;
     private Community[] communities;
     private HubConnection HubConnection;
 
@@ -59,17 +61,17 @@ else
         Action<HttpConnectionOptions> ConfigureHttpConnection()
         {
             return options =>
-                   {
-                       options.AccessTokenProvider = async () =>
-                                                           {
-                                                               var result = await AccessTokenProvider.RequestAccessToken();
-                                                               AccessToken token;
-                                                               bool tryGetToken = result.TryGetToken(out token);
-                                                               if (!tryGetToken)
-                                                                   return null;
-                                                               return token.Value;
-                                                           };
-                   };
+            {
+                options.AccessTokenProvider = async () =>
+                {
+                    var result = await AccessTokenProvider.RequestAccessToken();
+                    AccessToken token;
+                    bool tryGetToken = result.TryGetToken(out token);
+                    if (!tryGetToken)
+                        return null;
+                    return token.Value;
+                };
+            };
         }
 
         HubConnection = new HubConnectionBuilder()

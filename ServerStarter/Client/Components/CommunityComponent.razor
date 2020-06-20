@@ -1,9 +1,11 @@
 ﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.Logging
 @using ServerStarter.Shared
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
+@inject ILogger<CommunityComponent> Logger
 @implements IDisposable
 
 <tr>
@@ -16,7 +18,7 @@
             @foreach (var server in Community.Servers)
             {
                 <li>
-                    @server.Name (<a href="steam://connect/@server.Ip">@server.Ip</a>): @server.CurrentPlayers
+                    @server.Name (<a href="@GetConnectLink(server)">@server.Ip</a>): @server.CurrentPlayers
                 </li>
             }
         </ul>
@@ -55,6 +57,11 @@
     </tr>
 }
 
+<audio preload="auto" id="startSound0" src="assets/sounds/Announcer_am_gamestarting02.wav"></audio>
+<audio preload="auto" id="startSound1" src="assets/sounds/Announcer_am_gamestarting04.wav"></audio>
+<audio preload="auto" id="startSound2" src="assets/sounds/Announcer_am_gamestarting05.wav"></audio>
+<audio preload="auto" id="startSound3" src="assets/sounds/Announcer_am_roundstart04.wav"></audio>
+
 @code {
     [Parameter]
     public Community Community { get; set; }
@@ -62,11 +69,18 @@
     [Parameter]
     public HubConnection HubConnection { get; set; }
 
+    [Parameter]
+    public bool PlaySounds { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> PlaySoundsChanged { get; set; }
+
     ElementReference messageInputReference;
 
     private readonly List<string> messages = new List<string>();
     private readonly List<IDisposable> subscription = new List<IDisposable>();
     private readonly List<IDisposable> groupSubscription = new List<IDisposable>();
+    private readonly Random _random = new Random();
     private bool joined = false;
     private string messageInput;
 
@@ -91,7 +105,47 @@
         {
             exception.Redirect();
         }
+
         StateHasChanged();
+
+        await CheckPlayability();
+    }
+
+    private async Task CheckPlayability()
+    {
+        if (!joined)
+            return;
+
+        int playerPool = Community.CurrentPlayers + Community.WaitingPlayers;
+        if (playerPool >= Community.MinimumPlayers)
+            await JoinGame();
+    }
+
+    private async Task JoinGame()
+    {
+        var server = Community.Servers
+                              .OrderByDescending(s => s.CurrentPlayers)
+                              .FirstOrDefault(s => s.CurrentPlayers + Community.WaitingPlayers <= s.MaxPlayers);
+        if (server == null)
+        {
+            Logger.LogError("could not find fitting server for players in {Community}", Community);
+            return;     //TODO Callback for zarlo?
+        }
+
+        if (PlaySounds)
+        {
+            string id = "startSound" + _random.Next(4);
+            await JsRuntime.InvokeAsync<string>("Play", id);
+        }
+        
+        await Task.Delay(100);  //give time to update/start playing sound before blocking with confirm
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "server " + server.Name + " with " + server.CurrentPlayers + " playing at the moment is ready to start");
+        await LeaveQueue();
+        if (confirmed)
+        {
+            string link = GetConnectLink(server);
+            NavigationManager.NavigateTo(link);
+        }
     }
 
     async Task JoinQueue()
@@ -173,6 +227,11 @@
         subscription.Clear();
 
         LeaveQueue();
+    }
+
+    private string GetConnectLink(CommunityServer server)
+    {
+        return "steam://connect/" + server.Ip;
     }
 
 }

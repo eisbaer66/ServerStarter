@@ -21,25 +21,36 @@ namespace ServerStarter.Server.ZarloAdapter
             _queries = queries ?? throw new ArgumentNullException(nameof(queries));
         }
 
-        public async Task<IList<ServerPlayer>> GetPlayersAsync(string ipAndPort, CancellationToken cancellationToken)
+        public async Task<ServerInfo> GetPlayersAsync(string ipAndPort, CancellationToken cancellationToken)
         {
             var server = (await _queries.GetServers(cancellationToken))
                 .FirstOrDefault(s => s.PublicAddress == ipAndPort);
             if (server == null)
             {
                 _logger.LogError("no server found for {IpAndPort}", ipAndPort);
-                return new List<ServerPlayer>();
+                return new ServerInfo();
             }
 
             int serverId = server.Id;
 
-            return (await _queries.GetOnlinePlayers(cancellationToken))
-                   .Where(p => p.ServerId == serverId)
-                   .Select(p => new ServerPlayer
-                                {
-                                    SteamId = p.SteamId,
-                                })
-                   .ToList();
+            var players = (await _queries.GetOnlinePlayers(cancellationToken))
+                                .Where(p => p.ServerId == serverId)
+                                .Select(p => new ServerPlayer
+                                             {
+                                                 SteamId = p.SteamId,
+                                             })
+                                .ToList();
+            return new ServerInfo
+                   {
+                       MaxPlayers = server.MaxPlayers,
+                       Players    = players
+                   };
         }
+    }
+
+    public class ServerInfo
+    {
+        public int MaxPlayers { get; set; }
+        public IList<ServerPlayer> Players { get; set; } = new List<ServerPlayer>();
     }
 }
