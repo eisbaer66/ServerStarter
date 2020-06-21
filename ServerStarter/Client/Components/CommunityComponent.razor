@@ -191,6 +191,8 @@
         await HubConnection.InvokeAsync("JoinGroup", Community.Id);
         joined = true;
         StateHasChanged();
+
+        await LoadCommunity();
     }
 
     async void AddMessage(string msg)
@@ -212,6 +214,8 @@
         messageInput = string.Empty;
         joined = false;
         StateHasChanged();
+
+        await LoadCommunity();
     }
 
     async Task Send()

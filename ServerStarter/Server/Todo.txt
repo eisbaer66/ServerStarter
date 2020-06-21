@@ -4,10 +4,6 @@
 signing key
 error handling!
  
-get after join queue
- check playability
- and after leave ;)
-
 ui!
 profil daten
 personal data
@@ -15,8 +11,6 @@ personal data
 
 health probes
 not enough servers
-multi tab
- auto join
 
 update server db from api
  
