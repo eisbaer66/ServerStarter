@@ -1,6 +1,7 @@
 ﻿background updates
  thow out inactive connections? timeout?
- 
+
+signing key
 error handling!
  
 /api
@@ -11,6 +12,7 @@ profil daten
 personal data
  invitation accepted/declined
 
+health probes
 not enough servers
 multi tab
  auto join

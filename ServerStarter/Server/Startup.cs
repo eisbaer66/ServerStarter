@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
@@ -20,6 +21,7 @@ using Elastic.Apm.AspNetCore;
 using Elastic.Apm.NetCoreAll;
 using IdentityServer4.Hosting.LocalApiAuthentication;
 using IdentityServer4.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -56,7 +58,20 @@ namespace ServerStarter.Server
                                                         });
             services.AddTransient<DbSet<ApplicationUser>>(c => c.GetService<ApplicationDbContext>().Users);
 
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            var forwardedHeadersSettings = new ForwardedHeadersSettings();
+            Configuration.Bind("ServerStarters:ForwardedHeaders", forwardedHeadersSettings);
+            if (forwardedHeadersSettings.Headers != 0)
+                services.Configure<ForwardedHeadersOptions>(options =>
+                                                            {
+                                                                options.ForwardedHeaders = (ForwardedHeaders)forwardedHeadersSettings.Headers;
+                                                                options.ForwardLimit     = forwardedHeadersSettings.Limit;
+                                                                foreach (var knownNetwork in forwardedHeadersSettings.KnownNetworks)
+                                                                {
+                                                                    options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse(knownNetwork.Prefix), knownNetwork.PrefixLength));
+                                                                }
+                                                            });
+
+            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
                     
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddClaimsPrincipalFactory<UserClaimsPrincipalFactory>();
@@ -153,6 +168,8 @@ namespace ServerStarter.Server
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseForwardedHeaders();
+
             IElasticSettings elasticSettings = app.ApplicationServices.GetRequiredService<IElasticSettings>();
             if (elasticSettings.AreSet())
                 app.UseAllElasticApm(Configuration);
