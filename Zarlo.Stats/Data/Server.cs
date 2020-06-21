@@ -16,7 +16,7 @@ namespace Zarlo.Stats.Data
         public int ActPlayers { get; set; }
         [JsonProperty("name")]
         public string Name { get; set; }
-        [JsonProperty("publicaddress")]
-        public string PublicAddress { get; set; }
+        [JsonProperty("flag")]
+        public string Flag { get; set; }
     }
 }

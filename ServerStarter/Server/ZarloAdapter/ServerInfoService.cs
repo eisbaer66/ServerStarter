@@ -24,7 +24,7 @@ namespace ServerStarter.Server.ZarloAdapter
         public async Task<ServerInfo> GetPlayersAsync(string ipAndPort, CancellationToken cancellationToken)
         {
             var server = (await _queries.GetServers(cancellationToken))
-                .FirstOrDefault(s => s.PublicAddress == ipAndPort);
+                .FirstOrDefault(s => s.Address == ipAndPort);
             if (server == null)
             {
                 _logger.LogError("no server found for {IpAndPort}", ipAndPort);

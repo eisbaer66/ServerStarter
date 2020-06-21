@@ -49,8 +49,11 @@ namespace ServerStarter.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
-                                                                                        Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationDbContext>(options =>
+                                                        {
+                                                            options.UseMySql(Configuration.GetConnectionString("DefaultConnection"),
+                                                                             mySqlOptions => mySqlOptions.ServerVersion("10.3.15-MariaDB-1"));
+                                                        });
             services.AddTransient<DbSet<ApplicationUser>>(c => c.GetService<ApplicationDbContext>().Users);
 
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -116,6 +119,10 @@ namespace ServerStarter.Server
             Configuration.Bind("ServerStarters:Timings", timingSettings);
             services.AddSingleton<ITimingSettings>(timingSettings);
 
+            var settings = new ElasticSettings();
+            Configuration.Bind("ServerStarters:Elastic", settings);
+            services.AddSingleton<IElasticSettings>(settings);
+
             services.AddSingleton<HttpClient>(c => new HttpClient()
                                                    {
                                                        BaseAddress = new Uri(Configuration["ServerStarters:ServerInfoBaseAddress"]),
@@ -146,7 +153,10 @@ namespace ServerStarter.Server
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseAllElasticApm(Configuration);
+            IElasticSettings elasticSettings = app.ApplicationServices.GetRequiredService<IElasticSettings>();
+            if (elasticSettings.AreSet())
+                app.UseAllElasticApm(Configuration);
+
             app.UseResponseCompression();
 
             if (env.IsDevelopment())
