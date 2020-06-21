@@ -14,7 +14,7 @@ namespace ServerStarter.Server.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class CommunitiesController : ControllerBase
     {
         private readonly ICommunityRepository _repository;

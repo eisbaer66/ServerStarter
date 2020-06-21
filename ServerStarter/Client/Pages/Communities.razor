@@ -50,7 +50,7 @@ else
     {
         try
         {
-            communities = await Http.GetFromJsonAsync<Community[]>("Communities");
+            communities = await Http.GetFromJsonAsync<Community[]>("api/Communities");
         }
         catch (AccessTokenNotAvailableException exception)
         {

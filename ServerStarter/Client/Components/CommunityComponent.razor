@@ -99,7 +99,7 @@
     {
         try
         {
-            Community = await Http.GetFromJsonAsync<Community>("Communities/" + Community.Id);
+            Community = await Http.GetFromJsonAsync<Community>("api/Communities/" + Community.Id);
         }
         catch (AccessTokenNotAvailableException exception)
         {
