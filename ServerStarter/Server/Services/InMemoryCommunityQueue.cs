@@ -87,5 +87,15 @@ namespace ServerStarter.Server.Services
                 UserLeft?.Invoke(this, new UserLeftEventArgs { CommunityId = p.Key, UserId = userId });
             }
         }
+
+        public IEnumerable<Guid> GetQueuedCommunity(Guid userId)
+        {
+            //TODO keep reverse index if we get to many communities
+            foreach (var p in _queues)
+            {
+                if (p.Value.Contains(userId))
+                    yield return p.Key;
+            }
+        }
     }
 }

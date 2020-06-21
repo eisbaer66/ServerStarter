@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -50,6 +51,8 @@ namespace ServerStarter.Server.Hubs
 
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
              _queue.Join(communityId, userId);
+
+             await Clients.GroupExcept(userId.ToString(), Context.ConnectionId).SendAsync("JoinQueue", communityId);
         }
 
         public async Task LeaveGroup(string groupName)
@@ -59,47 +62,63 @@ namespace ServerStarter.Server.Hubs
 
             _queue.Leave(communityId, userId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+
+            await Clients.GroupExcept(userId.ToString(), Context.ConnectionId).SendAsync("LeaveQueue", groupName);
         }
 
         public override async Task OnConnectedAsync()
         {
             await base.OnConnectedAsync();
 
-            AddConnection();
+            Guid userId = Context.User.GetUserId();
+            AddConnection(userId);
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, userId.ToString());
+
+            await RejoinQueue(userId);
         }
 
-        public override Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception exception)
         {
             if (exception != null)
                 _logger.LogError(exception, "SignalR fatal disconnect");
 
-            RemoveConnection();
+            Guid userId = Context.User.GetUserId();
+            RemoveConnection(userId);
 
-            return base.OnDisconnectedAsync(exception);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId.ToString());
+
+            await base.OnDisconnectedAsync(exception);
         }
 
-        private void AddConnection()
+        private void AddConnection(Guid userId)
         {
-            var userId = Context.User.GetUserId();
             if (!_connections.ContainsKey(userId))
                 _connections.Add(userId, new HashSet<string>());
             _connections[userId].Add(Context.ConnectionId);
         }
 
-        private void RemoveConnection()
+        private void RemoveConnection(Guid userId)
         {
-            var userId = Context.User.GetUserId();
-            if (_connections.ContainsKey(userId))
+            if (!_connections.ContainsKey(userId)) 
+                return;
+            if (!_connections[userId].Contains(Context.ConnectionId)) 
+                return;
+
+            _connections[userId].Remove(Context.ConnectionId);
+            if (_connections[userId].Count != 0) 
+                return;
+
+            _connections.Remove(userId);
+            _queue.LeaveAllQueues(userId);
+        }
+
+        private async Task RejoinQueue(Guid userId)
+        {
+            IEnumerable<Guid> communityIds = _queue.GetQueuedCommunity(userId);
+            foreach (Guid communityId in communityIds)
             {
-                if (_connections[userId].Contains(Context.ConnectionId))
-                {
-                    _connections[userId].Remove(Context.ConnectionId);
-                    if (_connections[userId].Count == 0)
-                    {
-                        _connections.Remove(userId);
-                        _queue.LeaveAllQueues(userId);
-                    }
-                }
+                await Clients.Caller.SendAsync("JoinQueue", communityId);
             }
         }
     }

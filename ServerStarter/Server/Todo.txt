@@ -4,8 +4,9 @@
 signing key
 error handling!
  
-/api
-signal reconnect?
+get after join queue
+ check playability
+ and after leave ;)
 
 ui!
 profil daten

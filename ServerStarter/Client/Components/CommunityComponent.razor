@@ -137,7 +137,7 @@
             string id = "startSound" + _random.Next(4);
             await JsRuntime.InvokeAsync<string>("Play", id);
         }
-        
+
         await Task.Delay(100);  //give time to update/start playing sound before blocking with confirm
         bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "server " + server.Name + " with " + server.CurrentPlayers + " playing at the moment is ready to start");
         await LeaveQueue();
@@ -148,8 +148,11 @@
         }
     }
 
-    async Task JoinQueue()
+    public async Task JoinQueue()
     {
+        if (joined)
+            return;
+
         groupSubscription.Add(HubConnection.On<string, string, string>("MessageReceived", (communityId, user, message) =>
         {
             if (communityId != Community.Id.ToString())
@@ -177,8 +180,17 @@
             AddMessage(encodedMsg);
         }));
 
+        groupSubscription.Add(HubConnection.On<Guid>("LeaveQueue", async (communityId) =>
+        {
+            if (communityId != Community.Id)
+                return;
+
+            await LeaveQueue();
+        }));
+
         await HubConnection.InvokeAsync("JoinGroup", Community.Id);
         joined = true;
+        StateHasChanged();
     }
 
     async void AddMessage(string msg)
@@ -199,6 +211,7 @@
         messages.Clear();
         messageInput = string.Empty;
         joined = false;
+        StateHasChanged();
     }
 
     async Task Send()

@@ -12,5 +12,6 @@ namespace ServerStarter.Server.Services
         void LeaveAllQueues(Guid userId);
         event EventHandler<UserJoinedEventArgs> UserJoined;
         event EventHandler<UserLeftEventArgs> UserLeft;
+        IEnumerable<Guid> GetQueuedCommunity(Guid userId);
     }
 }

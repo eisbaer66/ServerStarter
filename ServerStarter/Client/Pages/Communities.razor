@@ -4,13 +4,15 @@
 @using Microsoft.AspNetCore.Http.Connections.Client
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.DependencyInjection
-@using ServerStarter.Shared
+@using Microsoft.Extensions.Logging
 @using ServerStarter.Client.Components
+@using ServerStarter.Shared
 @attribute [Authorize]
 @implements IDisposable
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IAccessTokenProvider AccessTokenProvider
+@inject ILogger<Communities> Logger
 
 <h1>Communities</h1>
 
@@ -35,16 +37,23 @@ else
         <tbody>
             @foreach (var community in communities)
             {
-                <CommunityComponent Community="community" HubConnection="HubConnection" @bind-PlaySounds="playsounds"></CommunityComponent>
+                <CommunityComponent @ref="Childs" Community="community" HubConnection="HubConnection" @bind-PlaySounds="playsounds"></CommunityComponent>
             }
         </tbody>
     </table>
 }
 
 @code {
+    private readonly IList<CommunityComponent> childs = new List<CommunityComponent>();
+
     private bool playsounds = true;
     private Community[] communities;
     private HubConnection HubConnection;
+
+    CommunityComponent Childs
+    {
+        set { childs.Add(value); }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,6 +87,18 @@ else
             .WithUrl(NavigationManager
                          .ToAbsoluteUri("/hubs/communities"), ConfigureHttpConnection())
             .Build();
+
+        HubConnection.On<Guid>("JoinQueue", async (communityId) =>
+                                                 {
+                                                     CommunityComponent community = childs.FirstOrDefault(c => c.Community.Id == communityId);
+                                                     if (community == null)
+                                                     {
+                                                         Logger.LogError("could not rejoin {CommunityId}, because it was not loaded", communityId);
+                                                         return;
+                                                     }
+
+                                                     await community.JoinQueue();
+                                                 });
         await HubConnection.StartAsync();
     }
 
