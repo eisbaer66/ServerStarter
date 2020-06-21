@@ -1,0 +1,342 @@
+2020-06-18 22:57:23.691 +02:00 [INF] Timed Hosted Service running.
+2020-06-18 22:57:23.812 +02:00 [INF] Queued Hosted Service is running.
+2020-06-18 22:57:24.050 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service name. The service name will be automatically discovered.
+2020-06-18 22:57:24.060 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service name. The automatically discovered service name is ServerStarter_Server
+2020-06-18 22:57:24.061 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service version. The service version will be automatically discovered.
+2020-06-18 22:57:24.062 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service version. The automatically discovered service version is 1.0.0
+2020-06-18 22:57:30.009 +02:00 [INF] {MetricsCollector} Collecting metrics in 30000 milliseconds interval
+2020-06-18 22:57:30.050 +02:00 [INF] Starting IdentityServer4 version 3.0.0.0
+2020-06-18 22:57:30.438 +02:00 [INF] Using explicitly configured authentication scheme Identity.Application for IdentityServer
+2020-06-18 22:57:30.671 +02:00 [INF] Now listening on: http://localhost:5000
+2020-06-18 22:57:30.672 +02:00 [INF] Now listening on: https://localhost:5001
+2020-06-18 22:57:30.675 +02:00 [INF] Application started. Press Ctrl+C to shut down.
+2020-06-18 22:57:30.675 +02:00 [INF] Hosting environment: Development
+2020-06-18 22:57:30.675 +02:00 [INF] Content root path: C:\Users\Jan\source\repos\ServerStarter\ServerStarter\Server
+2020-06-18 22:57:34.042 +02:00 [ERR] {CentralConfigFetcher} Exception was thrown while fetching configuration from APM Server and parsing it. ETag: `<null>'. URL: `"http://localhost:8200/config/v1/agents?service.name=ServerStarter_Server&service.environment=Development"'. Apm Server base URL: `"http://localhost:8200/"'. WaitInterval: 5m. dbgIterationsCount: 1.
++-> Request:
+    Method: GET, RequestUri: 'http://localhost:8200/config/v1/agents?service.name=ServerStarter_Server&service.environment=Development', Version: 1.1, Content: <null>, Headers:
+    {
+      User-Agent: elasticapm-dotnet/1.5.1
+      User-Agent: System.Net.Http/4.700.20.27001
+      User-Agent: .NET_Core/3.1.5
+    }
++-> Response: N/A
++-> Response body [length: N/A]: N/A
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it.
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Http.ConnectHelper.ConnectAsync(String host, Int32 port, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.ConnectHelper.ConnectAsync(String host, Int32 port, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean allowHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.GetHttpConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithRetryAsync(HttpRequestMessage request, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpClient.FinishSendAsyncBuffered(Task`1 sendTask, HttpRequestMessage request, CancellationTokenSource cts, Boolean disposeCts)
+   at Elastic.Apm.BackendComm.CentralConfig.CentralConfigFetcher.FetchConfigHttpResponseImplAsync(HttpRequestMessage httpRequest)
+   at Elastic.Apm.Helpers.AgentTimerExtensions.TryAwaitOrTimeout(IAgentTimer agentTimer, Task taskToAwait, AgentTimeInstant until, CancellationToken cancellationToken)
+   at Elastic.Apm.Helpers.AgentTimerExtensions.TryAwaitOrTimeout[TResult](IAgentTimer agentTimer, Task`1 taskToAwait, AgentTimeInstant until, CancellationToken cancellationToken)
+   at Elastic.Apm.Helpers.AgentTimerExtensions.AwaitOrTimeout[TResult](IAgentTimer agentTimer, Task`1 taskToAwait, AgentTimeInstant until, CancellationToken cancellationToken)
+   at Elastic.Apm.BackendComm.CentralConfig.CentralConfigFetcher.FetchConfigHttpResponseAsync(HttpRequestMessage httpRequest)
+   at Elastic.Apm.BackendComm.CentralConfig.CentralConfigFetcher.WorkLoopIteration()
+2020-06-18 22:57:34.106 +02:00 [INF] {CentralConfigFetcher} Waiting 5m... Default wait time is used because exception was thrown while fetching configuration from APM Server and parsing it.. dbgIterationsCount: 1.
+2020-06-18 22:57:49.892 +02:00 [INF] Application is shutting down...
+2020-06-18 22:57:49.912 +02:00 [INF] Queued Hosted Service is stopping.
+2020-06-18 22:59:27.387 +02:00 [INF] Timed Hosted Service running.
+2020-06-18 22:59:27.472 +02:00 [INF] Queued Hosted Service is running.
+2020-06-18 22:59:27.573 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service name. The service name will be automatically discovered.
+2020-06-18 22:59:27.577 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service name. The automatically discovered service name is ServerStarter_Server
+2020-06-18 22:59:27.578 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service version. The service version will be automatically discovered.
+2020-06-18 22:59:27.579 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service version. The automatically discovered service version is 1.0.0
+2020-06-18 22:59:29.249 +02:00 [INF] {MetricsCollector} Collecting metrics in 30000 milliseconds interval
+2020-06-18 22:59:29.287 +02:00 [INF] Starting IdentityServer4 version 3.0.0.0
+2020-06-18 22:59:29.496 +02:00 [INF] Using explicitly configured authentication scheme Identity.Application for IdentityServer
+2020-06-18 22:59:29.669 +02:00 [INF] Now listening on: http://localhost:5000
+2020-06-18 22:59:29.670 +02:00 [INF] Now listening on: https://localhost:5001
+2020-06-18 22:59:29.672 +02:00 [INF] Application started. Press Ctrl+C to shut down.
+2020-06-18 22:59:29.673 +02:00 [INF] Hosting environment: Development
+2020-06-18 22:59:29.673 +02:00 [INF] Content root path: C:\Users\Jan\source\repos\ServerStarter\ServerStarter\Server
+2020-06-18 23:00:12.300 +02:00 [INF] HTTP GET / responded 307 in 2.0039 ms
+2020-06-18 23:00:12.618 +02:00 [INF] HTTP GET / responded 404 in 225.3886 ms
+2020-06-18 23:03:25.955 +02:00 [INF] Timed Hosted Service running.
+2020-06-18 23:03:26.029 +02:00 [INF] Queued Hosted Service is running.
+2020-06-18 23:03:35.877 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service name. The service name will be automatically discovered.
+2020-06-18 23:03:35.882 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service name. The automatically discovered service name is ServerStarter_Server
+2020-06-18 23:03:35.884 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service version. The service version will be automatically discovered.
+2020-06-18 23:03:35.885 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service version. The automatically discovered service version is 1.0.0
+2020-06-18 23:03:41.699 +02:00 [INF] {MetricsCollector} Collecting metrics in 30000 milliseconds interval
+2020-06-18 23:03:41.735 +02:00 [INF] Starting IdentityServer4 version 3.0.0.0
+2020-06-18 23:03:41.933 +02:00 [INF] Using explicitly configured authentication scheme Identity.Application for IdentityServer
+2020-06-18 23:03:42.104 +02:00 [INF] Now listening on: http://localhost:5000
+2020-06-18 23:03:42.105 +02:00 [INF] Now listening on: https://localhost:5001
+2020-06-18 23:03:42.108 +02:00 [INF] Application started. Press Ctrl+C to shut down.
+2020-06-18 23:03:42.108 +02:00 [INF] Hosting environment: Development
+2020-06-18 23:03:42.108 +02:00 [INF] Content root path: C:\Users\Jan\source\repos\ServerStarter\ServerStarter\Server
+2020-06-18 23:05:04.380 +02:00 [INF] Timed Hosted Service running.
+2020-06-18 23:05:04.476 +02:00 [INF] Queued Hosted Service is running.
+2020-06-18 23:06:08.782 +02:00 [INF] Timed Hosted Service running.
+2020-06-18 23:06:08.854 +02:00 [INF] Queued Hosted Service is running.
+2020-06-18 23:06:32.282 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service name. The service name will be automatically discovered.
+2020-06-18 23:06:32.287 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service name. The automatically discovered service name is ServerStarter_Server
+2020-06-18 23:06:32.288 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service version. The service version will be automatically discovered.
+2020-06-18 23:06:32.289 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service version. The automatically discovered service version is 1.0.0
+2020-06-18 23:06:38.090 +02:00 [INF] {MetricsCollector} Collecting metrics in 30000 milliseconds interval
+2020-06-18 23:06:38.128 +02:00 [INF] Starting IdentityServer4 version 3.0.0.0
+2020-06-18 23:06:38.341 +02:00 [INF] Using explicitly configured authentication scheme Identity.Application for IdentityServer
+2020-06-18 23:06:38.519 +02:00 [INF] Now listening on: http://localhost:5000
+2020-06-18 23:06:38.521 +02:00 [INF] Now listening on: https://localhost:5001
+2020-06-18 23:06:38.524 +02:00 [INF] Application started. Press Ctrl+C to shut down.
+2020-06-18 23:06:38.524 +02:00 [INF] Hosting environment: Development
+2020-06-18 23:06:38.525 +02:00 [INF] Content root path: C:\Users\Jan\source\repos\ServerStarter\ServerStarter\Server
+2020-06-18 23:06:52.235 +02:00 [INF] HTTP GET / responded 404 in 113.0856 ms
+2020-06-18 23:08:59.292 +02:00 [INF] HTTP GET / responded 404 in 1.8702 ms
+2020-06-18 23:10:27.661 +02:00 [INF] Timed Hosted Service running.
+2020-06-18 23:10:27.738 +02:00 [INF] Queued Hosted Service is running.
+2020-06-18 23:10:27.860 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service name. The service name will be automatically discovered.
+2020-06-18 23:10:27.864 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service name. The automatically discovered service name is ServerStarter_Server
+2020-06-18 23:10:27.865 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service version. The service version will be automatically discovered.
+2020-06-18 23:10:27.866 +02:00 [INF] {AbstractConfigurationReader (MicrosoftExtensionsConfig)} The agent was started without a service version. The automatically discovered service version is 1.0.0
+2020-06-18 23:10:33.775 +02:00 [INF] {MetricsCollector} Collecting metrics in 30000 milliseconds interval
+2020-06-18 23:10:33.811 +02:00 [INF] Starting IdentityServer4 version 3.0.0.0
+2020-06-18 23:10:34.008 +02:00 [INF] Using explicitly configured authentication scheme Identity.Application for IdentityServer
+2020-06-18 23:10:34.177 +02:00 [INF] Now listening on: https://localhost:5001
+2020-06-18 23:10:34.179 +02:00 [INF] Now listening on: http://localhost:5000
+2020-06-18 23:10:34.182 +02:00 [INF] Application started. Press Ctrl+C to shut down.
+2020-06-18 23:10:34.182 +02:00 [INF] Hosting environment: Development
+2020-06-18 23:10:34.183 +02:00 [INF] Content root path: C:\Users\Jan\source\repos\ServerStarter\ServerStarter\Server
+2020-06-18 23:10:40.201 +02:00 [INF] HTTP GET / responded 200 in 187.4799 ms
+2020-06-18 23:10:40.220 +02:00 [INF] HTTP GET /css/app.css responded 304 in 2.1478 ms
+2020-06-18 23:10:40.220 +02:00 [INF] HTTP GET /JsInterop.js responded 304 in 2.1340 ms
+2020-06-18 23:10:40.220 +02:00 [INF] HTTP GET /_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication/AuthenticationService.js responded 304 in 2.1474 ms
+2020-06-18 23:10:40.220 +02:00 [INF] HTTP GET /css/bootstrap/bootstrap.min.css responded 304 in 2.1475 ms
+2020-06-18 23:10:40.227 +02:00 [INF] HTTP GET /css/open-iconic/font/css/open-iconic-bootstrap.min.css responded 304 in 0.2620 ms
+2020-06-18 23:10:40.231 +02:00 [INF] HTTP GET /_framework/blazor.webassembly.js responded 304 in 13.1307 ms
+2020-06-18 23:10:40.273 +02:00 [INF] HTTP GET /_framework/blazor.boot.json responded 200 in 2.7456 ms
+2020-06-18 23:10:40.275 +02:00 [INF] HTTP GET /favicon.ico responded 304 in 0.2278 ms
+2020-06-18 23:10:40.280 +02:00 [INF] HTTP GET /appsettings.json responded 304 in 0.1507 ms
+2020-06-18 23:10:40.300 +02:00 [INF] HTTP GET /_framework/wasm/dotnet.3.2.0.js responded 304 in 3.6114 ms
+2020-06-18 23:10:40.302 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.DependencyInjection.Abstractions.dll responded 304 in 1.3340 ms
+2020-06-18 23:10:40.302 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.SignalR.Client.dll responded 304 in 0.7526 ms
+2020-06-18 23:10:40.302 +02:00 [INF] HTTP GET /_framework/_bin/System.Xml.Linq.dll responded 304 in 1.2927 ms
+2020-06-18 23:10:40.302 +02:00 [INF] HTTP GET /_framework/_bin/netstandard.dll responded 304 in 1.4170 ms
+2020-06-18 23:10:40.306 +02:00 [INF] HTTP GET /_framework/_bin/ServerStarter.Client.dll responded 304 in 5.4564 ms
+2020-06-18 23:10:40.306 +02:00 [INF] HTTP GET /_framework/_bin/System.Core.dll responded 304 in 4.7439 ms
+2020-06-18 23:10:40.308 +02:00 [INF] HTTP GET /_framework/_bin/System.dll responded 304 in 5.5379 ms
+2020-06-18 23:10:40.308 +02:00 [INF] HTTP GET /_framework/_bin/WebAssembly.Net.WebSockets.dll responded 304 in 1.6945 ms
+2020-06-18 23:10:40.308 +02:00 [INF] HTTP GET /_framework/_bin/System.Memory.dll responded 304 in 1.3447 ms
+2020-06-18 23:10:40.308 +02:00 [INF] HTTP GET /_framework/_bin/mscorlib.dll responded 304 in 1.3525 ms
+2020-06-18 23:10:40.322 +02:00 [INF] HTTP GET /_framework/_bin/WebAssembly.Bindings.dll responded 304 in 5.6761 ms
+2020-06-18 23:10:40.322 +02:00 [INF] HTTP GET /_framework/_bin/System.Numerics.dll responded 304 in 5.9407 ms
+2020-06-18 23:10:40.325 +02:00 [INF] HTTP GET /_framework/_bin/System.Xml.dll responded 304 in 6.0150 ms
+2020-06-18 23:10:40.326 +02:00 [INF] HTTP GET /_framework/_bin/Mono.Security.dll responded 304 in 0.5064 ms
+2020-06-18 23:10:40.326 +02:00 [INF] HTTP GET /_framework/_bin/System.Transactions.dll responded 304 in 0.4760 ms
+2020-06-18 23:10:40.329 +02:00 [INF] HTTP GET /_framework/_bin/System.Runtime.Serialization.dll responded 304 in 1.1252 ms
+2020-06-18 23:10:40.334 +02:00 [INF] HTTP GET /_framework/_bin/System.ServiceModel.Internals.dll responded 304 in 1.3109 ms
+2020-06-18 23:10:40.334 +02:00 [INF] HTTP GET /_framework/_bin/System.Net.Http.dll responded 304 in 0.2278 ms
+2020-06-18 23:10:40.335 +02:00 [INF] HTTP GET /_framework/_bin/System.Net.Http.WebAssemblyHttpHandler.dll responded 304 in 0.2622 ms
+2020-06-18 23:10:40.336 +02:00 [INF] HTTP GET /_framework/_bin/System.ComponentModel.Composition.dll responded 304 in 0.2707 ms
+2020-06-18 23:10:40.340 +02:00 [INF] HTTP GET /_framework/_bin/System.IO.Compression.FileSystem.dll responded 304 in 0.4296 ms
+2020-06-18 23:10:40.342 +02:00 [INF] HTTP GET /_framework/_bin/System.IO.Compression.dll responded 304 in 0.2924 ms
+2020-06-18 23:10:40.343 +02:00 [INF] HTTP GET /_framework/_bin/System.Drawing.Common.dll responded 304 in 0.1904 ms
+2020-06-18 23:10:40.345 +02:00 [INF] HTTP GET /_framework/_bin/System.Data.DataSetExtensions.dll responded 304 in 0.3112 ms
+2020-06-18 23:10:40.346 +02:00 [INF] HTTP GET /_framework/_bin/System.Data.dll responded 304 in 0.1968 ms
+2020-06-18 23:10:40.347 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.SignalR.Common.dll responded 304 in 0.2688 ms
+2020-06-18 23:10:40.352 +02:00 [INF] HTTP GET /_framework/_bin/System.Text.Encodings.Web.dll responded 304 in 0.4170 ms
+2020-06-18 23:10:40.354 +02:00 [INF] HTTP GET /_framework/_bin/System.Buffers.dll responded 304 in 0.2785 ms
+2020-06-18 23:10:40.356 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Connections.Abstractions.dll responded 304 in 0.5187 ms
+2020-06-18 23:10:40.358 +02:00 [INF] HTTP GET /_framework/_bin/System.IO.Pipelines.dll responded 304 in 0.2536 ms
+2020-06-18 23:10:40.363 +02:00 [INF] HTTP GET /_framework/_bin/System.Threading.Tasks.Extensions.dll responded 304 in 0.4113 ms
+2020-06-18 23:10:40.367 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Http.Features.dll responded 304 in 0.3938 ms
+2020-06-18 23:10:40.369 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Primitives.dll responded 304 in 0.3149 ms
+2020-06-18 23:10:40.372 +02:00 [INF] HTTP GET /_framework/_bin/System.Runtime.CompilerServices.Unsafe.dll responded 304 in 0.4817 ms
+2020-06-18 23:10:40.374 +02:00 [INF] HTTP GET /_framework/_bin/System.Text.Json.dll responded 304 in 0.4082 ms
+2020-06-18 23:10:40.376 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Bcl.AsyncInterfaces.dll responded 304 in 0.2281 ms
+2020-06-18 23:10:40.378 +02:00 [INF] HTTP GET /_framework/_bin/System.Numerics.Vectors.dll responded 304 in 0.2368 ms
+2020-06-18 23:10:40.383 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Options.dll responded 304 in 0.4111 ms
+2020-06-18 23:10:40.385 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Http.Connections.Client.dll responded 304 in 0.2639 ms
+2020-06-18 23:10:40.388 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Http.Connections.Common.dll responded 304 in 0.3674 ms
+2020-06-18 23:10:40.390 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Logging.Abstractions.dll responded 304 in 0.4210 ms
+2020-06-18 23:10:40.392 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.SignalR.Client.Core.dll responded 304 in 0.3346 ms
+2020-06-18 23:10:40.393 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.SignalR.Protocols.Json.dll responded 304 in 0.1927 ms
+2020-06-18 23:10:40.394 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.DependencyInjection.dll responded 304 in 0.2167 ms
+2020-06-18 23:10:40.397 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Logging.dll responded 304 in 0.4022 ms
+2020-06-18 23:10:40.405 +02:00 [INF] HTTP GET /_framework/_bin/System.Threading.Channels.dll responded 304 in 0.6009 ms
+2020-06-18 23:10:40.407 +02:00 [INF] HTTP GET /_framework/_bin/System.Net.Http.Json.dll responded 304 in 0.4221 ms
+2020-06-18 23:10:40.409 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Http.dll responded 304 in 0.5192 ms
+2020-06-18 23:10:40.414 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Configuration.Abstractions.dll responded 304 in 0.5483 ms
+2020-06-18 23:10:40.415 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Configuration.Binder.dll responded 304 in 0.2463 ms
+2020-06-18 23:10:40.417 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.JSInterop.dll responded 304 in 0.3428 ms
+2020-06-18 23:10:40.424 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Authorization.dll responded 304 in 0.3797 ms
+2020-06-18 23:10:40.426 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Metadata.dll responded 304 in 0.5402 ms
+2020-06-18 23:10:40.426 +02:00 [INF] HTTP GET /_framework/_bin/ServerStarter.Shared.dll responded 200 in 6.8381 ms
+2020-06-18 23:10:40.428 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.Web.dll responded 304 in 0.3333 ms
+2020-06-18 23:10:40.431 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.Forms.dll responded 304 in 1.1158 ms
+2020-06-18 23:10:40.434 +02:00 [INF] HTTP GET /_framework/_bin/System.ComponentModel.Annotations.dll responded 304 in 0.3245 ms
+2020-06-18 23:10:40.437 +02:00 [INF] HTTP GET /_framework/_bin/System.ComponentModel.DataAnnotations.dll responded 304 in 0.3661 ms
+2020-06-18 23:10:40.439 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.dll responded 304 in 0.5056 ms
+2020-06-18 23:10:40.444 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.Authorization.dll responded 304 in 0.3615 ms
+2020-06-18 23:10:40.445 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.WebAssembly.dll responded 304 in 0.3395 ms
+2020-06-18 23:10:40.447 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Configuration.dll responded 304 in 0.2148 ms
+2020-06-18 23:10:40.449 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Configuration.Json.dll responded 304 in 0.2522 ms
+2020-06-18 23:10:40.453 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Configuration.FileExtensions.dll responded 304 in 0.2473 ms
+2020-06-18 23:10:40.455 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.FileProviders.Physical.dll responded 304 in 0.2006 ms
+2020-06-18 23:10:40.457 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.FileSystemGlobbing.dll responded 304 in 0.3937 ms
+2020-06-18 23:10:40.461 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.FileProviders.Abstractions.dll responded 304 in 0.6029 ms
+2020-06-18 23:10:40.466 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.JSInterop.WebAssembly.dll responded 304 in 0.4724 ms
+2020-06-18 23:10:40.468 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.WebAssembly.Authentication.dll responded 304 in 0.3627 ms
+2020-06-18 23:10:40.471 +02:00 [INF] HTTP GET /_framework/_bin/ServerStarter.Client.pdb responded 304 in 0.3686 ms
+2020-06-18 23:10:40.481 +02:00 [INF] HTTP GET /_framework/_bin/ServerStarter.Shared.pdb responded 200 in 2.0233 ms
+2020-06-18 23:10:40.483 +02:00 [INF] HTTP GET /_framework/wasm/dotnet.wasm responded 304 in 0.3198 ms
+2020-06-18 23:10:40.485 +02:00 [INF] HTTP GET /_framework/wasm/dotnet.timezones.dat responded 304 in 0.3358 ms
+2020-06-18 23:11:48.204 +02:00 [INF] HTTP GET / responded 307 in 2.0066 ms
+2020-06-18 23:11:48.222 +02:00 [INF] HTTP GET / responded 200 in 3.5930 ms
+2020-06-18 23:11:48.281 +02:00 [INF] HTTP GET /_framework/blazor.webassembly.js responded 200 in 12.4890 ms
+2020-06-18 23:11:48.290 +02:00 [INF] HTTP GET /css/app.css responded 200 in 22.8091 ms
+2020-06-18 23:11:48.290 +02:00 [INF] HTTP GET /JsInterop.js responded 200 in 22.3085 ms
+2020-06-18 23:11:48.295 +02:00 [INF] HTTP GET /css/bootstrap/bootstrap.min.css responded 200 in 27.1366 ms
+2020-06-18 23:11:48.304 +02:00 [INF] HTTP GET /css/open-iconic/font/css/open-iconic-bootstrap.min.css responded 200 in 5.7764 ms
+2020-06-18 23:11:48.374 +02:00 [INF] HTTP GET /_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication/AuthenticationService.js responded 200 in 105.5161 ms
+2020-06-18 23:11:48.395 +02:00 [INF] HTTP GET /_framework/blazor.boot.json responded 200 in 0.7768 ms
+2020-06-18 23:11:48.400 +02:00 [INF] HTTP GET /favicon.ico responded 200 in 2.6280 ms
+2020-06-18 23:11:48.408 +02:00 [INF] HTTP GET /appsettings.json responded 200 in 5.4804 ms
+2020-06-18 23:11:48.431 +02:00 [INF] HTTP GET /_framework/wasm/dotnet.3.2.0.js responded 200 in 15.3269 ms
+2020-06-18 23:11:48.439 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.SignalR.Client.dll responded 200 in 22.3589 ms
+2020-06-18 23:11:48.444 +02:00 [INF] HTTP GET /_framework/_bin/WebAssembly.Net.WebSockets.dll responded 200 in 17.1369 ms
+2020-06-18 23:11:48.452 +02:00 [INF] HTTP GET /_framework/_bin/WebAssembly.Bindings.dll responded 200 in 25.3928 ms
+2020-06-18 23:11:48.452 +02:00 [INF] HTTP GET /_framework/_bin/System.Memory.dll responded 200 in 25.8019 ms
+2020-06-18 23:11:48.493 +02:00 [INF] HTTP GET /_framework/_bin/System.Transactions.dll responded 200 in 40.7985 ms
+2020-06-18 23:11:48.493 +02:00 [INF] HTTP GET /_framework/_bin/ServerStarter.Client.dll responded 200 in 76.4920 ms
+2020-06-18 23:11:48.495 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.DependencyInjection.Abstractions.dll responded 200 in 70.4708 ms
+2020-06-18 23:11:48.505 +02:00 [INF] HTTP GET /_framework/_bin/System.Xml.Linq.dll responded 200 in 79.3603 ms
+2020-06-18 23:11:48.505 +02:00 [INF] HTTP GET /_framework/_bin/System.Numerics.dll responded 200 in 76.9608 ms
+2020-06-18 23:11:48.656 +02:00 [INF] HTTP GET /_framework/_bin/System.IO.Compression.FileSystem.dll responded 200 in 150.7671 ms
+2020-06-18 23:11:48.655 +02:00 [INF] HTTP GET /_framework/_bin/ServerStarter.Shared.dll responded 200 in 103.9154 ms
+2020-06-18 23:11:48.656 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Logging.dll responded 200 in 109.2558 ms
+2020-06-18 23:11:48.656 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Http.Features.dll responded 200 in 128.9776 ms
+2020-06-18 23:11:48.656 +02:00 [INF] HTTP GET /_framework/_bin/System.Buffers.dll responded 200 in 131.8182 ms
+2020-06-18 23:11:48.656 +02:00 [INF] HTTP GET /_framework/_bin/System.Runtime.CompilerServices.Unsafe.dll responded 200 in 128.3603 ms
+2020-06-18 23:11:48.656 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Primitives.dll responded 200 in 127.8369 ms
+2020-06-18 23:11:48.657 +02:00 [INF] HTTP GET /_framework/_bin/System.Net.Http.WebAssemblyHttpHandler.dll responded 200 in 153.6281 ms
+2020-06-18 23:11:48.657 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.JSInterop.WebAssembly.dll responded 200 in 63.2207 ms
+2020-06-18 23:11:48.657 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.FileProviders.Abstractions.dll responded 200 in 66.1916 ms
+2020-06-18 23:11:48.658 +02:00 [INF] HTTP GET /_framework/_bin/ServerStarter.Client.pdb responded 200 in 63.0491 ms
+2020-06-18 23:11:48.658 +02:00 [INF] HTTP GET /_framework/_bin/System.Text.Encodings.Web.dll responded 200 in 133.7412 ms
+2020-06-18 23:11:48.657 +02:00 [INF] HTTP GET /_framework/_bin/ServerStarter.Shared.pdb responded 200 in 59.4395 ms
+2020-06-18 23:11:48.658 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Configuration.FileExtensions.dll responded 200 in 73.2815 ms
+2020-06-18 23:11:48.658 +02:00 [INF] HTTP GET /_framework/_bin/netstandard.dll responded 200 in 232.8687 ms
+2020-06-18 23:11:48.685 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Configuration.Json.dll responded 200 in 101.6405 ms
+2020-06-18 23:11:48.658 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Http.Connections.Common.dll responded 200 in 115.8129 ms
+2020-06-18 23:11:48.685 +02:00 [INF] HTTP GET /_framework/_bin/System.Data.DataSetExtensions.dll responded 200 in 170.4918 ms
+2020-06-18 23:11:48.658 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Bcl.AsyncInterfaces.dll responded 200 in 125.5743 ms
+2020-06-18 23:11:48.686 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.Authorization.dll responded 200 in 107.0297 ms
+2020-06-18 23:11:48.687 +02:00 [INF] HTTP GET /_framework/_bin/System.IO.Pipelines.dll responded 200 in 161.0592 ms
+2020-06-18 23:11:48.687 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.SignalR.Common.dll responded 200 in 163.3577 ms
+2020-06-18 23:11:48.687 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Logging.Abstractions.dll responded 200 in 143.7217 ms
+2020-06-18 23:11:48.687 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Http.dll responded 200 in 136.1856 ms
+2020-06-18 23:11:48.687 +02:00 [INF] HTTP GET /_framework/_bin/System.ComponentModel.DataAnnotations.dll responded 200 in 126.0008 ms
+2020-06-18 23:11:48.697 +02:00 [INF] HTTP GET /_framework/_bin/System.Numerics.Vectors.dll responded 200 in 163.3042 ms
+2020-06-18 23:11:48.699 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Configuration.dll responded 200 in 119.8317 ms
+2020-06-18 23:11:48.700 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.Forms.dll responded 200 in 145.1483 ms
+2020-06-18 23:11:48.701 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Configuration.Binder.dll responded 200 in 150.3576 ms
+2020-06-18 23:11:48.701 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Configuration.Abstractions.dll responded 200 in 150.7223 ms
+2020-06-18 23:11:48.702 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Metadata.dll responded 200 in 149.2084 ms
+2020-06-18 23:11:48.703 +02:00 [INF] HTTP GET /_framework/_bin/System.ComponentModel.Annotations.dll responded 200 in 148.1297 ms
+2020-06-18 23:11:48.703 +02:00 [INF] HTTP GET /_framework/_bin/System.Threading.Tasks.Extensions.dll responded 200 in 176.2397 ms
+2020-06-18 23:11:48.711 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Connections.Abstractions.dll responded 200 in 186.1362 ms
+2020-06-18 23:11:48.711 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.JSInterop.dll responded 200 in 160.2835 ms
+2020-06-18 23:11:48.711 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.WebAssembly.Authentication.dll responded 200 in 117.2524 ms
+2020-06-18 23:11:48.711 +02:00 [INF] HTTP GET /_framework/_bin/System.Net.Http.dll responded 200 in 216.1357 ms
+2020-06-18 23:11:48.712 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.dll responded 200 in 150.2291 ms
+2020-06-18 23:11:48.712 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Http.Connections.Client.dll responded 200 in 169.2701 ms
+2020-06-18 23:11:48.716 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.FileSystemGlobbing.dll responded 200 in 127.6020 ms
+2020-06-18 23:11:48.718 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.SignalR.Protocols.Json.dll responded 200 in 174.9142 ms
+2020-06-18 23:11:48.721 +02:00 [INF] HTTP GET /_framework/_bin/System.Threading.Channels.dll responded 200 in 170.3570 ms
+2020-06-18 23:11:48.724 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.Options.dll responded 200 in 190.0393 ms
+2020-06-18 23:11:48.726 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Authorization.dll responded 200 in 174.1532 ms
+2020-06-18 23:11:48.729 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.WebAssembly.dll responded 200 in 150.5534 ms
+2020-06-18 23:11:48.731 +02:00 [INF] HTTP GET /_framework/_bin/System.Net.Http.Json.dll responded 200 in 180.7964 ms
+2020-06-18 23:11:48.734 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.Components.Web.dll responded 200 in 181.4338 ms
+2020-06-18 23:11:48.735 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.FileProviders.Physical.dll responded 200 in 147.9179 ms
+2020-06-18 23:11:48.742 +02:00 [INF] HTTP GET /_framework/_bin/System.Drawing.Common.dll responded 200 in 227.2824 ms
+2020-06-18 23:11:48.742 +02:00 [INF] HTTP GET /_framework/_bin/Mono.Security.dll responded 200 in 297.5384 ms
+2020-06-18 23:11:48.745 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.AspNetCore.SignalR.Client.Core.dll responded 200 in 202.1427 ms
+2020-06-18 23:11:48.747 +02:00 [INF] HTTP GET /_framework/_bin/System.ServiceModel.Internals.dll responded 200 in 258.9229 ms
+2020-06-18 23:11:48.749 +02:00 [INF] HTTP GET /_framework/_bin/System.IO.Compression.dll responded 200 in 243.7754 ms
+2020-06-18 23:11:48.751 +02:00 [INF] HTTP GET /_framework/_bin/Microsoft.Extensions.DependencyInjection.dll responded 200 in 204.5710 ms
+2020-06-18 23:11:48.762 +02:00 [INF] HTTP GET /_framework/_bin/System.Text.Json.dll responded 200 in 233.6726 ms
+2020-06-18 23:11:48.766 +02:00 [INF] HTTP GET /_framework/_bin/System.ComponentModel.Composition.dll responded 200 in 262.9890 ms
+2020-06-18 23:11:48.766 +02:00 [INF] HTTP GET /_framework/wasm/dotnet.timezones.dat responded 200 in 165.7102 ms
+2020-06-18 23:11:48.825 +02:00 [INF] HTTP GET /_framework/_bin/System.Runtime.Serialization.dll responded 200 in 341.0877 ms
+2020-06-18 23:11:48.834 +02:00 [INF] HTTP GET /_framework/_bin/System.Core.dll responded 200 in 407.9780 ms
+2020-06-18 23:11:48.854 +02:00 [INF] HTTP GET /_framework/_bin/System.Data.dll responded 200 in 331.9257 ms
+2020-06-18 23:11:48.858 +02:00 [INF] HTTP GET /_framework/_bin/System.dll responded 200 in 432.5223 ms
+2020-06-18 23:11:48.862 +02:00 [INF] HTTP GET /_framework/wasm/dotnet.wasm responded 200 in 263.3558 ms
+2020-06-18 23:11:48.862 +02:00 [INF] HTTP GET /_framework/_bin/System.Xml.dll responded 200 in 431.9763 ms
+2020-06-18 23:11:48.877 +02:00 [INF] HTTP GET /_framework/_bin/mscorlib.dll responded 200 in 450.1302 ms
+2020-06-18 23:11:49.485 +02:00 [INF] HTTP GET /_configuration/ServerStarter.Client responded 200 in 54.3543 ms
+2020-06-18 23:11:49.549 +02:00 [INF] HTTP GET /css/open-iconic/font/fonts/open-iconic.woff responded 200 in 0.9869 ms
+2020-06-18 23:11:49.574 +02:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2020-06-18 23:11:49.605 +02:00 [INF] HTTP GET /.well-known/openid-configuration responded 200 in 39.4903 ms
+2020-06-18 23:11:49.620 +02:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.AuthorizeEndpoint for /connect/authorize
+2020-06-18 23:11:49.663 +02:00 [INF] Showing error: prompt=none was requested but user is not authenticated
+2020-06-18 23:11:49.675 +02:00 [INF] {"ClientId":"ServerStarter.Client","ClientName":"ServerStarter.Client","RedirectUri":"https://localhost:5001/authentication/login-callback","AllowedRedirectUris":["/authentication/login-callback"],"SubjectId":"anonymous","ResponseType":"code","ResponseMode":"query","GrantType":"authorization_code","RequestedScopes":"ServerStarter.ServerAPI openid profile","State":"9a8a6426d6e44f65b051ac40fb0c50fd","UiLocales":null,"Nonce":null,"AuthenticationContextReferenceClasses":null,"DisplayMode":null,"PromptMode":"none","MaxAge":null,"LoginHint":null,"SessionId":null,"Raw":{"client_id":"ServerStarter.Client","redirect_uri":"https://localhost:5001/authentication/login-callback","response_type":"code","scope":"ServerStarter.ServerAPI openid profile","state":"9a8a6426d6e44f65b051ac40fb0c50fd","code_challenge":"pfHIrGIJH8amNywCaE4zCgxylOs9rq6XyOInLX38zME","code_challenge_method":"S256","prompt":"none","response_mode":"query"},"$type":"AuthorizeRequestValidationLog"}
+2020-06-18 23:11:49.700 +02:00 [INF] {"ClientId":"ServerStarter.Client","ClientName":"ServerStarter.Client","RedirectUri":"https://localhost:5001/authentication/login-callback","Endpoint":"Authorize","SubjectId":null,"Scopes":"ServerStarter.ServerAPI openid profile","GrantType":"authorization_code","Error":"login_required","ErrorDescription":null,"Category":"Token","Name":"Token Issued Failure","EventType":"Failure","Id":2001,"Message":null,"ActivityId":"0HM0JPG584LCH:000000AF","TimeStamp":"2020-06-18T21:11:49.0000000Z","ProcessId":101688,"LocalIpAddress":"::1:5001","RemoteIpAddress":"::1","$type":"TokenIssuedFailureEvent"}
+2020-06-18 23:11:49.717 +02:00 [INF] HTTP GET /connect/authorize?client_id=ServerStarter.Client&redirect_uri=https%3A%2F%2Flocalhost%3A5001%2Fauthentication%2Flogin-callback&response_type=code&scope=ServerStarter.ServerAPI%20openid%20profile&state=9a8a6426d6e44f65b051ac40fb0c50fd&code_challenge=pfHIrGIJH8amNywCaE4zCgxylOs9rq6XyOInLX38zME&code_challenge_method=S256&prompt=none&response_mode=query responded 302 in 103.5109 ms
+2020-06-18 23:11:49.725 +02:00 [INF] HTTP GET /authentication/login-callback?error=login_required&state=9a8a6426d6e44f65b051ac40fb0c50fd responded 200 in 1.0513 ms
+2020-06-18 23:11:49.802 +02:00 [INF] HTTP GET /_framework/blazor.webassembly.js responded 304 in 0.4564 ms
+2020-06-18 23:11:49.819 +02:00 [INF] HTTP GET /_framework/blazor.boot.json responded 304 in 0.4806 ms
+2020-06-18 23:11:49.849 +02:00 [INF] HTTP GET /assets/img/sits_01.png responded 200 in 1.5455 ms
+2020-06-18 23:11:55.236 +02:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.AuthorizeEndpoint for /connect/authorize
+2020-06-18 23:11:55.239 +02:00 [INF] Showing error: prompt=none was requested but user is not authenticated
+2020-06-18 23:11:55.240 +02:00 [INF] {"ClientId":"ServerStarter.Client","ClientName":"ServerStarter.Client","RedirectUri":"https://localhost:5001/authentication/login-callback","AllowedRedirectUris":["/authentication/login-callback"],"SubjectId":"anonymous","ResponseType":"code","ResponseMode":"query","GrantType":"authorization_code","RequestedScopes":"ServerStarter.ServerAPI openid profile","State":"a960db4afe6942a9864cca7d1deabe48","UiLocales":null,"Nonce":null,"AuthenticationContextReferenceClasses":null,"DisplayMode":null,"PromptMode":"none","MaxAge":null,"LoginHint":null,"SessionId":null,"Raw":{"client_id":"ServerStarter.Client","redirect_uri":"https://localhost:5001/authentication/login-callback","response_type":"code","scope":"ServerStarter.ServerAPI openid profile","state":"a960db4afe6942a9864cca7d1deabe48","code_challenge":"C6eFsqy6dGXHbwDCQJP3QPSy_iuzzEFm6uiYO_9ZprQ","code_challenge_method":"S256","prompt":"none","response_mode":"query"},"$type":"AuthorizeRequestValidationLog"}
+2020-06-18 23:11:55.259 +02:00 [INF] {"ClientId":"ServerStarter.Client","ClientName":"ServerStarter.Client","RedirectUri":"https://localhost:5001/authentication/login-callback","Endpoint":"Authorize","SubjectId":null,"Scopes":"ServerStarter.ServerAPI openid profile","GrantType":"authorization_code","Error":"login_required","ErrorDescription":null,"Category":"Token","Name":"Token Issued Failure","EventType":"Failure","Id":2001,"Message":null,"ActivityId":"0HM0JPG584LCH:000000B9","TimeStamp":"2020-06-18T21:11:55.0000000Z","ProcessId":101688,"LocalIpAddress":"::1:5001","RemoteIpAddress":"::1","$type":"TokenIssuedFailureEvent"}
+2020-06-18 23:11:55.271 +02:00 [INF] HTTP GET /connect/authorize?client_id=ServerStarter.Client&redirect_uri=https%3A%2F%2Flocalhost%3A5001%2Fauthentication%2Flogin-callback&response_type=code&scope=ServerStarter.ServerAPI%20openid%20profile&state=a960db4afe6942a9864cca7d1deabe48&code_challenge=C6eFsqy6dGXHbwDCQJP3QPSy_iuzzEFm6uiYO_9ZprQ&code_challenge_method=S256&prompt=none&response_mode=query responded 302 in 37.3385 ms
+2020-06-18 23:11:55.278 +02:00 [INF] HTTP GET /authentication/login-callback?error=login_required&state=a960db4afe6942a9864cca7d1deabe48 responded 200 in 1.7224 ms
+2020-06-18 23:11:55.287 +02:00 [INF] HTTP GET /_framework/blazor.webassembly.js responded 304 in 0.4387 ms
+2020-06-18 23:11:55.300 +02:00 [INF] HTTP GET /_framework/blazor.boot.json responded 200 in 0.8863 ms
+2020-06-18 23:11:55.315 +02:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.AuthorizeEndpoint for /connect/authorize
+2020-06-18 23:11:55.317 +02:00 [INF] Showing login: User is not authenticated
+2020-06-18 23:11:55.319 +02:00 [INF] HTTP GET /connect/authorize?client_id=ServerStarter.Client&redirect_uri=https%3A%2F%2Flocalhost%3A5001%2Fauthentication%2Flogin-callback&response_type=code&scope=ServerStarter.ServerAPI%20openid%20profile&state=94561849046945e9aef227bbb42446b4&code_challenge=tYoNjEKHrTUnOotNjHyz5x8cqImNYxA7eS52Nbt8Icg&code_challenge_method=S256&response_mode=query responded 302 in 12.8692 ms
+2020-06-18 23:11:55.494 +02:00 [INF] HTTP GET /Identity/Account/Login?ReturnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3DServerStarter.Client%26redirect_uri%3Dhttps%253A%252F%252Flocalhost%253A5001%252Fauthentication%252Flogin-callback%26response_type%3Dcode%26scope%3DServerStarter.ServerAPI%2520openid%2520profile%26state%3D94561849046945e9aef227bbb42446b4%26code_challenge%3DtYoNjEKHrTUnOotNjHyz5x8cqImNYxA7eS52Nbt8Icg%26code_challenge_method%3DS256%26response_mode%3Dquery responded 200 in 168.3884 ms
+2020-06-18 23:11:55.520 +02:00 [INF] HTTP GET /Identity/js/site.js?v=4q1jwFhaPaZgr8WAUSrux6hAuh0XDg9kPS3xIVq36I0 responded 200 in 0.9666 ms
+2020-06-18 23:11:55.529 +02:00 [INF] HTTP GET /Identity/css/site.css responded 200 in 10.2397 ms
+2020-06-18 23:11:55.531 +02:00 [INF] HTTP GET /Identity/lib/bootstrap/dist/css/bootstrap.css responded 200 in 12.2027 ms
+2020-06-18 23:11:55.536 +02:00 [INF] HTTP GET /Identity/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js responded 200 in 17.1574 ms
+2020-06-18 23:11:55.542 +02:00 [INF] HTTP GET /Identity/lib/jquery-validation/dist/jquery.validate.js responded 200 in 22.4404 ms
+2020-06-18 23:11:55.565 +02:00 [INF] HTTP GET /Identity/lib/bootstrap/dist/js/bootstrap.bundle.js responded 200 in 46.2449 ms
+2020-06-18 23:11:55.581 +02:00 [INF] HTTP GET /Identity/lib/jquery/dist/jquery.js responded 200 in 61.8564 ms
+2020-06-18 23:12:04.384 +02:00 [INF] AuthenticationScheme: Steam was challenged.
+2020-06-18 23:12:04.391 +02:00 [INF] HTTP POST /Identity/Account/ExternalLogin?returnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3DServerStarter.Client%26redirect_uri%3Dhttps%253A%252F%252Flocalhost%253A5001%252Fauthentication%252Flogin-callback%26response_type%3Dcode%26scope%3DServerStarter.ServerAPI%2520openid%2520profile%26state%3D94561849046945e9aef227bbb42446b4%26code_challenge%3DtYoNjEKHrTUnOotNjHyz5x8cqImNYxA7eS52Nbt8Icg%26code_challenge_method%3DS256%26response_mode%3Dquery responded 302 in 7506.1726 ms
+2020-06-18 23:13:18.243 +02:00 [INF] HTTP GET /signin-steam?state=CfDJ8AXoxeTqGS5DnC6SvZI0H1X35AzDgPZGTkJy-OiS-LveOS3R4z4UtPK9JBybbpCyOFsy80eKh8I8HyeXpjPto_YczuuOYcGgB6O8sl_zE8JIUY2p79AFhzXWJ24Pp1J1FiAYM6lYfet55nICjJzAmRumNA0mrg2pUcMA4cBOFhqTniA72T7SRcTlXHVoOuCNq3-todC8Z6JGVk7ca6_P3XhhRCC1NPfhgG-Z8Kh0dsG-nIXUcZ2aUbiIRuARlOPa-H2bI6R2XNuMLcbJ9nXfF4QMiCRwHn1L5zcMpASM-Z_vq2GkI-dUBDs5o_LquBePmaDOGFCmtRgkFLssyMk7fOw1c1qmATCtwH6j_mHKq2mqxxE9q8yAzk0wFJE9cOOF3v_oqBu5MucWKSjaLl1Tg3chh4dyUDy071vvO7XV4f68zinJ1pCMP_b2obHObuRiJI5IfBtA20oaB1R6Zqwt8cAMOdJoJ-ybcG-CN4z0spYfSgxotix2hTnM4lEdx_FSvIUYg89ZAz8cm8Y7-BXHXNMR71uFomaQtQdm2mwiawe7No-XSzcTSr3q-fGbdemPzgVqPE7ul0tzZtScrg2_i5hSNmsXrEroqjYZStBuAbeMF-3Sqh6rjugPkyT0muq5bmkGuu8z6oOHIsIXm-6IH0gPMix8RYMiUzPUG5slrXm3W8U5_ZoatmBni9ImwsJclIZQa3bdIxOmXyn0e6Z_kBr-foe9RP1DPixL1oYyzOxn-3MMgOb8O1LJGbOM0cZdh6vgmbKyFeo198H4gucAZhqbIuZGeGdNOY9CMBREN_6WJHwkdRpgVK6xgwylNuUjRIWaj2w5h6tfVO-ccyGV8g0WWPetdUJ8_r3zmVJnyde7z7EHnRcdsqR_qjly_NRJgC-gXOUgZry705mdGEvs2hg&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.mode=id_res&openid.op_endpoint=https%3A%2F%2Fsteamcommunity.com%2Fopenid%2Flogin&openid.claimed_id=https%3A%2F%2Fsteamcommunity.com%2Fopenid%2Fid%2F76561197974314026&openid.identity=https%3A%2F%2Fsteamcommunity.com%2Fopenid%2Fid%2F76561197974314026&openid.return_to=https%3A%2F%2Flocalhost%3A5001%2Fsignin-steam%3Fstate%3DCfDJ8AXoxeTqGS5DnC6SvZI0H1X35AzDgPZGTkJy-OiS-LveOS3R4z4UtPK9JBybbpCyOFsy80eKh8I8HyeXpjPto_YczuuOYcGgB6O8sl_zE8JIUY2p79AFhzXWJ24Pp1J1FiAYM6lYfet55nICjJzAmRumNA0mrg2pUcMA4cBOFhqTniA72T7SRcTlXHVoOuCNq3-todC8Z6JGVk7ca6_P3XhhRCC1NPfhgG-Z8Kh0dsG-nIXUcZ2aUbiIRuARlOPa-H2bI6R2XNuMLcbJ9nXfF4QMiCRwHn1L5zcMpASM-Z_vq2GkI-dUBDs5o_LquBePmaDOGFCmtRgkFLssyMk7fOw1c1qmATCtwH6j_mHKq2mqxxE9q8yAzk0wFJE9cOOF3v_oqBu5MucWKSjaLl1Tg3chh4dyUDy071vvO7XV4f68zinJ1pCMP_b2obHObuRiJI5IfBtA20oaB1R6Zqwt8cAMOdJoJ-ybcG-CN4z0spYfSgxotix2hTnM4lEdx_FSvIUYg89ZAz8cm8Y7-BXHXNMR71uFomaQtQdm2mwiawe7No-XSzcTSr3q-fGbdemPzgVqPE7ul0tzZtScrg2_i5hSNmsXrEroqjYZStBuAbeMF-3Sqh6rjugPkyT0muq5bmkGuu8z6oOHIsIXm-6IH0gPMix8RYMiUzPUG5slrXm3W8U5_ZoatmBni9ImwsJclIZQa3bdIxOmXyn0e6Z_kBr-foe9RP1DPixL1oYyzOxn-3MMgOb8O1LJGbOM0cZdh6vgmbKyFeo198H4gucAZhqbIuZGeGdNOY9CMBREN_6WJHwkdRpgVK6xgwylNuUjRIWaj2w5h6tfVO-ccyGV8g0WWPetdUJ8_r3zmVJnyde7z7EHnRcdsqR_qjly_NRJgC-gXOUgZry705mdGEvs2hg&openid.response_nonce=2020-06-18T21%3A13%3A21ZqaBNrGj%2Fu0x%2FKkGYh4cj4Li6HLM%3D&openid.assoc_handle=1234567890&openid.signed=signed%2Cop_endpoint%2Cclaimed_id%2Cidentity%2Creturn_to%2Cresponse_nonce%2Cassoc_handle&openid.sig=qr6JUwTYipMSW8lU9tRlWN6xOtw%3D responded 302 in 788.4224 ms
+2020-06-18 23:13:18.726 +02:00 [INF] Entity Framework Core 3.1.3 initialized 'ApplicationDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer' with options: None
+2020-06-18 23:13:19.911 +02:00 [INF] Executed DbCommand (90ms) [Parameters=[@__loginProvider_0='?' (Size = 128), @__providerKey_1='?' (Size = 128)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(2) [a].[LoginProvider], [a].[ProviderKey], [a].[ProviderDisplayName], [a].[UserId]
+FROM [AspNetUserLogins] AS [a]
+WHERE ([a].[LoginProvider] = @__loginProvider_0) AND ([a].[ProviderKey] = @__providerKey_1)
+2020-06-18 23:13:20.005 +02:00 [INF] Executed DbCommand (5ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(2) [a].[Id], [a].[AccessFailedCount], [a].[AvatarUrl], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[Name], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[SteamId], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[Id] = @__userId_0
+2020-06-18 23:13:20.038 +02:00 [WRN] User f36dc66f-2736-4820-b042-6218afe8a27d cannot sign in without a confirmed account.
+2020-06-18 23:13:20.059 +02:00 [INF] HTTP GET /Identity/Account/ExternalLogin?returnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3DServerStarter.Client%26redirect_uri%3Dhttps%253A%252F%252Flocalhost%253A5001%252Fauthentication%252Flogin-callback%26response_type%3Dcode%26scope%3DServerStarter.ServerAPI%2520openid%2520profile%26state%3D94561849046945e9aef227bbb42446b4%26code_challenge%3DtYoNjEKHrTUnOotNjHyz5x8cqImNYxA7eS52Nbt8Icg%26code_challenge_method%3DS256%26response_mode%3Dquery&handler=Callback responded 200 in 1801.0331 ms
+2020-06-18 23:13:48.446 +02:00 [INF] Entity Framework Core 3.1.3 initialized 'ApplicationDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer' with options: None
+2020-06-18 23:13:48.460 +02:00 [INF] Executed DbCommand (3ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[AvatarUrl], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[Name], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[SteamId], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2020-06-18 23:13:48.474 +02:00 [WRN] User e67b75d5-e591-431f-9856-6bd2afe07b1d validation failed: DuplicateUserName.
+2020-06-18 23:13:48.481 +02:00 [INF] HTTP POST /Identity/Account/ExternalLogin?returnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3DServerStarter.Client%26redirect_uri%3Dhttps%253A%252F%252Flocalhost%253A5001%252Fauthentication%252Flogin-callback%26response_type%3Dcode%26scope%3DServerStarter.ServerAPI%2520openid%2520profile%26state%3D94561849046945e9aef227bbb42446b4%26code_challenge%3DtYoNjEKHrTUnOotNjHyz5x8cqImNYxA7eS52Nbt8Icg%26code_challenge_method%3DS256%26response_mode%3Dquery&handler=Confirmation responded 200 in 3716.1990 ms
+2020-06-18 23:14:37.920 +02:00 [INF] HTTP GET /Identity/Account/Login?returnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3DServerStarter.Client%26redirect_uri%3Dhttps%253A%252F%252Flocalhost%253A5001%252Fauthentication%252Flogin-callback%26response_type%3Dcode%26scope%3DServerStarter.ServerAPI%2520openid%2520profile%26state%3D94561849046945e9aef227bbb42446b4%26code_challenge%3DtYoNjEKHrTUnOotNjHyz5x8cqImNYxA7eS52Nbt8Icg%26code_challenge_method%3DS256%26response_mode%3Dquery responded 200 in 9.5946 ms
+2020-06-18 23:14:39.190 +02:00 [INF] AuthenticationScheme: Steam was challenged.
+2020-06-18 23:14:39.192 +02:00 [INF] HTTP POST /Identity/Account/ExternalLogin?returnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fclient_id%3DServerStarter.Client%26redirect_uri%3Dhttps%253A%252F%252Flocalhost%253A5001%252Fauthentication%252Flogin-callback%26response_type%3Dcode%26scope%3DServerStarter.ServerAPI%2520openid%2520profile%26state%3D94561849046945e9aef227bbb42446b4%26code_challenge%3DtYoNjEKHrTUnOotNjHyz5x8cqImNYxA7eS52Nbt8Icg%26code_challenge_method%3DS256%26response_mode%3Dquery responded 302 in 6.6427 ms
+2020-06-18 23:14:42.267 +02:00 [INF] HTTP GET /signin-steam?state=CfDJ8AXoxeTqGS5DnC6SvZI0H1WUIWqmMR-ve1UqpBtNwqOREJN6jgTbWWd3bob9nFdZo5dzQ-CFuhBwSJEE03ZIHz2fsC3akbOLV0lMhL1MJDx5YfpJObtKlegOarjAv6Kd0u79hYb-gUqgP3He3c0RMm5iWbcyJXLbUEkSh1XzXZ3X76R4lo97bt3tr889Luc5nLahSrNQhOZvGBbDzpDVTontKWgL6RS9lr9-VfFK9quJq9SWhuKs_dUPfMDmebpFxoVciDpmAqhKdkAOkgTgieJ-UUSZFt6KBET_JJ61BUU95R5ap9LTwnGHZErr49EcbjPOVkkphRdMGa1VUOKDXkNxxaUdDLgB4FELp7cWW4dqUb6awcxhCUCG6rOLmeCCSLEbc4ihDhFF__9RHMhTNOclNOTgOxhZxNcDXPhBIRGuCB6aG212eT_iGeNZa0rI1R6u9f0tY4PeTdMlwQQeCh_U9e7jabRZHsamu-dzQJoeVma2D1Jmimcv7NKgr_Qm4D41NX7Xml9xLaGDhDgLsP12JE2jPWRO85xFR6fjx96aIVUgiNTjIayMbkwof0XozKaWynNm85GbMLlNYWf_KPN2n1A3BmamwkXNNpljEhQVpPq24zXuVe_TCPwxY6d4allSleThCKuBBCOJs-Has1_BxRZEEQZg2mAKkSxdFfrphxE2L2yYm-_xeBHdPqouIfBGuh4nT1CHlSc_BCrYuTe1-kI6vxlJp0DxTFmMhKNR5e4fRB_szzvWqzgRUkP3n7S1eDp9DzcWAA_LbP8Deq54JGGKCI20bDDLR2mLqTxVLBZba78k9wdvmmR5337VkMtMJiJPs9qCEhIINVWU5tgrvHvZpyhsslzPPHIP3vhd8ZJAo0Aciu7qaSb2tRr7HCMlvzhHNPH_3Xfxnm1KYk0&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.mode=id_res&openid.op_endpoint=https%3A%2F%2Fsteamcommunity.com%2Fopenid%2Flogin&openid.claimed_id=https%3A%2F%2Fsteamcommunity.com%2Fopenid%2Fid%2F76561197974314026&openid.identity=https%3A%2F%2Fsteamcommunity.com%2Fopenid%2Fid%2F76561197974314026&openid.return_to=https%3A%2F%2Flocalhost%3A5001%2Fsignin-steam%3Fstate%3DCfDJ8AXoxeTqGS5DnC6SvZI0H1WUIWqmMR-ve1UqpBtNwqOREJN6jgTbWWd3bob9nFdZo5dzQ-CFuhBwSJEE03ZIHz2fsC3akbOLV0lMhL1MJDx5YfpJObtKlegOarjAv6Kd0u79hYb-gUqgP3He3c0RMm5iWbcyJXLbUEkSh1XzXZ3X76R4lo97bt3tr889Luc5nLahSrNQhOZvGBbDzpDVTontKWgL6RS9lr9-VfFK9quJq9SWhuKs_dUPfMDmebpFxoVciDpmAqhKdkAOkgTgieJ-UUSZFt6KBET_JJ61BUU95R5ap9LTwnGHZErr49EcbjPOVkkphRdMGa1VUOKDXkNxxaUdDLgB4FELp7cWW4dqUb6awcxhCUCG6rOLmeCCSLEbc4ihDhFF__9RHMhTNOclNOTgOxhZxNcDXPhBIRGuCB6aG212eT_iGeNZa0rI1R6u9f0tY4PeTdMlwQQeCh_U9e7jabRZHsamu-dzQJoeVma2D1Jmimcv7NKgr_Qm4D41NX7Xml9xLaGDhDgLsP12JE2jPWRO85xFR6fjx96aIVUgiNTjIayMbkwof0XozKaWynNm85GbMLlNYWf_KPN2n1A3BmamwkXNNpljEhQVpPq24zXuVe_TCPwxY6d4allSleThCKuBBCOJs-Has1_BxRZEEQZg2mAKkSxdFfrphxE2L2yYm-_xeBHdPqouIfBGuh4nT1CHlSc_BCrYuTe1-kI6vxlJp0DxTFmMhKNR5e4fRB_szzvWqzgRUkP3n7S1eDp9DzcWAA_LbP8Deq54JGGKCI20bDDLR2mLqTxVLBZba78k9wdvmmR5337VkMtMJiJPs9qCEhIINVWU5tgrvHvZpyhsslzPPHIP3vhd8ZJAo0Aciu7qaSb2tRr7HCMlvzhHNPH_3Xfxnm1KYk0&openid.response_nonce=2020-06-18T21%3A14%3A45ZYNwH3S3qmfjIt1fFTRU6WXWv%2B24%3D&openid.assoc_handle=1234567890&openid.signed=signed%2Cop_endpoint%2Cclaimed_id%2Cidentity%2Creturn_to%2Cresponse_nonce%2Cassoc_handle&openid.sig=VyWnV4XGOE7eKU%2F2qdSIgCQCv%2Fg%3D responded 302 in 597.0869 ms
+2020-06-18 23:15:04.905 +02:00 [INF] Entity Framework Core 3.1.3 initialized 'ApplicationDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer' with options: None
+2020-06-18 23:15:04.917 +02:00 [INF] Executed DbCommand (3ms) [Parameters=[@__loginProvider_0='?' (Size = 128), @__providerKey_1='?' (Size = 128)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(2) [a].[LoginProvider], [a].[ProviderKey], [a].[ProviderDisplayName], [a].[UserId]
+FROM [AspNetUserLogins] AS [a]
+WHERE ([a].[LoginProvider] = @__loginProvider_0) AND ([a].[ProviderKey] = @__providerKey_1)
+2020-06-18 23:15:04.953 +02:00 [INF] Executed DbCommand (2ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(2) [a].[Id], [a].[AccessFailedCount], [a].[AvatarUrl], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[Name], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[SteamId], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[Id] = @__userId_0
+2020-06-18 23:15:04.959 +02:00 [WRN] User f36dc66f-2736-4820-b042-6218afe8a27d cannot sign in without a confirmed account.
