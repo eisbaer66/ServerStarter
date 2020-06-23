@@ -22,12 +22,12 @@ namespace Zarlo.Stats
 
         public async Task<Server[]> GetServers(CancellationToken cancellationToken)
         {
-            return (await GetJson<ServersResponse>("api/server/list", cancellationToken)).Servers;
+            return (await GetJson<ServersResponse>("server/list", cancellationToken)).Servers;
         }
 
         public async Task<OnlinePlayerInfo[]> GetOnlinePlayers(CancellationToken cancellationToken)
         {
-            return (await GetJson<OnlinePlayerResponse>("api/user/online", cancellationToken)).Users;
+            return (await GetJson<OnlinePlayerResponse>("user/online", cancellationToken)).Users;
         }
 
         public async Task<T> GetJson<T>(string url, CancellationToken cancellationToken)
