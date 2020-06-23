@@ -76,7 +76,7 @@ namespace ServerStarter.Server
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddClaimsPrincipalFactory<UserClaimsPrincipalFactory>();
 
-            services.AddIdentityServer()
+            services.AddIdentityServer(opt => opt.UserInteraction.LoginUrl = "/api/SteamAuth")
                 .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
 
