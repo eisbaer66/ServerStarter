@@ -5,9 +5,14 @@ signing key
 error handling!
  
 ui!
- autoscroll
  popup
  chat alignment (datetime)
+ scrollbars
+cookie consent
+ dsgvo?
+links
+ github
+ zarlo?
 profil daten
 personal data
  invitation accepted/declined

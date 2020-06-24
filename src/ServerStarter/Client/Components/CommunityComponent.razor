@@ -8,54 +8,54 @@
 @inject ILogger<CommunityComponent> Logger
 @implements IDisposable
 
-    <div class="row community">
-        <div class="col-sm-12 col-md-4 col-xl-4">
-            @Community.Name
-        </div>
-        <div class="col-sm-12 col-md-4 col-xl-2">
-            <span data-toggle="tooltip" title="@Community.CurrentPlayers currently playing">@Community.CurrentPlayers</span> /
-            <span data-toggle="tooltip" title="@Community.WaitingPlayers currently waiting">@Community.WaitingPlayers</span> /
-            <span data-toggle="tooltip" title="@Community.MinimumPlayers players needed to start a server">@Community.MinimumPlayers</span>
-        </div>
-        <div class="col-sm-12 col-md-4 col-xl-2">
-            @if (joined)
-            {
-                <button class="btn btn-themed btn-joinleave w-100" @onclick="LeaveQueue" disabled="@(!IsConnected)">Leave</button>
-            }
-            else
-            {
-                <button class="btn btn-themed btn-joinleave w-100" @onclick="JoinQueue" disabled="@(!IsConnected)">Join</button>
-            }
-        </div>
-        <div class="col-sm-12 col-md-12 col-xl-4 servers">
-            <ul>
-                @foreach (var server in Community.Servers.OrderByDescending(s => s.CurrentPlayers))
-                {
-                    <li>
-                        @server.Name (<a href="@GetConnectLink(server)">@server.Ip</a>): @server.CurrentPlayers
-                    </li>
-                }
-            </ul>
-        </div>
-
+<div class="row community">
+    <div class="col-sm-12 col-md-4 col-xl-4">
+        @Community.Name
+    </div>
+    <div class="col-sm-12 col-md-4 col-xl-2">
+        <span data-toggle="tooltip" title="@Community.CurrentPlayers currently playing">@Community.CurrentPlayers</span> /
+        <span data-toggle="tooltip" title="@Community.WaitingPlayers currently waiting">@Community.WaitingPlayers</span> /
+        <span data-toggle="tooltip" title="@Community.MinimumPlayers players needed to start a server">@Community.MinimumPlayers</span>
+    </div>
+    <div class="col-sm-12 col-md-4 col-xl-2">
         @if (joined)
         {
-            <div class="col-12 chat">
-                <div class="messages">
-                    <ul id="messagesList">
-                        @foreach (var message in messages)
-                        {
-                            <li>@message</li>
-                        }
-                    </ul>
-                </div>
-                <div class="controls">
-                    <input @ref="messageInputReference" @bind="messageInput" size="50" @onkeyup="KeyUp" />
-                    <button class="btn btn-themed" @onclick="Send" disabled="@(!IsConnected)">Send</button>
-                </div>
-            </div>
+            <button class="btn btn-themed btn-joinleave w-100" @onclick="LeaveQueue" disabled="@(!IsConnected)">Leave</button>
+        }
+        else
+        {
+            <button class="btn btn-themed btn-joinleave w-100" @onclick="JoinQueue" disabled="@(!IsConnected)">Join</button>
         }
     </div>
+    <div class="col-sm-12 col-md-12 col-xl-4 servers">
+        <ul>
+            @foreach (var server in Community.Servers.OrderByDescending(s => s.CurrentPlayers))
+            {
+                <li>
+                    @server.Name (<a href="@GetConnectLink(server)">@server.Ip</a>): @server.CurrentPlayers
+                </li>
+            }
+        </ul>
+    </div>
+
+    @if (joined)
+    {
+        <div class="col-12 chat">
+            <div class="messages">
+                <ul id="messagesList">
+                    @foreach (var message in messages)
+                    {
+                        <li @ref="lastMessageElement">@message</li>
+                    }
+                </ul>
+            </div>
+            <div class="controls">
+                <input @ref="messageInputReference" @bind="messageInput" size="50" @onkeyup="KeyUp" />
+                <button class="btn btn-themed" @onclick="Send" disabled="@(!IsConnected)">Send</button>
+            </div>
+        </div>
+    }
+</div>
 
 <audio preload="auto" id="startSound0" src="assets/sounds/Announcer_am_gamestarting02.wav"></audio>
 <audio preload="auto" id="startSound1" src="assets/sounds/Announcer_am_gamestarting04.wav"></audio>
@@ -76,6 +76,7 @@
     public EventCallback<bool> PlaySoundsChanged { get; set; }
 
     ElementReference messageInputReference;
+    ElementReference lastMessageElement;
 
     private readonly List<string> messages = new List<string>();
     private readonly List<IDisposable> subscription = new List<IDisposable>();
@@ -153,31 +154,31 @@
         if (joined)
             return;
 
-        groupSubscription.Add(HubConnection.On<string, string, string>("MessageReceived", (communityId, user, message) =>
+        groupSubscription.Add(HubConnection.On<string, string, string>("MessageReceived", async (communityId, user, message) =>
         {
             if (communityId != Community.Id.ToString())
                 return;
 
             var encodedMsg = $"{user}: {message}";
-            AddMessage(encodedMsg);
+            await AddMessage(encodedMsg);
         }));
 
-        groupSubscription.Add(HubConnection.On<string, string>("UserJoined", (communityId, user) =>
+        groupSubscription.Add(HubConnection.On<string, string>("UserJoined", async (communityId, user) =>
         {
             if (communityId != Community.Id.ToString())
                 return;
 
             var encodedMsg = $"{user} joined the queue";
-            AddMessage(encodedMsg);
+            await AddMessage(encodedMsg);
         }));
 
-        groupSubscription.Add(HubConnection.On<string, string>("UserLeft", (communityId, user) =>
+        groupSubscription.Add(HubConnection.On<string, string>("UserLeft", async (communityId, user) =>
         {
             if (communityId != Community.Id.ToString())
                 return;
 
             var encodedMsg = $"{user} left the queue";
-            AddMessage(encodedMsg);
+            await AddMessage(encodedMsg);
         }));
 
         groupSubscription.Add(HubConnection.On<Guid>("LeaveQueue", async (communityId) =>
@@ -196,10 +197,11 @@
         await LoadCommunity();
     }
 
-    async void AddMessage(string msg)
+    async Task AddMessage(string msg)
     {
         messages.Add("[" + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + "] " + msg);
         StateHasChanged();
+        await ScrollToLastMessage();
     }
     async Task LeaveQueue()
     {
@@ -230,6 +232,11 @@
     private async Task FocusInput()
     {
         await JsRuntime.InvokeVoidAsync("uiFunctions.focusElement", messageInputReference);
+    }
+
+    private async Task ScrollToLastMessage()
+    {
+        await JsRuntime.InvokeVoidAsync("uiFunctions.scrollElementIntoView", lastMessageElement);
     }
 
     async Task KeyUp(KeyboardEventArgs args)
