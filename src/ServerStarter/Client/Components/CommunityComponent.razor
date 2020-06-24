@@ -9,12 +9,27 @@
 @implements IDisposable
 
     <div class="row community">
-        <div class="col-sm-12 col-md-6 col-xl-4">
+        <div class="col-sm-12 col-md-4 col-xl-4">
             @Community.Name
         </div>
-        <div class="col-sm-12 col-md-6 col-xl-4 servers">
+        <div class="col-sm-12 col-md-4 col-xl-2">
+            <span data-toggle="tooltip" title="@Community.CurrentPlayers currently playing">@Community.CurrentPlayers</span> /
+            <span data-toggle="tooltip" title="@Community.WaitingPlayers currently waiting">@Community.WaitingPlayers</span> /
+            <span data-toggle="tooltip" title="@Community.MinimumPlayers players needed to start a server">@Community.MinimumPlayers</span>
+        </div>
+        <div class="col-sm-12 col-md-4 col-xl-2">
+            @if (joined)
+            {
+                <button class="btn btn-themed btn-joinleave w-100" @onclick="LeaveQueue" disabled="@(!IsConnected)">Leave</button>
+            }
+            else
+            {
+                <button class="btn btn-themed btn-joinleave w-100" @onclick="JoinQueue" disabled="@(!IsConnected)">Join</button>
+            }
+        </div>
+        <div class="col-sm-12 col-md-12 col-xl-4 servers">
             <ul>
-                @foreach (var server in Community.Servers)
+                @foreach (var server in Community.Servers.OrderByDescending(s => s.CurrentPlayers))
                 {
                     <li>
                         @server.Name (<a href="@GetConnectLink(server)">@server.Ip</a>): @server.CurrentPlayers
@@ -22,235 +37,224 @@
                 }
             </ul>
         </div>
-        <div class="col-sm-12 col-md-6 col-xl-3">
-            @Community.CurrentPlayers / @Community.WaitingPlayers / @Community.MinimumPlayers players needed
-        </div>
-        <div class="col-sm-12 col-md-6 col-xl-1">
-            @if (joined)
-            {
-                <button @onclick="LeaveQueue" disabled="@(!IsConnected)">Leave</button>
-            }
-            else
-            {
-                <button @onclick="JoinQueue" disabled="@(!IsConnected)">Join</button>
-            }
-        </div>
-    </div>
+
         @if (joined)
         {
-            <tr>
-                <td colspan="6">
+            <div class="col-12 chat">
+                <div class="messages">
                     <ul id="messagesList">
                         @foreach (var message in messages)
                         {
                             <li>@message</li>
                         }
                     </ul>
+                </div>
+                <div class="controls">
+                    <input @ref="messageInputReference" @bind="messageInput" size="50" @onkeyup="KeyUp" />
+                    <button class="btn btn-themed" @onclick="Send" disabled="@(!IsConnected)">Send</button>
+                </div>
+            </div>
+        }
+    </div>
 
-                    <hr>
-                    <div class="form-group">
-                        <label>
-                            Message:
-                            <input @ref="messageInputReference" @bind="messageInput" size="50" @onkeyup="KeyUp" />
-                        </label>
-                    </div>
-                    <button @onclick="Send" disabled="@(!IsConnected)">Send</button>
-                </td>
-            </tr>
+<audio preload="auto" id="startSound0" src="assets/sounds/Announcer_am_gamestarting02.wav"></audio>
+<audio preload="auto" id="startSound1" src="assets/sounds/Announcer_am_gamestarting04.wav"></audio>
+<audio preload="auto" id="startSound2" src="assets/sounds/Announcer_am_gamestarting05.wav"></audio>
+<audio preload="auto" id="startSound3" src="assets/sounds/Announcer_am_roundstart04.wav"></audio>
+
+@code {
+    [Parameter]
+    public Community Community { get; set; }
+
+    [Parameter]
+    public HubConnection HubConnection { get; set; }
+
+    [Parameter]
+    public bool PlaySounds { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> PlaySoundsChanged { get; set; }
+
+    ElementReference messageInputReference;
+
+    private readonly List<string> messages = new List<string>();
+    private readonly List<IDisposable> subscription = new List<IDisposable>();
+    private readonly List<IDisposable> groupSubscription = new List<IDisposable>();
+    private readonly Random _random = new Random();
+    private bool joined = false;
+    private string messageInput;
+
+    protected override async Task OnInitializedAsync()
+    {
+        subscription.Add(HubConnection.On<string>("Changed", async (communityId) =>
+        {
+            if (communityId != Community.Id.ToString())
+                return;
+
+            await LoadCommunity();
+        }));
+    }
+
+    private async Task LoadCommunity()
+    {
+        try
+        {
+            Community = await Http.GetFromJsonAsync<Community>("api/Communities/" + Community.Id);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
         }
 
-        <audio preload="auto" id="startSound0" src="assets/sounds/Announcer_am_gamestarting02.wav"></audio>
-        <audio preload="auto" id="startSound1" src="assets/sounds/Announcer_am_gamestarting04.wav"></audio>
-        <audio preload="auto" id="startSound2" src="assets/sounds/Announcer_am_gamestarting05.wav"></audio>
-        <audio preload="auto" id="startSound3" src="assets/sounds/Announcer_am_roundstart04.wav"></audio>
+        StateHasChanged();
 
-        @code {
-            [Parameter]
-            public Community Community { get; set; }
+        await CheckPlayability();
+    }
 
-            [Parameter]
-            public HubConnection HubConnection { get; set; }
+    private async Task CheckPlayability()
+    {
+        if (!joined)
+            return;
 
-            [Parameter]
-            public bool PlaySounds { get; set; }
+        int playerPool = Community.CurrentPlayers + Community.WaitingPlayers;
+        if (playerPool >= Community.MinimumPlayers)
+            await JoinGame();
+    }
 
-            [Parameter]
-            public EventCallback<bool> PlaySoundsChanged { get; set; }
-
-            ElementReference messageInputReference;
-
-            private readonly List<string> messages = new List<string>();
-            private readonly List<IDisposable> subscription = new List<IDisposable>();
-            private readonly List<IDisposable> groupSubscription = new List<IDisposable>();
-            private readonly Random _random = new Random();
-            private bool joined = false;
-            private string messageInput;
-
-            protected override async Task OnInitializedAsync()
-            {
-                subscription.Add(HubConnection.On<string>("Changed", async (communityId) =>
-                {
-                    if (communityId != Community.Id.ToString())
-                        return;
-
-                    await LoadCommunity();
-                }));
-            }
-
-            private async Task LoadCommunity()
-            {
-                try
-                {
-                    Community = await Http.GetFromJsonAsync<Community>("api/Communities/" + Community.Id);
-                }
-                catch (AccessTokenNotAvailableException exception)
-                {
-                    exception.Redirect();
-                }
-
-                StateHasChanged();
-
-                await CheckPlayability();
-            }
-
-            private async Task CheckPlayability()
-            {
-                if (!joined)
-                    return;
-
-                int playerPool = Community.CurrentPlayers + Community.WaitingPlayers;
-                if (playerPool >= Community.MinimumPlayers)
-                    await JoinGame();
-            }
-
-            private async Task JoinGame()
-            {
-                var server = Community.Servers
-                                      .OrderByDescending(s => s.CurrentPlayers)
-                                      .FirstOrDefault(s => s.CurrentPlayers + Community.WaitingPlayers <= s.MaxPlayers);
-                if (server == null)
-                {
-                    Logger.LogError("could not find fitting server for players in {Community}", Community);
-                    return;     //TODO Callback for zarlo?
-                }
-
-                if (PlaySounds)
-                {
-                    string id = "startSound" + _random.Next(4);
-                    await JsRuntime.InvokeAsync<string>("Play", id);
-                }
-
-                await Task.Delay(100);  //give time to update/start playing sound before blocking with confirm
-                bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "server " + server.Name + " with " + server.CurrentPlayers + " playing at the moment is ready to start");
-                await LeaveQueue();
-                if (confirmed)
-                {
-                    string link = GetConnectLink(server);
-                    NavigationManager.NavigateTo(link);
-                }
-            }
-
-            public async Task JoinQueue()
-            {
-                if (joined)
-                    return;
-
-                groupSubscription.Add(HubConnection.On<string, string, string>("MessageReceived", (communityId, user, message) =>
-                {
-                    if (communityId != Community.Id.ToString())
-                        return;
-
-                    var encodedMsg = $"{user}: {message}";
-                    AddMessage(encodedMsg);
-                }));
-
-                groupSubscription.Add(HubConnection.On<string, string>("UserJoined", (communityId, user) =>
-                {
-                    if (communityId != Community.Id.ToString())
-                        return;
-
-                    var encodedMsg = $"{user} joined the queue";
-                    AddMessage(encodedMsg);
-                }));
-
-                groupSubscription.Add(HubConnection.On<string, string>("UserLeft", (communityId, user) =>
-                {
-                    if (communityId != Community.Id.ToString())
-                        return;
-
-                    var encodedMsg = $"{user} left the queue";
-                    AddMessage(encodedMsg);
-                }));
-
-                groupSubscription.Add(HubConnection.On<Guid>("LeaveQueue", async (communityId) =>
-                {
-                    if (communityId != Community.Id)
-                        return;
-
-                    await LeaveQueue();
-                }));
-
-                await HubConnection.InvokeAsync("JoinGroup", Community.Id);
-                joined = true;
-                StateHasChanged();
-
-                await LoadCommunity();
-            }
-
-            async void AddMessage(string msg)
-            {
-                messages.Add("[" + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + "] " + msg);
-                StateHasChanged();
-            }
-            async Task LeaveQueue()
-            {
-                await HubConnection.InvokeAsync("LeaveGroup", Community.Id);
-
-                foreach (var subscription in groupSubscription)
-                {
-                    subscription.Dispose();
-                }
-                groupSubscription.Clear();
-
-                messages.Clear();
-                messageInput = string.Empty;
-                joined = false;
-                StateHasChanged();
-
-                await LoadCommunity();
-            }
-
-            async Task Send()
-            {
-                await HubConnection.SendAsync("SendMessage", Community.Id, messageInput);
-                messageInput = string.Empty;
-
-                await JsRuntime.InvokeVoidAsync("uiFunctions.focusElement", messageInputReference);
-            }
-
-            async Task KeyUp(KeyboardEventArgs args)
-            {
-                if (args.Key == "Enter")
-                    await Send();
-            }
-
-            public bool IsConnected =>
-                HubConnection.State == HubConnectionState.Connected;
-
-            public void Dispose()
-            {
-                foreach (var s in subscription)
-                {
-                    s.Dispose();
-                }
-                subscription.Clear();
-
-                LeaveQueue();
-            }
-
-            private string GetConnectLink(CommunityServer server)
-            {
-                return "steam://connect/" + server.Ip;
-            }
-
+    private async Task JoinGame()
+    {
+        var server = Community.Servers
+                                .OrderByDescending(s => s.CurrentPlayers)
+                                .FirstOrDefault(s => s.CurrentPlayers + Community.WaitingPlayers <= s.MaxPlayers);
+        if (server == null)
+        {
+            Logger.LogError("could not find fitting server for players in {Community}", Community);
+            return;     //TODO Callback for zarlo?
         }
+
+        if (PlaySounds)
+        {
+            string id = "startSound" + _random.Next(4);
+            await JsRuntime.InvokeAsync<string>("Play", id);
+        }
+
+        await Task.Delay(100);  //give time to update/start playing sound before blocking with confirm
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "server " + server.Name + " with " + server.CurrentPlayers + " playing at the moment is ready to start");
+        await LeaveQueue();
+        if (confirmed)
+        {
+            string link = GetConnectLink(server);
+            NavigationManager.NavigateTo(link);
+        }
+    }
+
+    public async Task JoinQueue()
+    {
+        if (joined)
+            return;
+
+        groupSubscription.Add(HubConnection.On<string, string, string>("MessageReceived", (communityId, user, message) =>
+        {
+            if (communityId != Community.Id.ToString())
+                return;
+
+            var encodedMsg = $"{user}: {message}";
+            AddMessage(encodedMsg);
+        }));
+
+        groupSubscription.Add(HubConnection.On<string, string>("UserJoined", (communityId, user) =>
+        {
+            if (communityId != Community.Id.ToString())
+                return;
+
+            var encodedMsg = $"{user} joined the queue";
+            AddMessage(encodedMsg);
+        }));
+
+        groupSubscription.Add(HubConnection.On<string, string>("UserLeft", (communityId, user) =>
+        {
+            if (communityId != Community.Id.ToString())
+                return;
+
+            var encodedMsg = $"{user} left the queue";
+            AddMessage(encodedMsg);
+        }));
+
+        groupSubscription.Add(HubConnection.On<Guid>("LeaveQueue", async (communityId) =>
+        {
+            if (communityId != Community.Id)
+                return;
+
+            await LeaveQueue();
+        }));
+
+        await HubConnection.InvokeAsync("JoinGroup", Community.Id);
+        joined = true;
+        StateHasChanged();
+        await FocusInput();
+
+        await LoadCommunity();
+    }
+
+    async void AddMessage(string msg)
+    {
+        messages.Add("[" + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + "] " + msg);
+        StateHasChanged();
+    }
+    async Task LeaveQueue()
+    {
+        await HubConnection.InvokeAsync("LeaveGroup", Community.Id);
+
+        foreach (var subscription in groupSubscription)
+        {
+            subscription.Dispose();
+        }
+        groupSubscription.Clear();
+
+        messages.Clear();
+        messageInput = string.Empty;
+        joined = false;
+        StateHasChanged();
+
+        await LoadCommunity();
+    }
+
+    async Task Send()
+    {
+        await HubConnection.SendAsync("SendMessage", Community.Id, messageInput);
+        messageInput = string.Empty;
+
+        await FocusInput();
+    }
+
+    private async Task FocusInput()
+    {
+        await JsRuntime.InvokeVoidAsync("uiFunctions.focusElement", messageInputReference);
+    }
+
+    async Task KeyUp(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+            await Send();
+    }
+
+    public bool IsConnected =>
+        HubConnection.State == HubConnectionState.Connected;
+
+    public void Dispose()
+    {
+        foreach (var s in subscription)
+        {
+            s.Dispose();
+        }
+        subscription.Clear();
+
+        LeaveQueue();
+    }
+
+    private string GetConnectLink(CommunityServer server)
+    {
+        return "steam://connect/" + server.Ip;
+    }
+
+}

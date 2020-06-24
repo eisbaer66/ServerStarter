@@ -5,12 +5,17 @@ signing key
 error handling!
  
 ui!
+ autoscroll
+ popup
+ chat alignment (datetime)
 profil daten
 personal data
  invitation accepted/declined
 
 health probes
 not enough servers
+queue order
+ if full server drops players there might not be enough space for everyone :(
 
 update server db from api
  
