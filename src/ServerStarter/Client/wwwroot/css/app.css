@@ -275,6 +275,10 @@ app {
                 list-style: none;
                 padding-left: 0px;
             }
+                .community .chat .messages ul .timestamp {
+                    min-width: 135px;
+                    display: inline-block;
+                }
         .community .chat .controls {
             background-color: var(--menucolor);
             color: var(--fontcolorlight);

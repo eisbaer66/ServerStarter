@@ -45,7 +45,7 @@
                 <ul id="messagesList">
                     @foreach (var message in messages)
                     {
-                        <li @ref="lastMessageElement">@message</li>
+                        <li @ref="lastMessageElement"><span class="timestamp">@message.Timestamp</span><span>@message.Text</span></li>
                     }
                 </ul>
             </div>
@@ -78,11 +78,16 @@
     ElementReference messageInputReference;
     ElementReference lastMessageElement;
 
-    private readonly List<string> messages = new List<string>();
+    private readonly List<Message> messages = new List<Message>();
+
     private readonly List<IDisposable> subscription = new List<IDisposable>();
+
     private readonly List<IDisposable> groupSubscription = new List<IDisposable>();
+
     private readonly Random _random = new Random();
+
     private bool joined = false;
+
     private string messageInput;
 
     protected override async Task OnInitializedAsync()
@@ -139,14 +144,14 @@
             await JsRuntime.InvokeAsync<string>("Play", id);
         }
 
-        await Task.Delay(100);  //give time to update/start playing sound before blocking with confirm
-        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "server " + server.Name + " with " + server.CurrentPlayers + " playing at the moment is ready to start");
-        await LeaveQueue();
-        if (confirmed)
-        {
-            string link = GetConnectLink(server);
-            NavigationManager.NavigateTo(link);
-        }
+        //await Task.Delay(100);  //give time to update/start playing sound before blocking with confirm
+        //bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "server " + server.Name + " with " + server.CurrentPlayers + " playing at the moment is ready to start");
+        //await LeaveQueue();
+        //if (confirmed)
+        //{
+        //    string link = GetConnectLink(server);
+        //    NavigationManager.NavigateTo(link);
+        //}
     }
 
     public async Task JoinQueue()
@@ -199,10 +204,11 @@
 
     async Task AddMessage(string msg)
     {
-        messages.Add("[" + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + "] " + msg);
+        messages.Add(new Message("[" + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + "]", msg));
         StateHasChanged();
         await ScrollToLastMessage();
     }
+
     async Task LeaveQueue()
     {
         await HubConnection.InvokeAsync("LeaveGroup", Community.Id);
@@ -262,6 +268,18 @@
     private string GetConnectLink(CommunityServer server)
     {
         return "steam://connect/" + server.Ip;
+    }
+
+    private class Message
+    {
+        public Message(string timestamp, string text)
+        {
+            Timestamp = timestamp ?? throw new ArgumentNullException(nameof(timestamp));
+            Text = text ?? throw new ArgumentNullException(nameof(text));
+        }
+
+        public string Timestamp { get; set; }
+        public string Text { get; set; }
     }
 
 }
