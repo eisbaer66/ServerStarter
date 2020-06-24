@@ -23,28 +23,16 @@
 else
 {
     <label><input type="checkbox" @bind="playsounds" /> Play sounds</label>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>CurrentPlayers</th>
-                <th>WaitingPlayers</th>
-                <th>MinimumPlayers</th>
-                <th>Servers</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var community in communities)
-            {
-                <CommunityComponent @ref="Childs" Community="community" HubConnection="HubConnection" @bind-PlaySounds="playsounds"></CommunityComponent>
-            }
-        </tbody>
-    </table>
+    <div class="container">
+    @foreach (var community in communities)
+    {
+        <CommunityComponent @ref="Childs" Community="community" HubConnection="HubConnection" @bind-PlaySounds="playsounds"></CommunityComponent>
+    }
+    </div>
 }
 
-@code {
-    private readonly IList<CommunityComponent> childs = new List<CommunityComponent>();
+    @code {
+private readonly IList<CommunityComponent> childs = new List<CommunityComponent>();
 
     private bool playsounds = true;
     private Community[] communities;
@@ -108,4 +96,4 @@ else
             _ = HubConnection.DisposeAsync();
     }
 
-}
+    }
