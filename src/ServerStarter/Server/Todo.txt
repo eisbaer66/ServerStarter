@@ -5,8 +5,6 @@ signing key
 error handling!
  
 ui!
- popup
- chat alignment (datetime)
  scrollbars
 cookie consent
  dsgvo?

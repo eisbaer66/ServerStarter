@@ -61,6 +61,37 @@
 <audio preload="auto" id="startSound1" src="assets/sounds/Announcer_am_gamestarting04.wav"></audio>
 <audio preload="auto" id="startSound2" src="assets/sounds/Announcer_am_gamestarting05.wav"></audio>
 <audio preload="auto" id="startSound3" src="assets/sounds/Announcer_am_roundstart04.wav"></audio>
+    
+@if (showPopup)
+{
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content modal-content-themed">
+                <div class="modal-header">
+                    <h3 class="modal-title">@playableServer.Name ready to play</h3>
+                    <button type="button" class="close"
+                            @onclick="ClosePopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    server @playableServer.Name  with @playableServer.CurrentPlayers playing at the moment is ready to start
+
+                    <div class="buttons">
+                        <button class="btn btn-themed secondary"
+                                @onclick="ClosePopup">
+                            Leave
+                        </button>
+                        <button class="btn btn-themed primary"
+                                @onclick="() => JoinGame(playableServer)">
+                            Join
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     [Parameter]
@@ -86,9 +117,11 @@
 
     private readonly Random _random = new Random();
 
+    private bool showPopup = false;
     private bool joined = false;
 
     private string messageInput;
+    private CommunityServer playableServer;
 
     protected override async Task OnInitializedAsync()
     {
@@ -112,9 +145,19 @@
             exception.Redirect();
         }
 
+        UpdatePlayableServer();
+
         StateHasChanged();
 
         await CheckPlayability();
+    }
+
+    private void UpdatePlayableServer()
+    {
+        if (playableServer == null)
+            return;
+
+        playableServer = Community.Servers.FirstOrDefault(s => s.Ip == playableServer.Ip);
     }
 
     private async Task CheckPlayability()
@@ -124,11 +167,14 @@
 
         int playerPool = Community.CurrentPlayers + Community.WaitingPlayers;
         if (playerPool >= Community.MinimumPlayers)
-            await JoinGame();
+            await Notify();
     }
 
-    private async Task JoinGame()
+    private async Task Notify()
     {
+        if (showPopup)
+            return;
+
         var server = Community.Servers
                                 .OrderByDescending(s => s.CurrentPlayers)
                                 .FirstOrDefault(s => s.CurrentPlayers + Community.WaitingPlayers <= s.MaxPlayers);
@@ -144,14 +190,23 @@
             await JsRuntime.InvokeAsync<string>("Play", id);
         }
 
-        //await Task.Delay(100);  //give time to update/start playing sound before blocking with confirm
-        //bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "server " + server.Name + " with " + server.CurrentPlayers + " playing at the moment is ready to start");
-        //await LeaveQueue();
-        //if (confirmed)
-        //{
-        //    string link = GetConnectLink(server);
-        //    NavigationManager.NavigateTo(link);
-        //}
+        playableServer = server;
+        showPopup = true;
+        StateHasChanged();
+    }
+
+    public async Task ClosePopup()
+    {
+        await LeaveQueue();
+        showPopup = false;
+        StateHasChanged();
+    }
+
+    public async Task JoinGame(CommunityServer server)
+    {
+        await LeaveQueue();
+        string link = GetConnectLink(server);
+        NavigationManager.NavigateTo(link);
     }
 
     public async Task JoinQueue()

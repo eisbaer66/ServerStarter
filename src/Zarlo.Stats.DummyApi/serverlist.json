@@ -1,84 +1,180 @@
 {
   "Servers": [
     {
-      "serverId": 15,
-      "address": "200.98.168.253",
-      "tracked": true,
-      "max_players": 24,
-      "act_players": 3,
-      "act_map": "koth_king",
-      "name": "Aww Yeaa Balancemod Brazil",
-      "publicaddress": "200.98.168.253:27016"
-    },
-    {
       "serverId": 6,
-      "address": "64.140.150.232",
       "tracked": true,
+      "official": true,
       "max_players": 24,
-      "act_players": 4,
-      "act_map": "cp_badlands",
+      "players": 0,
+      "map": "cp_gullywash_final1",
       "name": "Creators.TF | Balance Mod Server #1 | Washington",
-      "publicaddress": "64.140.150.232:27015"
+      "address": "64.140.150.232:27015",
+      "flag": "US"
     },
     {
       "serverId": 12,
-      "address": "64.140.150.232",
       "tracked": true,
+      "official": true,
       "max_players": 24,
-      "act_players": 24,
-      "act_map": "cp_process_final",
+      "players": 2,
+      "map": "pl_thundermountain",
       "name": "Creators.TF | Balance Mod Server #2 | Washington",
-      "publicaddress": "64.140.150.232:27025"
+      "address": "64.140.150.232:27025",
+      "flag": "US"
     },
     {
       "serverId": 13,
-      "address": "64.140.150.232",
       "tracked": true,
+      "official": true,
       "max_players": 24,
-      "act_players": 0,
-      "act_map": "koth_harvestalpine_v3b",
+      "players": 17,
+      "map": "koth_lakeside_final",
       "name": "Creators.TF | Balance Mod Server #3 | Washington",
-      "publicaddress": "64.140.150.232:27035"
+      "address": "64.140.150.232:27035",
+      "flag": "US"
     },
     {
-      "serverId": 5,
-      "address": "206.189.81.187",
+      "serverId": 17,
       "tracked": true,
+      "official": true,
       "max_players": 24,
-      "act_players": 0,
-      "act_map": "pl_fifthcurve_rc1",
-      "name": "Creators.TF | Balance Mod Server | Singapore",
-      "publicaddress": "206.189.81.187:27015"
+      "players": 0,
+      "map": "pl_sludgepit_final2",
+      "name": "Creators.TF | Balance Mod Server #4 | Washington",
+      "address": "64.140.150.232:27055",
+      "flag": "US"
+    },
+    {
+      "serverId": 18,
+      "tracked": true,
+      "official": true,
+      "max_players": 24,
+      "players": 0,
+      "map": "pl_vigil_rc7",
+      "name": "Creators.TF | Balance Mod Server #5 | Washington",
+      "address": "64.140.150.232:27065",
+      "flag": "US"
     },
     {
       "serverId": 4,
-      "address": "212.129.60.25",
       "tracked": true,
+      "official": true,
       "max_players": 24,
-      "act_players": 0,
-      "act_map": "koth_harvestalpine_v3b",
-      "name": "Creators.TF | EU Balance Mod Server #1 | NL",
-      "publicaddress": "212.129.60.25:27015"
+      "players": 5,
+      "map": "cp_snakewater_final1",
+      "name": "Creators.TF | Balance Mod Server #1 | Poland",
+      "address": "5.134.64.45:27025",
+      "flag": "PL"
     },
     {
       "serverId": 11,
-      "address": "212.129.60.25",
       "tracked": true,
+      "official": true,
       "max_players": 24,
-      "act_players": 21,
-      "act_map": "cp_badlands",
-      "name": "Creators.TF | EU Balance Mod Server #1 | Poland",
-      "publicaddress": "5.134.64.45:27025"
+      "players": 0,
+      "map": "pl_vigil_rc7",
+      "name": "Creators.TF | Balance Mod Server #2 | Poland",
+      "address": "5.134.64.45:27035",
+      "flag": "PL"
     },
     {
       "serverId": 14,
-      "address": "212.129.60.25",
       "tracked": true,
+      "official": true,
       "max_players": 24,
-      "act_players": 0,
-      "act_map": "cp_granary",
-      "name": "Creators.TF | EU Balance Mod Server #3 | NL",
-      "publicaddress": "212.129.60.25:27035"
+      "players": 0,
+      "map": "pl_swiftwater_final1",
+      "name": "Creators.TF | Balance Mod Server #3 | Poland",
+      "address": "5.134.64.45:27045",
+      "flag": "PL"
+    },
+    {
+      "serverId": 20,
+      "tracked": true,
+      "official": true,
+      "max_players": 24,
+      "players": 0,
+      "map": "cp_sunshine",
+      "name": "Creators.TF | Balance Mod Server #4 | Poland",
+      "address": "5.134.64.45:27014",
+      "flag": "PL"
+    },
+    {
+      "serverId": 21,
+      "tracked": true,
+      "official": true,
+      "max_players": 24,
+      "players": 1,
+      "map": "koth_harvestalpine_v3b",
+      "name": "Creators.TF | Balance Mod Server 24/7 Harvest | Poland",
+      "address": "5.134.64.45:27015",
+      "flag": "PL"
+    },
+    {
+      "serverId": 5,
+      "tracked": true,
+      "official": true,
+      "max_players": 24,
+      "players": 0,
+      "map": "koth_synthetic_rc6a",
+      "name": "Creators.TF | Balance Mod Server | Singapore",
+      "address": "206.189.81.187:27015",
+      "flag": "SG"
+    },
+    {
+      "serverId": 16,
+      "tracked": true,
+      "official": true,
+      "max_players": 24,
+      "players": 0,
+      "map": "cp_kalinka_rc5",
+      "name": "Creators.TF | Balance Mod Server #1 | Korea",
+      "address": "221.160.180.46:27015",
+      "flag": "KR"
+    },
+    {
+      "serverId": 22,
+      "tracked": true,
+      "official": true,
+      "max_players": 24,
+      "players": 0,
+      "map": "pl_barnblitz_pro6",
+      "name": "Creators.TF | Balance Mod Server #6 | Washington",
+      "address": "64.140.150.232:27075",
+      "flag": "US"
+    },
+    {
+      "serverId": 15,
+      "tracked": true,
+      "official": false,
+      "max_players": 24,
+      "players": 0,
+      "map": "workshop/koth_hardway_72_rc1.ugc755324034",
+      "name": "Aww Yeaa Balance Mod Brazil",
+      "address": "200.98.168.253:27016",
+      "flag": "BR"
+    },
+    {
+      "serverId": 19,
+      "tracked": true,
+      "official": false,
+      "max_players": 24,
+      "players": 0,
+      "map": "plr_hightower",
+      "name": "MicSnobs TF2 #5 Balance Mod | US East",
+      "address": "63.141.241.26:27025",
+      "flag": "US"
+    },
+    {
+      "serverId": 23,
+      "tracked": true,
+      "official": false,
+      "max_players": 24,
+      "players": 1,
+      "map": "cp_sunshine",
+      "name": "Balance MOD | New Horizon",
+      "address": "62.171.176.111:27033",
+      "flag": "DE"
     }
   ]
 }

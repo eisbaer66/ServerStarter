@@ -19,6 +19,8 @@
     --highlightcolor: #b05112;
     --activecolor: #e06818;
     --lightbackgroundcolor: #d1c5b0;
+    --secondarybuttonbackgroundcolor: #776B5F;
+    --secondarybuttoncolor: #EDE2CC;
 }
 
 html, body {
@@ -303,3 +305,39 @@ app {
         background-color: var(--highlightcolor);
         color: black
     }
+
+    .btn-themed.secondary {
+        background-color: var(--secondarybuttonbackgroundcolor);
+        color: var(--secondarybuttoncolor)
+    }
+        .btn-themed.secondary:hover {
+            background-color: var(--highlightcolor);
+            color: black
+        }
+
+.modal-dialog {
+    margin: 5rem auto;
+}
+.modal-content-themed {
+    background-color: var(--lightbackgroundcolor);
+    color: var(--fontcolordark);
+    border: 2px solid var(--bordercolor);
+}
+
+    .modal-content-themed .modal-header {
+        background-color: var(--menucolor);
+        color: var(--fontcolorlight);
+        border-bottom: 1px solid var(--bordercolor);
+    }
+
+        .modal-content-themed .modal-header .close {
+            color: var(--fontcolorlight);
+        }
+      
+
+    .modal-content-themed .modal-body .buttons {
+        margin-top: 10px;
+    }
+        .modal-content-themed .modal-body .buttons .primary {
+            float: right;
+        }

@@ -53,8 +53,12 @@ namespace ServerStarter.Server
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                                                         {
-                                                            options.UseMySql(Configuration.GetConnectionString("DefaultConnection"),
-                                                                             mySqlOptions => mySqlOptions.ServerVersion("10.3.15-MariaDB-1"));
+                                                            var databaseSettings = new DatabaseSettings();
+                                                            Configuration.GetSection("Database").Bind(databaseSettings);
+
+                                                            DatabaseSettingItem database = databaseSettings.Get("ServerStarter");
+
+                                                            database.Configure(options);
                                                         });
             services.AddTransient<DbSet<ApplicationUser>>(c => c.GetService<ApplicationDbContext>().Users);
 
