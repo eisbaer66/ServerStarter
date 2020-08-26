@@ -23,6 +23,7 @@ using IdentityServer4.Hosting.LocalApiAuthentication;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using ServerStarter.Server.Controllers;
@@ -61,6 +62,7 @@ namespace ServerStarter.Server
                                                             database.Configure(options);
                                                         });
             services.AddTransient<DbSet<ApplicationUser>>(c => c.GetService<ApplicationDbContext>().Users);
+            services.AddTransient<IQueryable<UserQueueStatistics>>(c => c.GetService<ApplicationDbContext>().UserQueueStatistics);
 
             var forwardedHeadersSettings = new ForwardedHeadersSettings();
             Configuration.Bind("ServerStarters:ForwardedHeaders", forwardedHeadersSettings);

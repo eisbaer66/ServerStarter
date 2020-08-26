@@ -15,6 +15,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20200826171516_UserQueueStatistics.cs" />
+    <Compile Remove="Migrations\20200826171516_UserQueueStatistics.Designer.cs" />
+    <Compile Remove="Migrations\MySql\20200826181249_UserQueueStatistics.cs" />
+    <Compile Remove="Migrations\MySql\20200826181249_UserQueueStatistics.Designer.cs" />
+    <Compile Remove="Migrations\MySql\20200826182321_test.cs" />
+    <Compile Remove="Migrations\MySql\20200826182321_test.Designer.cs" />
+    <Compile Remove="Migrations\SqlServer\20200826173527_Setup.cs" />
+    <Compile Remove="Migrations\SqlServer\20200826173527_Setup.Designer.cs" />
+    <Compile Remove="Migrations\SqlServer\20200826180855_test.cs" />
+    <Compile Remove="Migrations\SqlServer\20200826180855_test.Designer.cs" />
+    <Compile Remove="Migrations\SqlServer\20200826201320_test.cs" />
+    <Compile Remove="Migrations\SqlServer\20200826201320_test.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
   </ItemGroup>
 
@@ -28,20 +43,20 @@
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OpenId" Version="3.1.0" />
     <PackageReference Include="AspNet.Security.OpenId.Steam" Version="3.1.0" />
-    <PackageReference Include="Elastic.Apm.NetCoreAll" Version="1.5.1" />
+    <PackageReference Include="Elastic.Apm.NetCoreAll" Version="1.6.1" />
     <PackageReference Include="Elastic.Apm.SerilogEnricher" Version="1.5.1" />
     <PackageReference Include="Elastic.CommonSchema.Serilog" Version="1.5.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="3.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="3.2.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.7" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
     <PackageReference Include="murmurhash" Version="1.0.3" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.1.1" />
-    <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.1.2" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
     <PackageReference Include="Serilog.Formatting.Compact" Version="1.1.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
-    <PackageReference Include="Serilog.Sinks.ElasticSearch" Version="8.1.0" />
+    <PackageReference Include="Serilog.Sinks.ElasticSearch" Version="8.2.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
     <PackageReference Include="System.Runtime.Caching" Version="4.7.0" />
   </ItemGroup>
@@ -53,11 +68,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.3" />
-    <PackageReference Include="Microsoft.AspNetCore.ApiAuthorization.IdentityServer" Version="3.1.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.7" />
+    <PackageReference Include="Microsoft.AspNetCore.ApiAuthorization.IdentityServer" Version="3.1.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
