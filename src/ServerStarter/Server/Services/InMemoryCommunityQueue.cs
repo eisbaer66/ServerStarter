@@ -20,6 +20,7 @@ namespace ServerStarter.Server.Services
     {
         readonly         IDictionary<Guid, HashSet<Guid>> _queues = new Dictionary<Guid, HashSet<Guid>>();
         private readonly ILogger<InMemoryCommunityQueue>  _logger;
+
         public event EventHandler<UserJoinedEventArgs>    UserJoined;
         public event EventHandler<UserLeftEventArgs>      UserLeft;
 
@@ -96,6 +97,13 @@ namespace ServerStarter.Server.Services
                 if (p.Value.Contains(userId))
                     yield return p.Key;
             }
+        }
+        public bool Contains(Guid userId, Guid communityId)
+        {
+            if (!_queues.ContainsKey(communityId))
+                return false;
+
+            return _queues[communityId].Contains(userId);
         }
     }
 }

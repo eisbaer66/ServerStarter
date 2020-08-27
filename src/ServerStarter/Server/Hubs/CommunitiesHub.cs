@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using ServerStarter.Server.Identity.AuthPolicies;
 using ServerStarter.Server.Services;
 
 namespace ServerStarter.Server.Hubs
@@ -39,6 +40,7 @@ namespace ServerStarter.Server.Hubs
                                  };
         }
 
+        [Authorize(Policy = Policies.JoinedQueueFromHubParameter0)]
         public async Task SendMessage(string groupName, string message)
         {
             await Clients.Group(groupName).SendAsync("MessageReceived", groupName, Context.User.GetName(), message);
@@ -55,6 +57,7 @@ namespace ServerStarter.Server.Hubs
              await Clients.GroupExcept(userId.ToString(), Context.ConnectionId).SendAsync("JoinQueue", communityId);
         }
 
+        [Authorize(Policy = Policies.JoinedQueueFromHubParameter0)]
         public async Task LeaveGroup(string groupName)
         {
             var userId      = Context.User.GetUserId();

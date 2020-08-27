@@ -21,6 +21,7 @@ using Elastic.Apm.AspNetCore;
 using Elastic.Apm.NetCoreAll;
 using IdentityServer4.Hosting.LocalApiAuthentication;
 using IdentityServer4.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -31,6 +32,8 @@ using ServerStarter.Server.Data;
 using ServerStarter.Server.Data.Repositories;
 using ServerStarter.Server.Hubs;
 using ServerStarter.Server.Identity;
+using ServerStarter.Server.Identity.AuthPolicies;
+using ServerStarter.Server.Identity.AuthPolicies.JoinedQueue;
 using ServerStarter.Server.Models;
 using ServerStarter.Server.Services;
 using ServerStarter.Server.WorkerServices;
@@ -134,6 +137,16 @@ namespace ServerStarter.Server
                                             {
                                                 opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
                                             });
+            services.AddAuthorization(options =>
+                                      {
+                                          options.AddPolicy(Policies.JoinedQueueFromGroupName, 
+                                                            policy => policy.Requirements.Add(new JoinedQueuePerParameterNameRequirement("groupName")));
+                                          options.AddPolicy(Policies.JoinedQueueFromHubParameter0, 
+                                                            policy => policy.Requirements.Add(new JoinedQueuePerHubParameterIndexRequirement(0)));
+                                      });
+
+            services.AddSingleton<IAuthorizationHandler, JoinedQueuePerParameterNameHandler>();
+            services.AddSingleton<IAuthorizationHandler, JoinedQueuePerHubInvocationContextHandler>();
 
 
             TimingSettings timingSettings = new TimingSettings();
