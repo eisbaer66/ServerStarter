@@ -1,7 +1,4 @@
-﻿PTerry
-
-
-background updates
+﻿background updates
  thow out inactive connections? timeout?
 
 signing key
