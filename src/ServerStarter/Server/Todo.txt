@@ -4,16 +4,11 @@
 signing key
 error handling!
  
-ui!
- scrollbars
 cookie consent
  dsgvo?
 links
  github
  zarlo?
-profil daten
-personal data
- invitation accepted/declined
 
 health probes
 not enough servers
