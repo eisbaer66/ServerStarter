@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -23,6 +24,7 @@ using Elastic.Apm.NetCoreAll;
 using IdentityServer4.Hosting.LocalApiAuthentication;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -188,8 +190,22 @@ namespace ServerStarter.Server
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.GnuTerryPratchett();
+            //app.GnuTerryPratchett();
             app.UseForwardedHeaders();
+
+            
+            var logger = app.ApplicationServices.GetRequiredService<ILogger<Startup>>();
+            if (logger.IsEnabled(LogLevel.Trace))
+                app.Use(async (ctx, next) =>
+                    {
+                        logger.LogTrace("incoming Request {RequestContext}", ctx);
+                        await next();
+                    });
+            app.Use(async (ctx, next) =>
+                    {
+                        ctx.Request.Host     = new HostString(Configuration["ServerStarters:Host"]);
+                        await next();
+                    });
 
             IElasticSettings elasticSettings = app.ApplicationServices.GetRequiredService<IElasticSettings>();
             if (elasticSettings.AreSet())
