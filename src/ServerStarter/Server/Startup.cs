@@ -193,7 +193,7 @@ namespace ServerStarter.Server
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //app.GnuTerryPratchett();
+            app.GnuTerryPratchett();
             app.UseForwardedHeaders();
 
             
@@ -201,12 +201,12 @@ namespace ServerStarter.Server
             if (logger.IsEnabled(LogLevel.Trace))
                 app.Use(async (ctx, next) =>
                     {
-                        logger.LogTrace("incoming Request {RequestProtocol} {RequestHost} {@RequestHeaders}", ctx.Request.Protocol, ctx.Request.Host, ctx.Request.Headers);
+                        logger.LogTrace("incoming Request {RequestProtocol} {RequestScheme} {RequestHost} {@RequestHeaders}", ctx.Request.Protocol, ctx.Request.Scheme, ctx.Request.Protocol, ctx.Request.Host, ctx.Request.Headers);
                         await next();
                     });
             app.Use(async (ctx, next) =>
                     {
-                        ctx.Request.Protocol = Configuration["ServerStarters:Protocol"];
+                        ctx.Request.Scheme = Configuration["ServerStarters:Scheme"];
                         ctx.Request.Host     = new HostString(Configuration["ServerStarters:Host"]);
                         await next();
                     });
