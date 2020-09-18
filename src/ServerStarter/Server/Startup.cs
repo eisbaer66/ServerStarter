@@ -105,6 +105,9 @@ namespace ServerStarter.Server
                               options.ApplicationKey = Configuration["ServerStarters:SteamApiKey"];
                               options.Events.OnAuthenticated = async ctx =>
                                                                {
+                                                                   ILogger<Startup> logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Startup>>();
+                                                                   logger.LogTrace("Steam OnAuthenticated {@SteamAuthUserPayload} {@SteamAuthTicket}", ctx.UserPayload, ctx.Ticket);
+
                                                                    ClaimsIdentity identity = ctx.Ticket.Principal.Identity as ClaimsIdentity;
                                                                    if (identity != null)
                                                                    {
@@ -198,7 +201,7 @@ namespace ServerStarter.Server
             if (logger.IsEnabled(LogLevel.Trace))
                 app.Use(async (ctx, next) =>
                     {
-                        logger.LogTrace("incoming Request {RequestContext}", ctx);
+                        logger.LogTrace("incoming Request {@RequestHeaders}", ctx.Request.Headers);
                         await next();
                     });
             app.Use(async (ctx, next) =>
