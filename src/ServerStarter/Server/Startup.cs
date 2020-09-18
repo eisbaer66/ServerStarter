@@ -201,11 +201,12 @@ namespace ServerStarter.Server
             if (logger.IsEnabled(LogLevel.Trace))
                 app.Use(async (ctx, next) =>
                     {
-                        logger.LogTrace("incoming Request {@RequestHeaders}", ctx.Request.Headers);
+                        logger.LogTrace("incoming Request {RequestProtocol} {RequestHost} {@RequestHeaders}", ctx.Request.Protocol, ctx.Request.Host, ctx.Request.Headers);
                         await next();
                     });
             app.Use(async (ctx, next) =>
                     {
+                        ctx.Request.Protocol = Configuration["ServerStarters:Protocol"];
                         ctx.Request.Host     = new HostString(Configuration["ServerStarters:Host"]);
                         await next();
                     });
