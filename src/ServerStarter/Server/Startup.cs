@@ -206,8 +206,13 @@ namespace ServerStarter.Server
                     });
             app.Use(async (ctx, next) =>
                     {
-                        ctx.Request.Scheme = Configuration["ServerStarters:Scheme"];
-                        ctx.Request.Host     = new HostString(Configuration["ServerStarters:Host"]);
+                        string scheme = Configuration["ServerStarters:Scheme"];
+                        if (ctx.Request.Scheme == "http" && !string.IsNullOrEmpty(scheme))
+                        {
+                            ctx.Request.Scheme = scheme;
+                        }
+
+                        ctx.Request.Host = new HostString(Configuration["ServerStarters:Host"]);
                         await next();
                     });
 
