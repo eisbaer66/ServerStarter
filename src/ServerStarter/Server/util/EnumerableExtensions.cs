@@ -6,6 +6,16 @@ namespace ServerStarter.Server.util
 {
     public static class EnumerableExtensions
     {
+        public static async Task<IList<T>> Sequence<T>(this IEnumerable<Task<T>> tasks)
+        {
+            IList<T> list = new List<T>();
+            foreach (var task in tasks)
+            {
+                list.Add(await task);
+            }
+
+            return list;
+        }
         public static async Task<IEnumerable<T>> WhenAll<T>(this IEnumerable<Task<T>> tasks)
         {
             var array = tasks.ToArray();

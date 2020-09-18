@@ -33,7 +33,7 @@ namespace ServerStarter.Server.Controllers
 
             return await communities
                          .Select(community => _service.UpdateCommunity(community, ct))
-                         .WhenAll();
+                         .Sequence();
         }
 
         [HttpGet("{id}")]
