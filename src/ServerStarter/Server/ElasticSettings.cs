@@ -2,17 +2,19 @@
 {
     public interface IElasticSettings
     {
-        string Url { get; set; }
-        string Username { get; set; }
-        string Password { get; set; }
-        bool AreSet();
+        string Url        { get; set; }
+        string Username   { get; set; }
+        string Password   { get; set; }
+        bool   ApmEnabled { get; set; }
+        bool   AreSet();
     }
 
     public class ElasticSettings : IElasticSettings
     {
-        public string Url      { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string Url        { get; set; }
+        public string Username   { get; set; }
+        public string Password   { get; set; }
+        public bool   ApmEnabled { get; set; }
 
         public bool AreSet()
         {

@@ -220,7 +220,7 @@ namespace ServerStarter.Server
                     });
 
             IElasticSettings elasticSettings = app.ApplicationServices.GetRequiredService<IElasticSettings>();
-            if (elasticSettings.AreSet())
+            if (elasticSettings.AreSet() && elasticSettings.ApmEnabled)
                 app.UseAllElasticApm(Configuration);
 
             app.UseResponseCompression();
