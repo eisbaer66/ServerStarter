@@ -23,12 +23,14 @@ using Elastic.Apm.AspNetCore;
 using Elastic.Apm.NetCoreAll;
 using IdentityServer4.Hosting.LocalApiAuthentication;
 using IdentityServer4.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Serilog;
 using ServerStarter.Server.Controllers;
 using ServerStarter.Server.Data;
@@ -133,6 +135,7 @@ namespace ServerStarter.Server
                               options.Events.OnTicketReceived = async ctx => { };
                           });
             services.AddTransient<IProfileService, ProfileService>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>());
 
             services.AddSignalR();
 
