@@ -293,20 +293,29 @@ app {
 }
 
 .community {
-    font-size: 1.3rem;
     background-color: var(--menucolor);
     color: var(--fontcolorlight);
     padding: 10px;
     border-radius: 5px;
     margin-bottom: 10px;
 }
+    .community .name {
+        height: 100%;
+        font-size: 1.3rem;
+        overflow: hidden;
+    }
+
+    .community .players {
+        white-space: nowrap;
+        overflow: hidden;
+    }
 
     .community .btn-joinleave {
-        margin-bottom: 5px
+        height: 100%;
     }
 
     .community .servers {
-        font-size: 1rem;
+        margin-top: 5px;
     }
         .community .servers ul {
             background-color: var(--lightbackgroundcolor);
@@ -319,7 +328,6 @@ app {
             overflow-x: auto;
         }
     .community .chat {
-        font-size: 1rem;
         background-color: var(--lightbackgroundcolor);
         color: var(--fontcolordark);
         border-radius: 5px;
