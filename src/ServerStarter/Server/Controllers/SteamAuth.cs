@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -125,9 +126,9 @@ namespace ServerStarter.Server.Controllers
 
                 var user = new ApplicationUser
                 {
-                    UserName = name,
-                    Name = name,
-                    SteamId = steamId,
+                    UserName  = steamId.ToString(CultureInfo.InvariantCulture),
+                    Name      = name,
+                    SteamId   = steamId,
                     AvatarUrl = avatar,
                 };
 
