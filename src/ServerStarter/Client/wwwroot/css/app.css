@@ -21,6 +21,7 @@
     --lightbackgroundcolor: #d1c5b0;
     --secondarybuttonbackgroundcolor: #776B5F;
     --secondarybuttoncolor: #EDE2CC;
+    --discordUser: #338ECC;
 
     --devAlpha: #FF4D16;
 }
@@ -96,6 +97,10 @@ a, .btn-link {
     a:hover {
         color: var(--activecolor);
     }
+
+p.br {
+    margin-bottom: 0px;
+} 
 
 .btn-primary {
     color: #fff;
@@ -294,6 +299,9 @@ app {
     }
 }
 
+.communitiesContainer {
+    margin-top: 5px;
+}
 .community {
     background-color: var(--menucolor);
     color: var(--fontcolorlight);
@@ -417,4 +425,8 @@ app {
     color: var(--devAlpha);
     font-style: italic;
     font-weight: bold;
+}
+
+code.discordUser {
+    color: var(--discordUser)
 }

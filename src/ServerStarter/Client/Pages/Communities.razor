@@ -14,22 +14,24 @@
 @inject IAccessTokenProvider AccessTokenProvider
 @inject ILogger<Communities> Logger
 
-<h1>Communities</h1>
+<DescriptionComponent></DescriptionComponent>
 
-@if (communities == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <label><input type="checkbox" @bind="playsounds" /> Play sounds</label>
-    <div class="container">
-    @foreach (var community in communities)
+<div class="communitiesContainer">
+    @if (communities == null)
     {
-        <CommunityComponent @ref="Childs" Community="community" HubConnection="HubConnection" @bind-PlaySounds="playsounds"></CommunityComponent>
+        <p><em>Loading...</em></p>
     }
-    </div>
-}
+    else
+    {
+        <label><input type="checkbox" @bind="playsounds" /> Play sounds</label>
+        <div class="container">
+            @foreach (var community in communities)
+            {
+                <CommunityComponent @ref="Childs" Community="community" HubConnection="HubConnection" @bind-PlaySounds="playsounds"></CommunityComponent>
+            }
+        </div>
+    }
+</div>
 
     @code {
 private readonly IList<CommunityComponent> childs = new List<CommunityComponent>();
