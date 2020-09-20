@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using ServerStarter.Server
+@using System.Security.Claims
 
 @inject NavigationManager Navigation
 @inject SignOutSessionStateManager SignOutManager
@@ -11,7 +12,7 @@
 
 <AuthorizeView>
     <Authorized>
-        <a href="authentication/profile">Hello, <img src="@GetAvatarUrl(context)" /> @context.User.Identity.Name!</a>
+        <a href="authentication/profile">Hello, <img src="@GetAvatarUrl(context)" /> @GetName(context)!</a>
         <button class="nav-link btn btn-link" @onclick="BeginSignOut">Log out</button>
     </Authorized>
     <NotAuthorized>
@@ -31,5 +32,12 @@
         var claim = state.User.Claims.FirstOrDefault(c => c.Type == IcebearClaimTypes.Avatar);
 
         return claim?.Value;
+    }
+
+    private string GetName(AuthenticationState state)
+    {
+        var claim = state.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+
+        return claim?.Value ?? state.User.Identity.Name;
     }
 }
