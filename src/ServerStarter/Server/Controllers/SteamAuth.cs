@@ -131,6 +131,7 @@ namespace ServerStarter.Server.Controllers
                     AvatarUrl = avatar,
                 };
 
+                _logger.LogTrace("creating User {@ApplicationUser}", user);
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
@@ -146,6 +147,7 @@ namespace ServerStarter.Server.Controllers
                 }
                 foreach (var error in result.Errors)
                 {
+                    _logger.LogError("error creating User {@ApplicationUser}: {@IdentityError}", user, error);
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
