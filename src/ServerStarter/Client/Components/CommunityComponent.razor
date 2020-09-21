@@ -19,6 +19,9 @@
         <div class="row col-12">
             <span data-toggle="tooltip" title="@Community.WaitingPlayers players ready to play">@Community.WaitingPlayers players ready to play</span>
         </div>
+        <div class="row col-12">
+            <span data-toggle="tooltip" title="@NeededPlayers() more players needed to play">@NeededPlayers() more players needed to play</span>
+        </div>
     </div>
     <div class="col-sm-12 col-lg-3 col-xl-2">
         @if (joined)
@@ -125,6 +128,15 @@
 
     private string messageInput;
     private CommunityServer playableServer;
+
+    private int NeededPlayers()
+    {
+        int neededPlayers = Community.MinimumPlayers - Community.CurrentPlayers - Community.WaitingPlayers;
+        if (neededPlayers < 0)
+            return 0;
+
+        return neededPlayers;
+    }
 
     protected override async Task OnInitializedAsync()
     {
