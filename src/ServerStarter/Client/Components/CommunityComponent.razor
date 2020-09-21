@@ -213,15 +213,13 @@
     public async Task ClosePopup()
     {
         await LeaveQueue();
-        showPopup = false;
-        StateHasChanged();
     }
 
     public async Task JoinGame(CommunityServer server)
     {
         await LeaveQueue();
         string link = GetConnectLink(server);
-        NavigationManager.NavigateTo(link);
+        await JsRuntime.InvokeAsync<object>("open", link);
     }
 
     public async Task JoinQueue()
@@ -292,6 +290,7 @@
         messages.Clear();
         messageInput = string.Empty;
         joined = false;
+        showPopup = false;
         StateHasChanged();
 
         await LoadCommunity();
