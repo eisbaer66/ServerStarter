@@ -18,6 +18,9 @@
         </div>
     </div>
     <div class="col-sm-12 col-lg-5 col-xl-3 players">
+        <div class="row col-sm-6 col-lg-12 label">
+            <span data-toggle="tooltip" title="queue for @PreferredServer.Name (@PreferredServer.Ip)">@PreferredServer.Name (<a href="@GetConnectLink(PreferredServer)">@PreferredServer.Ip</a>)</span>
+        </div>
         <div class="row col-12">
             <span data-toggle="tooltip" title="@Community.CurrentPlayers players currently in-game">@Community.CurrentPlayers players currently in-game</span>
         </div>
@@ -79,14 +82,14 @@
         <div class="modal-dialog">
             <div class="modal-content modal-content-themed">
                 <div class="modal-header">
-                    <h3 class="modal-title">@playableServer.Name ready to play</h3>
+                    <h3 class="modal-title">@PreferredServer.Name ready to play</h3>
                     <button type="button" class="close"
                             @onclick="ClosePopup">
                         <span aria-hidden="true">X</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    server @playableServer.Name  with @playableServer.CurrentPlayers playing at the moment is ready to start
+                    server @PreferredServer.Name  with @PreferredServer.CurrentPlayers playing at the moment is ready to start
 
                     <div class="buttons">
                         <button class="btn btn-themed secondary"
@@ -94,7 +97,7 @@
                             Leave
                         </button>
                         <button class="btn btn-themed primary"
-                                @onclick="() => JoinGame(playableServer)">
+                                @onclick="() => JoinGame(PreferredServer)">
                             Join
                         </button>
                     </div>
@@ -132,7 +135,6 @@
     private bool joined = false;
 
     private string messageInput;
-    private CommunityServer playableServer;
 
     private int NeededPlayers
     {
@@ -151,6 +153,14 @@
         get
         {
             return Community.Servers.Count(s => s.ConsideredFull);
+        }
+    }
+
+    private CommunityServer PreferredServer
+    {
+        get
+        {
+            return Community.Servers.FirstOrDefault(s => s.PreferredForQueue);
         }
     }
 
@@ -176,19 +186,9 @@
             exception.Redirect();
         }
 
-        UpdatePlayableServer();
-
         StateHasChanged();
 
         await CheckPlayability();
-    }
-
-    private void UpdatePlayableServer()
-    {
-        if (playableServer == null)
-            return;
-
-        playableServer = Community.Servers.FirstOrDefault(s => s.Ip == playableServer.Ip);
     }
 
     private async Task CheckPlayability()
@@ -206,10 +206,7 @@
         if (showPopup)
             return;
 
-        var server = Community.Servers
-                                .OrderByDescending(s => s.CurrentPlayers)
-                                .FirstOrDefault(s => s.CurrentPlayers + Community.WaitingPlayers <= s.MaxPlayers);
-        if (server == null)
+        if (PreferredServer == null)
         {
             Logger.LogError("could not find fitting server for players in {Community}", Community);
             return;     //TODO Callback for zarlo?
@@ -221,7 +218,6 @@
             await JsRuntime.InvokeAsync<string>("Play", id);
         }
 
-        playableServer = server;
         showPopup = true;
         StateHasChanged();
     }

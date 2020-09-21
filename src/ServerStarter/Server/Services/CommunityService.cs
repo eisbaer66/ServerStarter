@@ -63,9 +63,21 @@ namespace ServerStarter.Server.Services
 
             var waitingPlayers = await GetWaitingPlayers(community, servers);
 
-            var currentPlayers = servers.Where(s => !s.ConsideredFull)
-                                        .Select(s => s.CurrentPlayers)
-                                        .Aggregate(0, (a, p) => p > a ? p : a);
+            var queueServer = servers.Where(s => !s.ConsideredFull)
+                                     .Aggregate<CommunityServer, CommunityServer>(null, (a, s) =>
+                                                                                        {
+                                                                                            if (a == null)
+                                                                                                return s;
+                                                                                            return s.CurrentPlayers > a.CurrentPlayers ? s : a;
+                                                                                        });
+
+            int currentPlayers = 0;
+            if (queueServer != null)
+            {
+                queueServer.PreferredForQueue = true;
+                currentPlayers              = queueServer.CurrentPlayers;
+            }
+
             return new Community
                    {
                        Id             = community.Id,
