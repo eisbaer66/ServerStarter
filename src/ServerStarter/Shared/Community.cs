@@ -44,6 +44,7 @@ namespace ServerStarter.Shared
         public int                 CurrentPlayers { get; set; }
         public IList<ServerPlayer> Players        { get; set; }
         public int                 MaxPlayers     { get; set; }
+        public bool                ConsideredFull { get; set; }
 
         protected bool Equals(CommunityServer other)
         {

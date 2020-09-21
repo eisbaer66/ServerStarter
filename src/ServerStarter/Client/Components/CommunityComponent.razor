@@ -10,7 +10,12 @@
 
 <div class="row community">
     <div class="col-sm-12 col-lg-4 col-xl-3">
-        <span class="name" data-toggle="tooltip" title="@Community.Name">@Community.Name</span>
+        <div class="row col-12">
+            <span class="name" data-toggle="tooltip" title="@Community.Name">@Community.Name</span>
+        </div>
+        <div class="row col-12">
+            <span data-toggle="tooltip" title="@FullServers/@Community.Servers.Count full servers">@FullServers/@Community.Servers.Count full servers</span>
+        </div>
     </div>
     <div class="col-sm-12 col-lg-5 col-xl-3 players">
         <div class="row col-12">
@@ -20,7 +25,7 @@
             <span data-toggle="tooltip" title="@Community.WaitingPlayers players ready to play">@Community.WaitingPlayers players ready to play</span>
         </div>
         <div class="row col-12">
-            <span data-toggle="tooltip" title="@NeededPlayers() more players needed to play">@NeededPlayers() more players needed to play</span>
+            <span data-toggle="tooltip" title="@NeededPlayers more players needed to play">@NeededPlayers more players needed to play</span>
         </div>
     </div>
     <div class="col-sm-12 col-lg-3 col-xl-2">
@@ -129,13 +134,24 @@
     private string messageInput;
     private CommunityServer playableServer;
 
-    private int NeededPlayers()
+    private int NeededPlayers
     {
-        int neededPlayers = Community.MinimumPlayers - Community.CurrentPlayers - Community.WaitingPlayers;
-        if (neededPlayers < 0)
-            return 0;
+        get
+        {
+            int neededPlayers = Community.MinimumPlayers - Community.CurrentPlayers - Community.WaitingPlayers;
+            if (neededPlayers < 0)
+                return 0;
 
-        return neededPlayers;
+            return neededPlayers;
+        }
+    }
+
+    private int FullServers
+    {
+        get
+        {
+            return Community.Servers.Count(s => s.ConsideredFull);
+        }
     }
 
     protected override async Task OnInitializedAsync()

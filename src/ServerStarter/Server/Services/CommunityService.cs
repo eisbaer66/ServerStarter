@@ -56,15 +56,16 @@ namespace ServerStarter.Server.Services
                                                                 MaxPlayers     = info.MaxPlayers,
                                                                 CurrentPlayers = info.Players.Count,
                                                                 Players        = info.Players,
-                                                            };
+                                                                ConsideredFull = info.Players.Count >= community.MaximumPlayers
+                                                     };
                                                  })
                                          .WhenAllList();
 
             var waitingPlayers = await GetWaitingPlayers(community, servers);
 
-            var currentPlayers = servers.Where(s => s.CurrentPlayers < community.MaximumPlayers)
+            var currentPlayers = servers.Where(s => !s.ConsideredFull)
                                         .Select(s => s.CurrentPlayers)
-                                        .Max();
+                                        .Aggregate(0, (a, p) => p > a ? p : a);
             return new Community
                    {
                        Id             = community.Id,
