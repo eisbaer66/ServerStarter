@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using ServerStarter.Server.Data.Repositories;
+//using Microsoft.EntityFrameworkCore;
 using ServerStarter.Server.Models;
 using ServerStarter.Server.util;
 using Community = ServerStarter.Shared.Community;
@@ -18,15 +20,15 @@ namespace ServerStarter.Server.Services
 
     public class CommunityService : ICommunityService
     {
-        private readonly IServerInfoService           _serverInfoService;
-        private readonly ICommunityQueue              _queue;
-        private readonly ICommunityState             _state;
-        private readonly DbSet<ApplicationUser>       _users;
+        private readonly IServerInfoService     _serverInfoService;
+        private readonly ICommunityQueueService _queue;
+        private readonly ICommunityState        _state;
+        private readonly IUserRepository        _users;
 
         public CommunityService(IServerInfoService     serverInfoService,
-                                ICommunityQueue        queue,
-                                DbSet<ApplicationUser> users,
-                                ICommunityState       state)
+                                ICommunityQueueService queue,
+                                IUserRepository        users,
+                                ICommunityState        state)
         {
             _serverInfoService = serverInfoService ?? throw new ArgumentNullException(nameof(serverInfoService));
             _queue             = queue             ?? throw new ArgumentNullException(nameof(queue));
@@ -89,19 +91,15 @@ namespace ServerStarter.Server.Services
                    };
         }
 
-        private async Task<List<Guid>> GetWaitingPlayers(Models.Community community, IList<CommunityServer> servers)
+        private async Task<IList<string>> GetWaitingPlayers(Models.Community community, IList<CommunityServer> servers)
         {
             var playingSteamIds = servers
                                   .SelectMany(s => s.Players)
                                   .Select(p => p.SteamId);
-            var playingUsers = await _users
-                                     .Where(u => playingSteamIds.Contains(u.SteamId))
-                                     .ToListAsync();
+            var playingUsers = await _users.GetForSteamIds(playingSteamIds);
             var playingUserIds = playingUsers
-                                 .Select(t => new Guid(t.Id))
-                                 .ToList();
-            var waitingPlayers = _queue.GetWaitingPlayers(community.Id, playingUserIds)
-                                       .ToList();
+                                 .Select(t => t.Id);
+            var waitingPlayers = await _queue.GetWaitingPlayers(community.Id, playingUserIds);
             return waitingPlayers;
         }
     }

@@ -27,6 +27,8 @@
     <Compile Remove="Migrations\SqlServer\20200826180855_test.Designer.cs" />
     <Compile Remove="Migrations\SqlServer\20200826201320_test.cs" />
     <Compile Remove="Migrations\SqlServer\20200826201320_test.Designer.cs" />
+    <Compile Remove="Migrations\SqlServer\20200925131311_Queues.cs" />
+    <Compile Remove="Migrations\SqlServer\20200925131311_Queues.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

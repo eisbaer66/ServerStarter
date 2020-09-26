@@ -12,22 +12,19 @@ namespace ServerStarter.Server.WorkerServices
     public class CommunityQueueUpdate : TimedHostedService
     {
         private readonly IServiceProvider     _serviceProvider;
-        private readonly ICommunityQueue      _queue;
         private readonly IBackgroundTaskQueue _taskQueue;
         private readonly IServerInfoCache     _cache;
         private          bool                 _running = false;
 
-        public CommunityQueueUpdate(IServiceProvider serviceProvider,
+        public CommunityQueueUpdate(IServiceProvider              serviceProvider,
                                     ILogger<CommunityQueueUpdate> logger,
-                                    ICommunityQueue queue,
                                     IBackgroundTaskQueue          taskQueue,
-                                    ITimingSettings settings,
-                                    IServerInfoCache cache) : base(logger, settings.Interval)
+                                    ITimingSettings               settings,
+                                    IServerInfoCache              cache) : base(logger, settings.Interval)
         {
-            _queue           = queue           ?? throw new ArgumentNullException(nameof(queue));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _taskQueue       = taskQueue       ?? throw new ArgumentNullException(nameof(taskQueue));
-            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _cache           = cache           ?? throw new ArgumentNullException(nameof(cache));
         }
 
         protected override void DoWork(object state)
@@ -37,22 +34,25 @@ namespace ServerStarter.Server.WorkerServices
             
             _running = true;
             _cache.Reset();
-            IEnumerable<Guid> waitingCommunityIds = _queue.GetWaitingCommunityIds();
-            foreach (Guid communityId in waitingCommunityIds)
-            {
-                _taskQueue.QueueBackgroundWorkItem(async c =>
-                                                   {
-                                                       using (IServiceScope scope = _serviceProvider.CreateScope())
-                                                       {
-                                                           var repository = scope.ServiceProvider.GetRequiredService<ICommunityRepository>();
-                                                           var service = scope.ServiceProvider.GetRequiredService<ICommunityService>();
 
-                                                           var communityData = await repository.Get(communityId);
-                                                           await service.UpdateCommunity(communityData, StoppingToken);
-                                                       }
-                                                   });
-            }
-            _taskQueue.QueueBackgroundWorkItem(async c => { _running = false; });       //TODO Ghetto-Wait
+            _taskQueue.QueueBackgroundWorkItem(async c =>
+            {
+                using IServiceScope    outerScope         = _serviceProvider.CreateScope();
+                ICommunityQueueService queue              = outerScope.ServiceProvider.GetRequiredService<ICommunityQueueService>();
+                var                    waitingCommunities = await queue.GetWaitingCommunityIds();
+                foreach (var community in waitingCommunities)
+                {
+                    _taskQueue.QueueBackgroundWorkItem(async c =>
+                                                       {
+                                                           using IServiceScope scope      = _serviceProvider.CreateScope();
+                                                           var                 service    = scope.ServiceProvider.GetRequiredService<ICommunityService>();
+
+                                                           await service.UpdateCommunity(community, StoppingToken);
+                                                       });
+                }
+
+                _running = false;
+            });
         }
     }
 }

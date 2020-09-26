@@ -8,7 +8,7 @@ namespace ServerStarter.Server.Identity.AuthPolicies.JoinedQueue
 {
     public class JoinedQueuePerHubInvocationContextHandler : JoinedQueueHandlerBase<JoinedQueuePerHubParameterIndexRequirement>
     {
-        public JoinedQueuePerHubInvocationContextHandler(ILogger<JoinedQueuePerParameterNameHandler> logger, ICommunityQueue queue) : base(logger, queue)
+        public JoinedQueuePerHubInvocationContextHandler(ILogger<JoinedQueuePerParameterNameHandler> logger, ICommunityQueueService queue) : base(logger, queue)
         {
         }
 

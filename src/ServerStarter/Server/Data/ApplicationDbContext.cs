@@ -19,6 +19,7 @@ namespace ServerStarter.Server.Data
         {
         }
         public DbSet<Community> Communities { get; set; }
+        public DbSet<CommunityQueue> CommunitiesQueues { get; set; }
         public DbSet<UserQueueStatistics> UserQueueStatistics { get; set; }
     }
     class MySqlDbContext : ApplicationDbContext

@@ -15,14 +15,9 @@ namespace ServerStarter.Server
         {
             return GetClaim(user, ClaimTypes.Name);
         }
-        public static Guid GetUserId(this ClaimsPrincipal user)
+        public static string GetUserId(this ClaimsPrincipal user)
         {
-            var claim = GetClaim(user, JwtClaimTypes.Subject);
-            if(claim == null)
-                claim = GetClaim(user, ClaimTypes.NameIdentifier);
-
-            var userId = new Guid(claim);
-            return userId;
+            return GetClaim(user, JwtClaimTypes.Subject) ?? GetClaim(user, ClaimTypes.NameIdentifier);
         }
     }
 }

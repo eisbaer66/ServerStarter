@@ -35,6 +35,7 @@ using Serilog;
 using ServerStarter.Server.Controllers;
 using ServerStarter.Server.Data;
 using ServerStarter.Server.Data.Repositories;
+using ServerStarter.Server.Data.Repositories.Queues;
 using ServerStarter.Server.Hubs;
 using ServerStarter.Server.Identity;
 using ServerStarter.Server.Identity.AuthPolicies;
@@ -154,8 +155,8 @@ namespace ServerStarter.Server
                                                             policy => policy.Requirements.Add(new JoinedQueuePerHubParameterIndexRequirement(0)));
                                       });
 
-            services.AddSingleton<IAuthorizationHandler, JoinedQueuePerParameterNameHandler>();
-            services.AddSingleton<IAuthorizationHandler, JoinedQueuePerHubInvocationContextHandler>();
+            services.AddScoped<IAuthorizationHandler, JoinedQueuePerParameterNameHandler>();
+            services.AddScoped<IAuthorizationHandler, JoinedQueuePerHubInvocationContextHandler>();
 
 
             TimingSettings timingSettings = new TimingSettings();
@@ -170,10 +171,13 @@ namespace ServerStarter.Server
                                                    {
                                                        BaseAddress = new Uri(Configuration["ServerStarters:ServerInfoBaseAddress"]),
                                                    });
-            services.AddSingleton<CommunitiesHub>();
+            services.AddScoped<CommunitiesHub>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddSingleton<ICommunityState, CommunityState>();
-            services.AddSingleton<ICommunityQueue, InMemoryCommunityQueue>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            //services.AddSingleton<ICommunityQueueRepository, InMemoryCommunityQueueRepositoryCache>();
+            services.AddScoped<ICommunityQueueRepository, CommunityQueueRepository>();
+            services.AddScoped<ICommunityQueueService, CommunityQueueService>();
             services.AddSingleton<CachingServerInfoQueries>(c =>
                                                       {
                                                           IMemoryCache cache = c.GetRequiredService<IMemoryCache>();

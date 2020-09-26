@@ -9,26 +9,25 @@ namespace ServerStarter.Server.Identity.AuthPolicies.JoinedQueue
     public abstract class JoinedQueueHandlerBase<T> : AuthorizationHandler<T> where T : IAuthorizationRequirement
     {
         protected readonly ILogger<JoinedQueuePerParameterNameHandler> Logger;
-        private readonly   ICommunityQueue                             _queue;
+        private readonly   ICommunityQueueService                             _queue;
 
-        public JoinedQueueHandlerBase(ILogger<JoinedQueuePerParameterNameHandler> logger, ICommunityQueue queue)
+        public JoinedQueueHandlerBase(ILogger<JoinedQueuePerParameterNameHandler> logger, ICommunityQueueService queue)
         {
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _queue = queue  ?? throw new ArgumentNullException(nameof(queue));
         }
 
-        protected Task HandleCommunity(AuthorizationHandlerContext context, string value, T requirement)
+        protected async Task HandleCommunity(AuthorizationHandlerContext context, string value, T requirement)
         {
             var  communityId = new Guid(value);
-            Guid userId      = context.User.GetUserId();
-            if (!_queue.Contains(userId, communityId))
+            string userId      = context.User.GetUserId();
+            if (!await _queue.Contains(userId, communityId))
             {
                 Logger.LogError("user {UserId} is not queued for community {CommunityId}", userId, communityId);
-                return Task.CompletedTask;
+                return;
             }
 
             context.Succeed(requirement);
-            return Task.CompletedTask;
         }
     }
 }

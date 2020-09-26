@@ -14,11 +14,11 @@ namespace ServerStarter.Server.Hubs
     [Authorize]
     public class CommunitiesHub : Hub
     {
-        private readonly ICommunityQueue _queue;
-        private readonly ILogger<CommunitiesHub> _logger;
-        private readonly IDictionary<Guid, HashSet<string>> _connections = new Dictionary<Guid, HashSet<string>>();
+        private readonly ICommunityQueueService               _queue;
+        private readonly ILogger<CommunitiesHub>              _logger;
+        private readonly IDictionary<string, HashSet<string>> _connections = new Dictionary<string, HashSet<string>>();
 
-        public CommunitiesHub(ICommunityQueue queue, ILogger<CommunitiesHub> logger)
+        public CommunitiesHub(ICommunityQueueService queue, ILogger<CommunitiesHub> logger)
         {
             _queue = queue ?? throw new ArgumentNullException(nameof(queue));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -52,7 +52,7 @@ namespace ServerStarter.Server.Hubs
             var communityId = new Guid(groupName);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-             _queue.Join(communityId, userId);
+            await _queue.Join(communityId, userId);
 
              await Clients.GroupExcept(userId.ToString(), Context.ConnectionId).SendAsync("JoinQueue", communityId);
         }
@@ -63,7 +63,7 @@ namespace ServerStarter.Server.Hubs
             var userId      = Context.User.GetUserId();
             var communityId = new Guid(groupName);
 
-            _queue.Leave(communityId, userId);
+            await _queue.Leave(communityId, userId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
 
             await Clients.GroupExcept(userId.ToString(), Context.ConnectionId).SendAsync("LeaveQueue", groupName);
@@ -73,7 +73,7 @@ namespace ServerStarter.Server.Hubs
         {
             await base.OnConnectedAsync();
 
-            Guid userId = Context.User.GetUserId();
+            string userId = Context.User.GetUserId();
             AddConnection(userId);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, userId.ToString());
@@ -86,7 +86,7 @@ namespace ServerStarter.Server.Hubs
             if (exception != null)
                 _logger.LogError(exception, "SignalR fatal disconnect");
 
-            Guid userId = Context.User.GetUserId();
+            string userId = Context.User.GetUserId();
             RemoveConnection(userId);
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId.ToString());
@@ -94,14 +94,14 @@ namespace ServerStarter.Server.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        private void AddConnection(Guid userId)
+        private void AddConnection(string userId)
         {
             if (!_connections.ContainsKey(userId))
                 _connections.Add(userId, new HashSet<string>());
             _connections[userId].Add(Context.ConnectionId);
         }
 
-        private void RemoveConnection(Guid userId)
+        private async Task RemoveConnection(string userId)
         {
             if (!_connections.ContainsKey(userId)) 
                 return;
@@ -113,15 +113,15 @@ namespace ServerStarter.Server.Hubs
                 return;
 
             _connections.Remove(userId);
-            _queue.LeaveAllQueues(userId);
+            await _queue.LeaveAllQueues(userId);
         }
 
-        private async Task RejoinQueue(Guid userId)
+        private async Task RejoinQueue(string userId)
         {
-            IEnumerable<Guid> communityIds = _queue.GetQueuedCommunity(userId);
-            foreach (Guid communityId in communityIds)
+            var queues = await _queue.GetQueuedCommunity(userId);
+            foreach (var queue in queues)
             {
-                await Clients.Caller.SendAsync("JoinQueue", communityId);
+                await Clients.Caller.SendAsync("JoinQueue", queue.Community.Id);
             }
         }
     }

@@ -7,7 +7,7 @@ namespace ServerStarter.Server.Identity.AuthPolicies.JoinedQueue
 {
     public class JoinedQueuePerParameterNameHandler : JoinedQueueHandlerBase<JoinedQueuePerParameterNameRequirement>
     {
-        public JoinedQueuePerParameterNameHandler(ILogger<JoinedQueuePerParameterNameHandler> logger, ICommunityQueue queue) : base(logger, queue)
+        public JoinedQueuePerParameterNameHandler(ILogger<JoinedQueuePerParameterNameHandler> logger, ICommunityQueueService queue) : base(logger, queue)
         {
         }
 

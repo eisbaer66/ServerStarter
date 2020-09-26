@@ -323,6 +323,43 @@ namespace ServerStarter.Server.Migrations.MySql
                     b.ToTable("Communities");
                 });
 
+            modelBuilder.Entity("ServerStarter.Server.Models.CommunityQueue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("CommunityId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommunityId");
+
+                    b.ToTable("CommunitiesQueues");
+                });
+
+            modelBuilder.Entity("ServerStarter.Server.Models.CommunityQueueEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("QueueId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QueueId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CommunityQueueEntry");
+                });
+
             modelBuilder.Entity("ServerStarter.Server.Models.CommunityServer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -369,8 +406,7 @@ namespace ServerStarter.Server.Migrations.MySql
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserQueueStatistics");
                 });
@@ -426,6 +462,24 @@ namespace ServerStarter.Server.Migrations.MySql
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ServerStarter.Server.Models.CommunityQueue", b =>
+                {
+                    b.HasOne("ServerStarter.Server.Models.Community", "Community")
+                        .WithMany()
+                        .HasForeignKey("CommunityId");
+                });
+
+            modelBuilder.Entity("ServerStarter.Server.Models.CommunityQueueEntry", b =>
+                {
+                    b.HasOne("ServerStarter.Server.Models.CommunityQueue", "Queue")
+                        .WithMany("Entries")
+                        .HasForeignKey("QueueId");
+
+                    b.HasOne("ServerStarter.Server.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
             modelBuilder.Entity("ServerStarter.Server.Models.CommunityServer", b =>
                 {
                     b.HasOne("ServerStarter.Server.Models.Community", null)
@@ -436,8 +490,8 @@ namespace ServerStarter.Server.Migrations.MySql
             modelBuilder.Entity("ServerStarter.Server.Models.UserQueueStatistics", b =>
                 {
                     b.HasOne("ServerStarter.Server.Models.ApplicationUser", "User")
-                        .WithOne("QueueStatistics")
-                        .HasForeignKey("ServerStarter.Server.Models.UserQueueStatistics", "UserId")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
