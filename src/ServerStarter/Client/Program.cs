@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ServerStarter.Client
 {
@@ -14,6 +15,8 @@ namespace ServerStarter.Client
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
+            //builder.Logging.SetMinimumLevel(LogLevel.Trace);
+
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddHttpClient("ServerStarter.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))

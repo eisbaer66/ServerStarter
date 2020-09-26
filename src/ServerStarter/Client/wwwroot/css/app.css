@@ -436,3 +436,8 @@ app {
 code.discordUser {
     color: var(--discordUser)
 }
+
+input.shortInline {
+    margin: 0px 5px;
+    width: 40px;
+}

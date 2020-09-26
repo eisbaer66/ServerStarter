@@ -23,79 +23,100 @@
     }
     else
     {
-        <label><input type="checkbox" @bind="playsounds" /> Play sounds</label>
+    <EditForm Model="@settings" class="d-flex flex-column">
+    @*OnValidSubmit="@SettingsSpeichern"*@
+        <DataAnnotationsValidator />
+    
+        <label>
+            <InputCheckbox id="playsounds" @bind-Value="settings.PlaySounds"></InputCheckbox>
+            Play sounds
+        </label>
+        <label>
+            <InputCheckbox id="automaticJoinEnabled" @bind-Value="settings.AutomaticJoinEnabled"></InputCheckbox>
+            automatically join,<InputNumber id="automaticJoinDelay" class="shortInline" @bind-Value="settings.AutomaticJoinDelayInSeconds"></InputNumber> seconds after server is ready to play
+        </label>
+
+        <ValidationSummary />
+        @*<button type="submit">Submit</button>*@
+    </EditForm>
+
         <div class="container">
             @foreach (var community in communities)
             {
-                <CommunityComponent @ref="Childs" Community="community" HubConnection="HubConnection" @bind-PlaySounds="playsounds"></CommunityComponent>
+                <CommunityComponent @ref="Childs" Community="community" HubConnection="HubConnection" @bind-QueueSettings="settings"></CommunityComponent>
             }
         </div>
     }
 </div>
 
     @code {
-private readonly IList<CommunityComponent> childs = new List<CommunityComponent>();
+        private readonly IList<CommunityComponent> childs = new List<CommunityComponent>();
 
-    private bool playsounds = true;
-    private Community[] communities;
-    private HubConnection HubConnection;
+        private QueueSettings settings = new QueueSettings
+                                         {
+                                             PlaySounds = true,
+                                             AutomaticJoinEnabled = true,
+                                             AutomaticJoinDelayInSeconds = 30,
+                                         };
+        private Community[] communities;
+        private HubConnection HubConnection;
 
-    CommunityComponent Childs
-    {
-        set { childs.Add(value); }
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
+        CommunityComponent Childs
         {
-            communities = await Http.GetFromJsonAsync<Community[]>("api/Communities");
-        }
-        catch (AccessTokenNotAvailableException exception)
-        {
-            exception.Redirect();
+            set { childs.Add(value); }
         }
 
-
-        Action<HttpConnectionOptions> ConfigureHttpConnection()
+        protected override async Task OnInitializedAsync()
         {
-            return options =>
+            try
             {
-                options.AccessTokenProvider = async () =>
+                communities = await Http.GetFromJsonAsync<Community[]>("api/Communities");
+            }
+            catch (AccessTokenNotAvailableException exception)
+            {
+                exception.Redirect();
+            }
+
+
+            Action<HttpConnectionOptions> ConfigureHttpConnection()
+            {
+                return options =>
                 {
-                    var result = await AccessTokenProvider.RequestAccessToken();
-                    AccessToken token;
-                    bool tryGetToken = result.TryGetToken(out token);
-                    if (!tryGetToken)
-                        return null;
-                    return token.Value;
+                    options.AccessTokenProvider = async () =>
+                    {
+                        var result = await AccessTokenProvider.RequestAccessToken();
+                        AccessToken token;
+                        bool tryGetToken = result.TryGetToken(out token);
+                        if (!tryGetToken)
+                            return null;
+                        return token.Value;
+                    };
                 };
-            };
+            }
+
+            HubConnection = new HubConnectionBuilder()
+                .WithUrl(NavigationManager
+                             .ToAbsoluteUri("/hubs/communities"), ConfigureHttpConnection())
+                .Build();
+
+            HubConnection.On<Guid>("JoinQueue", async (communityId) =>
+            {
+                CommunityComponent community = childs.FirstOrDefault(c => c.Community.Id == communityId);
+                if (community == null)
+                {
+                    Logger.LogError("could not rejoin {CommunityId}, because it was not loaded", communityId);
+                    return;
+                }
+
+                await community.JoinQueue();
+            });
+            await HubConnection.StartAsync();
         }
 
-        HubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager
-                         .ToAbsoluteUri("/hubs/communities"), ConfigureHttpConnection())
-            .Build();
-
-        HubConnection.On<Guid>("JoinQueue", async (communityId) =>
-                                                 {
-                                                     CommunityComponent community = childs.FirstOrDefault(c => c.Community.Id == communityId);
-                                                     if (community == null)
-                                                     {
-                                                         Logger.LogError("could not rejoin {CommunityId}, because it was not loaded", communityId);
-                                                         return;
-                                                     }
-
-                                                     await community.JoinQueue();
-                                                 });
-        await HubConnection.StartAsync();
-    }
-
-    public void Dispose()
-    {
-        if (HubConnection != null)
-            _ = HubConnection.DisposeAsync();
-    }
+        public void Dispose()
+        {
+            if (HubConnection != null)
+                _ = HubConnection.DisposeAsync();
+        }
 
     }

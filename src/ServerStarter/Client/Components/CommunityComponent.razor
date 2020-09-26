@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.Logging
 @using ServerStarter.Shared
+@using System.Timers
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
@@ -99,6 +100,10 @@
                         <button class="btn btn-themed primary"
                                 @onclick="() => JoinGame(PreferredServer)">
                             Join
+                            @if (QueueSettings.AutomaticJoinEnabled)
+                            {
+                                <span>(@SecondsTillAutoJoin sec.)</span>
+                            }
                         </button>
                     </div>
                 </div>
@@ -115,10 +120,10 @@
     public HubConnection HubConnection { get; set; }
 
     [Parameter]
-    public bool PlaySounds { get; set; }
+    public QueueSettings QueueSettings { get; set; }
 
     [Parameter]
-    public EventCallback<bool> PlaySoundsChanged { get; set; }
+    public EventCallback<QueueSettings> QueueSettingsChanged { get; set; }
 
     ElementReference messageInputReference;
     ElementReference lastMessageElement;
@@ -135,6 +140,9 @@
     private bool joined = false;
 
     private string messageInput;
+    private DateTime _autoJoinTime;
+
+    private int SecondsTillAutoJoin => Math.Max(0, (int)(_autoJoinTime - DateTime.UtcNow).TotalSeconds);
 
     private int NeededPlayers
     {
@@ -212,10 +220,42 @@
             return;     //TODO Callback for zarlo?
         }
 
-        if (PlaySounds)
+        if (QueueSettings.PlaySounds)
         {
             string id = "startSound" + _random.Next(4);
             await JsRuntime.InvokeAsync<string>("Play", id);
+        }
+
+        if (QueueSettings.AutomaticJoinEnabled)
+        {
+            _autoJoinTime = DateTime.UtcNow.AddSeconds(QueueSettings.AutomaticJoinDelayInSeconds);
+            if (DateTime.UtcNow >= _autoJoinTime)
+            {
+                JoinGame(PreferredServer); //purposely not awaited to prevent WebSocket from resetting 
+                return;
+            }
+
+            var timer = new Timer(1000)
+            {
+                AutoReset = true,
+            };
+            timer.Elapsed += (sender, args) =>
+                             {
+                                 Logger.LogTrace("checking auto-join");
+
+                                 if (DateTime.UtcNow >= _autoJoinTime)
+                                 {
+                                     Logger.LogTrace("auto-joining");
+
+                                     timer.Enabled = false;
+                                     timer.Dispose();
+                                     timer = null;
+                                     
+                                     JoinGame(PreferredServer); //purposely not awaited to prevent WebSocket from resetting 
+                                 }   
+                                 StateHasChanged();
+                             };
+            timer.Enabled = true;
         }
 
         showPopup = true;

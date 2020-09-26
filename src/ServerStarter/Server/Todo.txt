@@ -1,5 +1,13 @@
-﻿background updates
- thow out inactive connections? timeout?
+﻿
+leave all queues when joining one
+chat
+ members
+ steam avatar/profile
+save queuesettings per user
+ incl userdata
+
+background updates
+ throw out inactive connections? timeout?
 
 signing key
 error handling!
