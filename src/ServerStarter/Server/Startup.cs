@@ -199,12 +199,21 @@ namespace ServerStarter.Server
             app.GnuTerryPratchett();
             app.UseForwardedHeaders();
 
-            
+
+            //Steam-Overlay sends multipart forms without setting ContentLength :/
+            app.Use(async (ctx, next) =>
+                    {
+                        var isMultiPartFrom = ctx.Request.ContentType?.StartsWith("multipart/form-data") ?? false;
+                        if (isMultiPartFrom)
+                            ctx.Request.ContentLength ??= 0;
+                        await next();
+                    });
+
             var logger = app.ApplicationServices.GetRequiredService<ILogger<Startup>>();
             if (logger.IsEnabled(LogLevel.Trace))
                 app.Use(async (ctx, next) =>
                     {
-                        logger.LogTrace("incoming Request {RequestProtocol} {RequestScheme} {RequestHost} {@RequestHeaders}", ctx.Request.Protocol, ctx.Request.Scheme, ctx.Request.Host, ctx.Request.Headers);
+                        logger.LogTrace("incoming Request {RequestProtocol} {RequestScheme} {RequestHost} {RequestContentLength} bytes of {RequestContentType} {@RequestHeaders}", ctx.Request.Protocol, ctx.Request.Scheme, ctx.Request.Host, ctx.Request.ContentLength, ctx.Request.ContentType, ctx.Request.Headers);
                         await next();
                     });
             app.Use(async (ctx, next) =>
