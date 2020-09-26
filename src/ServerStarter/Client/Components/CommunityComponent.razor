@@ -310,7 +310,9 @@
 
     async Task Send()
     {
-        await HubConnection.SendAsync("SendMessage", Community.Id, messageInput);
+        if (!string.IsNullOrEmpty(messageInput))
+            await HubConnection.SendAsync("SendMessage", Community.Id, messageInput);
+
         messageInput = string.Empty;
 
         await FocusInput();

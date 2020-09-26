@@ -43,6 +43,12 @@ namespace ServerStarter.Server.Hubs
         [Authorize(Policy = Policies.JoinedQueueFromHubParameter0)]
         public async Task SendMessage(string groupName, string message)
         {
+            if (string.IsNullOrEmpty(message))
+            {
+                _logger.LogTrace("ignored empty message from {UserId} to {GroupName}", Context.User.GetUserId(), groupName);
+                return;
+            }
+
             await Clients.Group(groupName).SendAsync("MessageReceived", groupName, Context.User.GetName(), message);
         }
 
