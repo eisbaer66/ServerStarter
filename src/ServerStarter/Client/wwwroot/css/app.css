@@ -10,6 +10,26 @@
     src: local('../fonts/tf2build.ttf'), url('../fonts/tf2build.ttf');
 }
 
+@-webkit-keyframes rotation {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes doublerotation {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+
+    to {
+        -webkit-transform: rotate(720deg);
+    }
+}
+
 :root {
     --menucolortop: #36312a;
     --menucolor: #332d27;
@@ -440,4 +460,13 @@ code.discordUser {
 input.shortInline {
     margin: 0px 5px;
     width: 40px;
+}
+
+.queuedIcon {
+    height: 1rem;
+    width: 1rem;
+    margin-top: 5px;
+    background: url("../assets/img/tf2_simple_light.png");
+    background-size: 100%;
+    -webkit-animation: doublerotation 2s infinite ease-in-out;
 }

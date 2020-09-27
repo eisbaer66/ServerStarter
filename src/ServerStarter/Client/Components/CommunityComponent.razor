@@ -17,6 +17,12 @@
         <div class="row col-12">
             <span data-toggle="tooltip" title="@FullServers/@Community.Servers.Count full servers">@FullServers/@Community.Servers.Count full servers</span>
         </div>
+        <div class="row col-12">
+            @if (joined)
+            {
+                <figure class="queuedIcon" />
+            }
+        </div>
     </div>
     <div class="col-sm-12 col-lg-5 col-xl-3 players">
         <div class="row col-sm-6 col-lg-12 label">
