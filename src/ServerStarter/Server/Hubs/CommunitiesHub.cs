@@ -94,6 +94,7 @@ namespace ServerStarter.Server.Hubs
 
             string userId = Context.User.GetUserId();
             RemoveConnection(userId);
+            await _queue.LeaveAllQueues(userId);
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId.ToString());
 
@@ -107,19 +108,18 @@ namespace ServerStarter.Server.Hubs
             _connections[userId].Add(Context.ConnectionId);
         }
 
-        private async Task RemoveConnection(string userId)
+        private void RemoveConnection(string userId)
         {
-            if (!_connections.ContainsKey(userId)) 
+            if (!_connections.ContainsKey(userId))
                 return;
-            if (!_connections[userId].Contains(Context.ConnectionId)) 
+            if (!_connections[userId].Contains(Context.ConnectionId))
                 return;
 
             _connections[userId].Remove(Context.ConnectionId);
-            if (_connections[userId].Count != 0) 
+            if (_connections[userId].Count != 0)
                 return;
 
             _connections.Remove(userId);
-            await _queue.LeaveAllQueues(userId);
         }
 
         private async Task RejoinQueue(string userId)
