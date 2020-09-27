@@ -7,10 +7,6 @@ namespace ServerStarter.Server.Migrations.MySql
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_UserQueueStatistics_UserId",
-                table: "UserQueueStatistics");
-
             migrationBuilder.CreateTable(
                 name: "CommunitiesQueues",
                 columns: table => new
@@ -55,11 +51,6 @@ namespace ServerStarter.Server.Migrations.MySql
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserQueueStatistics_UserId",
-                table: "UserQueueStatistics",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_CommunitiesQueues_CommunityId",
                 table: "CommunitiesQueues",
                 column: "CommunityId");
@@ -82,16 +73,6 @@ namespace ServerStarter.Server.Migrations.MySql
 
             migrationBuilder.DropTable(
                 name: "CommunitiesQueues");
-
-            migrationBuilder.DropIndex(
-                name: "IX_UserQueueStatistics_UserId",
-                table: "UserQueueStatistics");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserQueueStatistics_UserId",
-                table: "UserQueueStatistics",
-                column: "UserId",
-                unique: true);
         }
     }
 }
