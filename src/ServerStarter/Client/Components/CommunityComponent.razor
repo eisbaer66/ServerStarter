@@ -20,7 +20,7 @@
     </div>
     <div class="col-sm-12 col-lg-5 col-xl-3 players">
         <div class="row col-sm-6 col-lg-12 label">
-            <span data-toggle="tooltip" title="queue for @PreferredServer.Name (@PreferredServer.Ip)">@PreferredServer.Name (<a href="@GetConnectLink(PreferredServer)">@PreferredServer.Ip</a>)</span>
+            <span data-toggle="tooltip" title="queue for @PreferredServer.Name (@PreferredServer.Ip)">@PreferredServer.Name (<a href="@GetConnectLink(PreferredServer)" target="_blank">@PreferredServer.Ip</a>)</span>
         </div>
         <div class="row col-12">
             <span data-toggle="tooltip" title="@Community.CurrentPlayers players currently in-game">@Community.CurrentPlayers players currently in-game</span>
@@ -46,9 +46,9 @@
         <ul>
             @foreach (var server in Community.Servers.OrderByDescending(s => s.CurrentPlayers))
             {
-                <li>
-                    @server.Name (<a href="@GetConnectLink(server)">@server.Ip</a>): @server.CurrentPlayers
-                </li>
+            <li>
+                @server.Name (<a href="@GetConnectLink(server)" target="_blank">@server.Ip</a>): @server.CurrentPlayers
+            </li>
             }
         </ul>
     </div>
@@ -125,6 +125,9 @@
     [Parameter]
     public EventCallback<QueueSettings> QueueSettingsChanged { get; set; }
 
+    [Parameter]
+    public EventCallback<CommunityServer> JoinedServer { get; set; }
+
     ElementReference messageInputReference;
     ElementReference lastMessageElement;
 
@@ -141,6 +144,7 @@
 
     private string messageInput;
     private DateTime _autoJoinTime;
+    private Timer _timer;
 
     private int SecondsTillAutoJoin => Math.Max(0, (int)(_autoJoinTime - DateTime.UtcNow).TotalSeconds);
 
@@ -231,35 +235,40 @@
             _autoJoinTime = DateTime.UtcNow.AddSeconds(QueueSettings.AutomaticJoinDelayInSeconds);
             if (DateTime.UtcNow >= _autoJoinTime)
             {
-                JoinGame(PreferredServer); //purposely not awaited to prevent WebSocket from resetting 
+                await JoinGame(PreferredServer);
                 return;
             }
 
-            var timer = new Timer(1000)
+            _timer = new Timer(1000)
             {
                 AutoReset = true,
             };
-            timer.Elapsed += (sender, args) =>
-                             {
-                                 Logger.LogTrace("checking auto-join");
+            _timer.Elapsed += async (sender, args) =>
+            {
+                Logger.LogTrace("checking auto-join");
 
-                                 if (DateTime.UtcNow >= _autoJoinTime)
-                                 {
-                                     Logger.LogTrace("auto-joining");
-
-                                     timer.Enabled = false;
-                                     timer.Dispose();
-                                     timer = null;
-                                     
-                                     JoinGame(PreferredServer); //purposely not awaited to prevent WebSocket from resetting 
-                                 }   
-                                 StateHasChanged();
-                             };
-            timer.Enabled = true;
+                if (DateTime.UtcNow >= _autoJoinTime)
+                {
+                    Logger.LogTrace("auto-joining");
+                    await JoinGame(PreferredServer);
+                }
+                StateHasChanged();
+            };
+            _timer.Enabled = true;
         }
 
         showPopup = true;
         StateHasChanged();
+    }
+
+    private void DisableAutoJoinTimer()
+    {
+        if (_timer == null)
+            return;
+
+        _timer.Enabled = false;
+        _timer.Dispose();
+        _timer = null;
     }
 
     public async Task ClosePopup()
@@ -269,7 +278,10 @@
 
     public async Task JoinGame(CommunityServer server)
     {
-        await LeaveQueue();
+        DisableAutoJoinTimer();
+        if (JoinedServer.HasDelegate)
+            await JoinedServer.InvokeAsync(server);
+
         string link = GetConnectLink(server);
         await JsRuntime.InvokeAsync<object>("open", link);
     }
@@ -329,8 +341,10 @@
         await ScrollToLastMessage();
     }
 
-    async Task LeaveQueue()
+    public async Task LeaveQueue()
     {
+        DisableAutoJoinTimer();
+
         await HubConnection.InvokeAsync("LeaveGroup", Community.Id);
 
         foreach (var subscription in groupSubscription)

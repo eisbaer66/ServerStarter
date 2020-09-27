@@ -43,7 +43,7 @@
         <div class="container">
             @foreach (var community in communities)
             {
-                <CommunityComponent @ref="Childs" Community="community" HubConnection="HubConnection" @bind-QueueSettings="settings"></CommunityComponent>
+                <CommunityComponent @ref="Childs" Community="community" HubConnection="HubConnection" @bind-QueueSettings="settings" JoinedServer="JoinedServer"></CommunityComponent>
             }
         </div>
     }
@@ -117,6 +117,14 @@
         {
             if (HubConnection != null)
                 _ = HubConnection.DisposeAsync();
+        }
+
+        private async Task JoinedServer(CommunityServer server)
+        {
+            foreach (CommunityComponent component in childs)
+            {
+                await component.LeaveQueue();
+            }
         }
 
     }

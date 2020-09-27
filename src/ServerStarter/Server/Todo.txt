@@ -1,5 +1,4 @@
 ﻿
-leave all queues when joining one
 chat
  members
  steam avatar/profile
