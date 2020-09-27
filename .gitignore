@@ -341,3 +341,4 @@ healthchecksdb
 /ServerStarter/Server/Logs
 /serverstarter.tar
 /src/ServerStarter/Server/Logs
+/src/ServerStarter/Server/signing

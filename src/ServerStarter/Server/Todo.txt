@@ -1,5 +1,4 @@
 ﻿
-ignore players without steamid
 queue animation
 fix prefered server if ppup is open
 chat

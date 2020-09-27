@@ -35,6 +35,7 @@ namespace ServerStarter.Server.ZarloAdapter
 
             var players = (await _queries.GetOnlinePlayers(cancellationToken))
                                 .Where(p => p.ServerId == serverId)
+                                .Where(p => p.SteamId > 0)
                                 .Select(p => new ServerPlayer
                                              {
                                                  SteamId = p.SteamId,
