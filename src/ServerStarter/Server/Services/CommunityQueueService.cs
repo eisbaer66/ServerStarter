@@ -97,22 +97,29 @@ namespace ServerStarter.Server.Services
             UserLeft?.Invoke(this, new UserLeftEventArgs { CommunityId = communityId, UserId = userId });
         }
 
-        public async Task<IList<string>> GetWaitingPlayers(Guid communityId, IEnumerable<string> playingUserIds)
+        public async Task<IList<ApplicationUser>> GetQueuedPlayers(Guid communityId)
         {
             var queue = await _repository.Get(communityId);
             if (queue == null)
-                return new string[0];
+                return new ApplicationUser[0];
 
-            IList<string> userIds       = new List<string>();
-            var          playingLookup = playingUserIds.ToHashSet();
-            foreach (CommunityQueueEntry entry in queue.Entries)
+            return queue.Entries.Select(e => e.User).ToList();
+        }
+
+        public IList<ApplicationUser> GetWaitingPlayers(IList<ApplicationUser> queuedUsers, IEnumerable<ApplicationUser> playingUsers)
+        {
+            IList<ApplicationUser> users       = new List<ApplicationUser>();
+            var                    playingLookup = playingUsers
+                                                   .Select(t => t.Id)
+                                                   .ToHashSet();
+            foreach (var user in queuedUsers)
             {
-                if (playingLookup.Contains(entry.User.Id))
+                if (playingLookup.Contains(user.Id))
                     continue;
-                userIds.Add(entry.User.Id);
+                users.Add(user);
             }
 
-            return userIds;
+            return users;
         }
 
         public async Task<Community[]> GetWaitingCommunityIds()

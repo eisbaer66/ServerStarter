@@ -12,6 +12,7 @@ namespace ServerStarter.Shared
         public int                    WaitingPlayers { get; set; }
         public int                    MinimumPlayers { get; set; }
         public IList<CommunityServer> Servers        { get; set; }
+        public IList<CommunityPlayer> QueuedPlayers  { get; set; }
 
         protected bool Equals(Community other)
         {
@@ -20,7 +21,8 @@ namespace ServerStarter.Shared
                    CurrentPlayers == other.CurrentPlayers &&
                    WaitingPlayers == other.WaitingPlayers &&
                    MinimumPlayers == other.MinimumPlayers &&
-                   Servers.EqualsByIndex(other.Servers);
+                   Servers.EqualsByIndex(other.Servers) &&
+                   QueuedPlayers.EqualsByIndex(other.QueuedPlayers);
         }
 
         public override bool Equals(object obj)
@@ -33,7 +35,30 @@ namespace ServerStarter.Shared
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, Name, CurrentPlayers, WaitingPlayers, MinimumPlayers, Servers);
+            return HashCode.Combine(Id, Name, CurrentPlayers, WaitingPlayers, MinimumPlayers, Servers, QueuedPlayers);
+        }
+    }
+
+    public class CommunityPlayer
+    {
+        public string Name { get; set; }
+
+        protected bool Equals(CommunityPlayer other)
+        {
+            return Name == other.Name;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((CommunityPlayer) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Name != null ? Name.GetHashCode() : 0);
         }
     }
 

@@ -1,7 +1,6 @@
 ﻿
 fix prefered server if ppup is open
 chat
- members
  steam avatar/profile
 save queuesettings per user
  incl userdata

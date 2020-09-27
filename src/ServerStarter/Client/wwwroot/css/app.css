@@ -363,6 +363,30 @@ app {
             max-height: 80px;
             overflow-x: auto;
         }
+
+    .community .chatsection {
+        display: flex;
+        flex: 1 0 auto;
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+    .community .chatMembers {
+        margin-right: 10px;
+        max-width: 200px;
+        overflow-x: hidden;
+        max-height: 303px;
+    }
+        .community .chatMembers li {
+            list-style-type: none;
+        }
+        .community .chatMembers ul {
+            padding-left: 10px;
+        }
+    .community .chatColumn {
+        display: flex;
+        flex: 1 0 auto;
+        flex-direction: column;
+    }
     .community .chat {
         background-color: var(--lightbackgroundcolor);
         color: var(--fontcolordark);
@@ -371,6 +395,7 @@ app {
         padding: 10px;
     }
         .community .chat .messages {
+            flex: 1 1 auto;
             border-bottom: 3px solid var(--bordercolor);
             margin-bottom: 10px;
             padding-bottom: 10px;

@@ -8,6 +8,7 @@ using ServerStarter.Server.Data.Repositories;
 //using Microsoft.EntityFrameworkCore;
 using ServerStarter.Server.Models;
 using ServerStarter.Server.util;
+using ServerStarter.Shared;
 using Community = ServerStarter.Shared.Community;
 using CommunityServer = ServerStarter.Shared.CommunityServer;
 
@@ -63,7 +64,13 @@ namespace ServerStarter.Server.Services
                                                  })
                                          .WhenAllList();
 
-            var waitingPlayers = await GetWaitingPlayers(community, servers);
+            var queuedPlayers  = await _queue.GetQueuedPlayers(community.Id);
+            var waitingPlayers = await GetWaitingPlayers(queuedPlayers, servers);
+            var queuedCommunityPlayers = queuedPlayers.Select(p => new CommunityPlayer
+                                                                   {
+                                                                       Name = p.Name,
+                                                                   })
+                                                      .ToList();
 
             var queueServer = servers.Where(s => !s.ConsideredFull)
                                      .Aggregate<CommunityServer, CommunityServer>(null, (a, s) =>
@@ -77,7 +84,7 @@ namespace ServerStarter.Server.Services
             if (queueServer != null)
             {
                 queueServer.PreferredForQueue = true;
-                currentPlayers              = queueServer.CurrentPlayers;
+                currentPlayers                = queueServer.CurrentPlayers;
             }
 
             return new Community
@@ -88,19 +95,17 @@ namespace ServerStarter.Server.Services
                        CurrentPlayers = currentPlayers,
                        WaitingPlayers = waitingPlayers.Count,
                        Servers        = servers.ToList(),
+                       QueuedPlayers  = queuedCommunityPlayers,
                    };
         }
 
-        private async Task<IList<string>> GetWaitingPlayers(Models.Community community, IList<CommunityServer> servers)
+        private async Task<IList<ApplicationUser>> GetWaitingPlayers(IList<ApplicationUser> queuedUsers, IList<CommunityServer> servers)
         {
             var playingSteamIds = servers
                                   .SelectMany(s => s.Players)
                                   .Select(p => p.SteamId);
             var playingUsers = await _users.GetForSteamIds(playingSteamIds);
-            var playingUserIds = playingUsers
-                                 .Select(t => t.Id);
-            var waitingPlayers = await _queue.GetWaitingPlayers(community.Id, playingUserIds);
-            return waitingPlayers;
+            return _queue.GetWaitingPlayers(queuedUsers, playingUsers);
         }
     }
 }

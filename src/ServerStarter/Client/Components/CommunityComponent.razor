@@ -61,18 +61,29 @@
 
     @if (joined)
     {
-        <div class="col-12 chat">
-            <div class="messages">
-                <ul id="messagesList">
-                    @foreach (var message in messages)
+        <div class="chatsection">
+            <div class="chatMembers">
+                queued players:
+                <ul id="chatMemberList">
+                    @foreach (var player in Community.QueuedPlayers)
                     {
-                        <li @ref="lastMessageElement"><span class="timestamp">@message.Timestamp</span><span>@message.Text</span></li>
+                        <li>@player.Name</li>
                     }
                 </ul>
             </div>
-            <div class="controls">
-                <input @ref="messageInputReference" @bind="messageInput" size="50" @onkeyup="KeyUp" />
-                <button class="btn btn-themed" @onclick="Send" disabled="@(!IsConnected)">Send</button>
+            <div class="chatColumn chat">
+                <div class="messages">
+                    <ul id="messagesList">
+                        @foreach (var message in messages)
+                        {
+                            <li @ref="lastMessageElement"><span class="timestamp">@message.Timestamp</span><span>@message.Text</span></li>
+                        }
+                    </ul>
+                </div>
+                <div class="controls">
+                    <input @ref="messageInputReference" @bind="messageInput" size="50" @onkeyup="KeyUp"/>
+                    <button class="btn btn-themed" @onclick="Send" disabled="@(!IsConnected)">Send</button>
+                </div>
             </div>
         </div>
     }
