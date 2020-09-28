@@ -252,6 +252,7 @@
             _autoJoinTime = DateTime.UtcNow.AddSeconds(QueueSettings.AutomaticJoinDelayInSeconds);
             if (DateTime.UtcNow >= _autoJoinTime)
             {
+                Logger.LogTrace("auto-joining immediately");
                 await JoinGame(PreferredServer);
                 return;
             }
@@ -296,11 +297,12 @@
     public async Task JoinGame(CommunityServer server)
     {
         DisableAutoJoinTimer();
-        if (JoinedServer.HasDelegate)
-            await JoinedServer.InvokeAsync(server);
 
         string link = GetConnectLink(server);
-        await JsRuntime.InvokeAsync<object>("open", link);
+        await JsRuntime.InvokeAsync<string>("openNewWindow", link);
+
+        if (JoinedServer.HasDelegate)
+            await JoinedServer.InvokeAsync(server);
     }
 
     public async Task JoinQueue()
@@ -360,6 +362,8 @@
 
     public async Task LeaveQueue()
     {
+        if (!joined)
+            return;
         DisableAutoJoinTimer();
 
         await HubConnection.InvokeAsync("LeaveGroup", Community.Id);

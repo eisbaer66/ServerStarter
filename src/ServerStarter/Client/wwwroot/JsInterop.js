@@ -9,3 +9,6 @@
 window.Play = function (id) {
     document.getElementById(id).play();
 }
+window.openNewWindow = function (link) {
+    window.open(link, "_blank");
+}

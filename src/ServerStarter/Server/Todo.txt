@@ -1,4 +1,6 @@
 ﻿
+chat width
+only scroll chat 
 fix prefered server if ppup is open
 chat
  steam avatar/profile

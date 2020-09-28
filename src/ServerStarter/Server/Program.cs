@@ -27,7 +27,8 @@ namespace ServerStarter.Server
                                 config
                                     .ReadFrom.Configuration(ctx.Configuration)
                                     .Enrich.With<EventTypeEnricher>()
-                                    .Destructure.With<JsonDocumentDestructuringPolicy>();
+                                    .Destructure.With<JsonDocumentDestructuringPolicy>()
+                                    .Enrich.WithProperty("Environment", ctx.HostingEnvironment.EnvironmentName);
 
                                 var settings = new ElasticSettings();
                                 ctx.Configuration.Bind("ServerStarters:Elastic", settings);
