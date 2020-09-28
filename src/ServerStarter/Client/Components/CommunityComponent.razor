@@ -61,17 +61,18 @@
 
     @if (joined)
     {
-        <div class="chatsection">
-            <div class="chatMembers">
-                queued players:
-                <ul id="chatMemberList">
-                    @foreach (var player in Community.QueuedPlayers)
-                    {
-                        <li>@player.Name</li>
-                    }
-                </ul>
-            </div>
-            <div class="chatColumn chat">
+        
+        <div class="chatMembers col-sm-12 col-lg-12 col-xl-2 m-t-10">
+            queued players:
+            <ul id="chatMemberList">
+                @foreach (var player in Community.QueuedPlayers)
+                {
+                    <li>@player.Name</li>
+                }
+            </ul>
+        </div>
+        <div class="col-sm-12 col-lg-12 col-xl-10 m-t-10">
+            <div class="chat">
                 <div class="messages">
                     <ul id="messagesList">
                         @foreach (var message in messages)
