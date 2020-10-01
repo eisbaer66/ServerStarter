@@ -1,5 +1,4 @@
 ﻿
-queue events
 only scroll chat 
 discord preview
 servername next to queued-icon
@@ -9,6 +8,7 @@ chat
 save queuesettings per user
  incl userdata
 
+move UseAllElasticApm behinde UseStaticFiles?
 background updates
  throw out inactive connections? timeout?
 

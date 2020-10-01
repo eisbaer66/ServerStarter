@@ -15,7 +15,5 @@ namespace ServerStarter.Server.Services
         Task<Community[]>                       GetWaitingCommunityIds();
         Task<CommunityQueue[]>                  GetQueuedCommunity(string userId);
         Task<bool>                              Contains(string           userId, Guid communityId);
-        event EventHandler<UserJoinedEventArgs> UserJoined;
-        event EventHandler<UserLeftEventArgs>   UserLeft;
     }
 }

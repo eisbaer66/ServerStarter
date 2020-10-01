@@ -27,24 +27,24 @@ namespace ServerStarter.Server.Services
     {
         private readonly ILogger<CommunityQueueService> _logger;
         private readonly ApplicationDbContext           _dbContext;
+        private readonly IMessaging                     _messaging;
         private readonly ICommunityRepository           _communityRepository;
         private readonly IUserRepository                _users;
         private readonly ICommunityQueueRepository      _repository;
-
-        public event EventHandler<UserJoinedEventArgs> UserJoined;
-        public event EventHandler<UserLeftEventArgs>   UserLeft;
 
         public CommunityQueueService(ILogger<CommunityQueueService> logger,
                                      ICommunityQueueRepository      repository,
                                      ICommunityRepository           communityRepository,
                                      IUserRepository                users,
-                                     ApplicationDbContext           dbContext)
+                                     ApplicationDbContext           dbContext,
+                                     IMessaging                     messaging)
         {
             _logger              = logger              ?? throw new ArgumentNullException(nameof(logger));
             _repository          = repository          ?? throw new ArgumentNullException(nameof(repository));
             _communityRepository = communityRepository ?? throw new ArgumentNullException(nameof(communityRepository));
             _users               = users               ?? throw new ArgumentNullException(nameof(users));
             _dbContext           = dbContext           ?? throw new ArgumentNullException(nameof(dbContext));
+            _messaging      = messaging;
         }
 
         public async Task Join(Guid communityId, string userId)
@@ -77,7 +77,7 @@ namespace ServerStarter.Server.Services
             await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation("enqueued {UserId} for {CommunityId}", userId, communityId);
-            UserJoined?.Invoke(this, new UserJoinedEventArgs{CommunityId = communityId, UserId = userId});
+            _messaging.UserJoinedNotification(this, new UserJoinedEventArgs{CommunityId = communityId, UserId = userId});
         }
 
         public async Task Leave(Guid communityId, string userId)
@@ -94,7 +94,7 @@ namespace ServerStarter.Server.Services
             await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation("dequeued {UserId} for {CommunityId}", userId, communityId);
-            UserLeft?.Invoke(this, new UserLeftEventArgs { CommunityId = communityId, UserId = userId });
+            _messaging.UserLeftNotification(this, new UserLeftEventArgs { CommunityId = communityId, UserId = userId });
         }
 
         public async Task<IList<ApplicationUser>> GetQueuedPlayers(Guid communityId)
@@ -137,7 +137,7 @@ namespace ServerStarter.Server.Services
                     return;
 
                 q.Remove(user);
-                UserLeft?.Invoke(this, new UserLeftEventArgs { CommunityId = q.Community.Id, UserId = userId });
+                _messaging.UserLeftNotification(this, new UserLeftEventArgs { CommunityId = q.Community.Id, UserId = userId });
             }
             await _dbContext.SaveChangesAsync();
         }

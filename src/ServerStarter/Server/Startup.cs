@@ -164,6 +164,8 @@ namespace ServerStarter.Server
             services.AddScoped<IAuthorizationHandler, JoinedQueuePerHubInvocationContextHandler>();
 
 
+            services.AddSingleton<IMessaging, Messaging>();
+
             TimingSettings timingSettings = new TimingSettings();
             Configuration.Bind("ServerStarters:Timings", timingSettings);
             services.AddSingleton<ITimingSettings>(timingSettings);

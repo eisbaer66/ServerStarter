@@ -16,28 +16,53 @@ namespace ServerStarter.Server.Hubs
         private readonly ILogger<CommunitiesHub>              _logger;
         private readonly IDictionary<string, HashSet<string>> _connections = new Dictionary<string, HashSet<string>>();
         private readonly IHubApm<CommunitiesHub>              _apm;
+        private readonly IMessaging                           _messaging;
 
-        public CommunitiesHub(ICommunityQueueService queue, ILogger<CommunitiesHub> logger, IHubApm<CommunitiesHub> apm)
+        public CommunitiesHub(ICommunityQueueService queue, ILogger<CommunitiesHub> logger, IHubApm<CommunitiesHub> apm, IMessaging messaging)
         {
-            _queue  = queue  ?? throw new ArgumentNullException(nameof(queue));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _apm    = apm    ?? throw new ArgumentNullException(nameof(apm));
+            _queue     = queue     ?? throw new ArgumentNullException(nameof(queue));
+            _logger    = logger    ?? throw new ArgumentNullException(nameof(logger));
+            _apm       = apm       ?? throw new ArgumentNullException(nameof(apm));
+            _messaging = messaging ?? throw new ArgumentNullException(nameof(messaging));
 
-            _queue.UserJoined += async (sender, args) =>
-                                 {
-                                     string groupName = args.CommunityId.ToString();
-                                     string name = Context.User.GetName();
-                                     await Clients.Group(groupName).SendAsync("UserJoined", groupName, name);
-                                     await Clients.NotifyCommunityChange(groupName);
-                                 };
+            messaging.UserJoined += UserJoinedQueue;
+            messaging.UserLeft   += UserLeftQueue;
+        }
 
-            _queue.UserLeft += async (sender, args) =>
-                                 {
-                                     string groupName = args.CommunityId.ToString();
-                                     string name = Context.User.GetName();
-                                     await Clients.Group(groupName).SendAsync("UserLeft", groupName, name);
-                                     await Clients.NotifyCommunityChange(groupName);
-                                 };
+        protected override void Dispose(bool disposing)
+        {
+            _messaging.UserJoined -= UserJoinedQueue;
+            _messaging.UserLeft   -= UserLeftQueue;
+        }
+
+        private async void UserJoinedQueue(object sender, UserJoinedEventArgs args)
+        {
+            try
+            {
+                string groupName = args.CommunityId.ToString();
+                string name      = Context.User.GetName();
+                await Clients.Group(groupName).SendAsync("UserJoined", groupName, name);
+                await Clients.NotifyCommunityChange(groupName);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "error notifying existing users of newly joined user");
+            }
+        }
+
+        private async void UserLeftQueue(object sender, UserLeftEventArgs args)
+        {
+            try
+            {
+                string groupName = args.CommunityId.ToString();
+                string name      = Context.User.GetName();
+                await Clients.Group(groupName).SendAsync("UserLeft", groupName, name);
+                await Clients.NotifyCommunityChange(groupName);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "error notifying existing users of leaving user");
+            }
         }
 
         [Authorize(Policy = Policies.JoinedQueueFromHubParameter0)]
