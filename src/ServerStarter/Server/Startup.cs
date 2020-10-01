@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -19,7 +21,10 @@ using System.Security.Claims;
 using System.Text.Json;
 using AspNet.Security.OpenId.Steam;
 using ClacksMiddleware.Extensions;
+using Elastic.Apm;
+using Elastic.Apm.Api;
 using Elastic.Apm.AspNetCore;
+using Elastic.Apm.Helpers;
 using Elastic.Apm.NetCoreAll;
 using IdentityServer4.Hosting.LocalApiAuthentication;
 using IdentityServer4.Services;
@@ -175,7 +180,6 @@ namespace ServerStarter.Server
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddSingleton<ICommunityState, CommunityState>();
             services.AddScoped<IUserRepository, UserRepository>();
-            //services.AddSingleton<ICommunityQueueRepository, InMemoryCommunityQueueRepositoryCache>();
             services.AddScoped<ICommunityQueueRepository, CommunityQueueRepository>();
             services.AddScoped<ICommunityQueueService, CommunityQueueService>();
             services.AddSingleton<CachingServerInfoQueries>(c =>
@@ -195,6 +199,8 @@ namespace ServerStarter.Server
             services.AddTransient<ICommunityService, CommunityService>();
             services.AddTransient<IServerInfoService, ServerInfoService>();
             services.AddTransient<ServerInfoQueries>();
+
+            services.AddTransient<IHubApm<CommunitiesHub>, HubApm<CommunitiesHub>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -234,7 +240,58 @@ namespace ServerStarter.Server
 
             IElasticSettings elasticSettings = app.ApplicationServices.GetRequiredService<IElasticSettings>();
             if (elasticSettings.AreSet() && elasticSettings.ApmEnabled)
+            {
                 app.UseAllElasticApm(Configuration);
+
+                //don't create transactions for
+                //- static files,
+                //- blazor-framework
+                //gonna get easier with 1.7 of Elastic.Apm.AspNetCore, see (TransactionIgnoreUrls)
+                WildcardMatcher[] matchers = new string[]
+                                                  {
+                                                      "/VAADIN/*",
+                                                      "/heartbeat*",
+                                                      "/favicon.ico",
+                                                      "*.js",
+                                                      "*.css",
+                                                      "*.jpg",
+                                                      "*.jpeg",
+                                                      "*.png",
+                                                      "*.gif",
+                                                      "*.webp",
+                                                      "*.svg",
+                                                      "*.woff",
+                                                      "*.woff2",
+
+                                                      "*.json",
+                                                      "*.wav",
+                                                      "/_framework/*",
+                                                  }
+                    .Select(WildcardMatcher.ValueOf)
+                    .ToArray();
+                string GetHeader(IDictionary<string, string> dict, string key)
+                {
+                    if (dict == null)
+                        return null;
+                    if (!dict.ContainsKey(key))
+                        return null;
+                    return dict[key].ToLowerInvariant();
+                }
+                Agent.AddFilter((ITransaction t) =>
+                                {
+                                    Request request    = t?.Context?.Request;
+                                    //ignore transactions representing a WebSocket connection
+                                    if (GetHeader(request?.Headers, "Connection") == "upgrade" &&
+                                        GetHeader(request?.Headers, "Upgrade") == "websocket" &&
+                                        GetHeader(t?.Custom, "icebear.HubApm") != "true")
+                                        return null;
+
+                                    var pathName       = request?.Url?.PathName;
+                                    if (pathName != null && matchers.Any(m => m.Matches(pathName)))
+                                        return null;
+                                    return t;
+                                });
+            }
 
             app.UseResponseCompression();
 

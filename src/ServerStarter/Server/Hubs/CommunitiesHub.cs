@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -17,11 +15,13 @@ namespace ServerStarter.Server.Hubs
         private readonly ICommunityQueueService               _queue;
         private readonly ILogger<CommunitiesHub>              _logger;
         private readonly IDictionary<string, HashSet<string>> _connections = new Dictionary<string, HashSet<string>>();
+        private readonly IHubApm<CommunitiesHub>              _apm;
 
-        public CommunitiesHub(ICommunityQueueService queue, ILogger<CommunitiesHub> logger)
+        public CommunitiesHub(ICommunityQueueService queue, ILogger<CommunitiesHub> logger, IHubApm<CommunitiesHub> apm)
         {
-            _queue = queue ?? throw new ArgumentNullException(nameof(queue));
+            _queue  = queue  ?? throw new ArgumentNullException(nameof(queue));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _apm    = apm    ?? throw new ArgumentNullException(nameof(apm));
 
             _queue.UserJoined += async (sender, args) =>
                                  {
@@ -43,36 +43,46 @@ namespace ServerStarter.Server.Hubs
         [Authorize(Policy = Policies.JoinedQueueFromHubParameter0)]
         public async Task SendMessage(string groupName, string message)
         {
-            if (string.IsNullOrEmpty(message))
-            {
-                _logger.LogTrace("ignored empty message from {UserId} to {GroupName}", Context.User.GetUserId(), groupName);
-                return;
-            }
+            await _apm.Trace("SendMessage", async () => {
+                                           if (string.IsNullOrEmpty(message))
+                                           {
+                                               _logger.LogTrace("ignored empty message from {UserId} to {GroupName}", Context.User.GetUserId(), groupName);
+                                               return;
+                                           }
 
-            await Clients.Group(groupName).SendAsync("MessageReceived", groupName, Context.User.GetName(), message);
+                                           await Clients.Group(groupName).SendAsync("MessageReceived", groupName, Context.User.GetName(), message);
+                                       });
         }
 
         public async Task JoinGroup(string groupName)
         {
-            var userId = Context.User.GetUserId();
-            var communityId = new Guid(groupName);
+            await _apm.Trace("JoinGroup",
+                             async () =>
+                             {
+                                 var userId      = Context.User.GetUserId();
+                                 var communityId = new Guid(groupName);
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-            await _queue.Join(communityId, userId);
+                                 await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+                                 await _queue.Join(communityId, userId);
 
-             await Clients.GroupExcept(userId.ToString(), Context.ConnectionId).SendAsync("JoinQueue", communityId);
+                                 await Clients.GroupExcept(userId.ToString(), Context.ConnectionId).SendAsync("JoinQueue", communityId);
+                             });
         }
 
         [Authorize(Policy = Policies.JoinedQueueFromHubParameter0)]
         public async Task LeaveGroup(string groupName)
         {
-            var userId      = Context.User.GetUserId();
-            var communityId = new Guid(groupName);
+            await _apm.Trace("LeaveGroup",
+                             async () =>
+                             {
+                                 var userId      = Context.User.GetUserId();
+                                 var communityId = new Guid(groupName);
 
-            await _queue.Leave(communityId, userId);
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+                                 await _queue.Leave(communityId, userId);
+                                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
 
-            await Clients.GroupExcept(userId.ToString(), Context.ConnectionId).SendAsync("LeaveQueue", groupName);
+                                 await Clients.GroupExcept(userId.ToString(), Context.ConnectionId).SendAsync("LeaveQueue", groupName);
+                             });
         }
 
         public override async Task OnConnectedAsync()
