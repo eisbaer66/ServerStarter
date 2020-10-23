@@ -48,12 +48,12 @@ namespace ServerStarter.Server.WorkerServices
                 {
                     _taskQueue.QueueBackgroundWorkItem(async c =>
                                                        {
-                                                           _logger.LogTrace("inner CommunityQueueUpdate-workitem started for {Community}", community);
+                                                           _logger.LogTrace("inner CommunityQueueUpdate-workitem started for {@Community}", community);
                                                            using IServiceScope scope   = _serviceProvider.CreateScope();
                                                            var                 service = scope.ServiceProvider.GetRequiredService<ICommunityService>();
 
                                                            await service.UpdateCommunity(community, StoppingToken);
-                                                           _logger.LogTrace("inner CommunityQueueUpdate-workitem finished for {Community}", community);
+                                                           _logger.LogTrace("inner CommunityQueueUpdate-workitem finished for {@Community}", community);
                                                        });
                 }
 

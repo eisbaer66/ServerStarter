@@ -25,6 +25,9 @@ namespace ServerStarter.Server.Services
             if (!_lastCommunities.ContainsKey(updatedCommunity.Id))
             {
                 _lastCommunities.Add(updatedCommunity.Id, updatedCommunity);
+
+                _logger.LogInformation("new community, notifying clients {@Community}", updatedCommunity);
+                await _hub.Clients.NotifyCommunityChange(updatedCommunity.Id);
                 return;
             }
 

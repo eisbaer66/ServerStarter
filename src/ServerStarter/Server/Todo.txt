@@ -1,4 +1,6 @@
 ﻿
+desktop notifications?
+
 only scroll chat 
 discord preview
 servername next to queued-icon
@@ -11,6 +13,8 @@ save queuesettings per user
 move UseAllElasticApm behinde UseStaticFiles?
 background updates
  throw out inactive connections? timeout?
+  poke to see if gamer is still there
+   6h/6h/1h/1h/...?
 
 signing key
 error handling!
