@@ -16,13 +16,13 @@ namespace ServerStarter.Shared
 
         protected bool Equals(Community other)
         {
-            return Id.Equals(other.Id)                    &&
-                   Name           == other.Name           &&
-                   CurrentPlayers == other.CurrentPlayers &&
-                   WaitingPlayers == other.WaitingPlayers &&
-                   MinimumPlayers == other.MinimumPlayers &&
-                   Servers.EqualsByIndex(other.Servers) &&
-                   QueuedPlayers.EqualsByIndex(other.QueuedPlayers);
+            return Id.Equals(other.Id)                     &&
+                   Name           == other.Name            &&
+                   CurrentPlayers == other.CurrentPlayers  &&
+                   WaitingPlayers == other.WaitingPlayers  &&
+                   MinimumPlayers == other.MinimumPlayers  &&
+                   Servers.EqualsBySelector(other.Servers, s => s.Ip) &&
+                   QueuedPlayers.EqualsByIndex(other.QueuedPlayers, p => p.Name);
         }
 
         public override bool Equals(object obj)
@@ -80,7 +80,7 @@ namespace ServerStarter.Shared
                    MaxPlayers      == other.MaxPlayers      &&
                    ConsideredFull  == other.ConsideredFull  &&
                    PreferredForQueue == other.PreferredForQueue &&
-                   Players.EqualsByIndex(other.Players);
+                   Players.EqualsBySelector(other.Players, p => p.SteamId);
         }
 
         public override bool Equals(object obj)

@@ -199,7 +199,14 @@ namespace ServerStarter.Server
 
             services.AddTransient<ICommunityRepository, CommunityRepository>();
             services.AddTransient<ICommunityService, CommunityService>();
-            services.AddTransient<IServerInfoService, ServerInfoService>();
+            services.AddTransient<ServerInfoService>();
+            services.AddTransient<IServerInfoService, ExceptionSwallowingServerInfoService>(sp =>
+                                                                                            {
+                                                                                                var service = sp.GetRequiredService<ServerInfoService>();
+                                                                                                var logger  = sp.GetRequiredService<ILogger<ExceptionSwallowingServerInfoService>>();
+
+                                                                                                return new ExceptionSwallowingServerInfoService(service, logger);
+                                                                                            });
             services.AddTransient<ServerInfoQueries>();
 
             services.AddTransient<IHubApm<CommunitiesHub>, HubApm<CommunitiesHub>>();

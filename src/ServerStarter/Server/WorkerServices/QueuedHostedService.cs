@@ -30,8 +30,7 @@ namespace ServerStarter.Server.WorkerServices
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var workItem =
-                    await TaskQueue.DequeueAsync(stoppingToken);
+                var workItem = await TaskQueue.DequeueAsync(stoppingToken);
 
                 try
                 {
@@ -42,6 +41,8 @@ namespace ServerStarter.Server.WorkerServices
                     _logger.LogError(ex, "Error occurred executing {WorkItem}.", nameof(workItem));
                 }
             }
+
+            _logger.LogWarning("Queued Hosted Service was cancelled {CancellationToken}", stoppingToken);
         }
 
         public override async Task StopAsync(CancellationToken stoppingToken)
