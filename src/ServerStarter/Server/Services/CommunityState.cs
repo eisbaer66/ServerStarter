@@ -26,7 +26,7 @@ namespace ServerStarter.Server.Services
             {
                 _lastCommunities.Add(updatedCommunity.Id, updatedCommunity);
 
-                _logger.LogInformation("new community, notifying clients {@Community}", updatedCommunity);
+                _logger.LogInformation("new community, notifying clients {@UpdatedCommunity}", updatedCommunity);
                 await _hub.Clients.NotifyCommunityChange(updatedCommunity.Id);
                 return;
             }
@@ -35,12 +35,12 @@ namespace ServerStarter.Server.Services
 
             if (!lastCommunity.Equals(updatedCommunity))
             {
-                _logger.LogInformation("community changed, notifying clients {@Community}", updatedCommunity);
+                _logger.LogInformation("community changed, notifying clients {@UpdatedCommunity}", updatedCommunity);
                 await _hub.Clients.NotifyCommunityChange(lastCommunity.Id);
             }
             else
             {
-                _logger.LogTrace("community did not changed, no notification send to clients {@Community}", updatedCommunity);
+                _logger.LogTrace("community did not changed, no notification send to clients {@UpdatedCommunity}", updatedCommunity);
             }
 
             _lastCommunities[updatedCommunity.Id] = updatedCommunity;

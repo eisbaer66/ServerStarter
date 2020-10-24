@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ServerStarter.Server.Data.Repositories;
 //using Microsoft.EntityFrameworkCore;
 using ServerStarter.Server.Models;
@@ -21,25 +22,29 @@ namespace ServerStarter.Server.Services
 
     public class CommunityService : ICommunityService
     {
-        private readonly IServerInfoService     _serverInfoService;
-        private readonly ICommunityQueueService _queue;
-        private readonly ICommunityState        _state;
-        private readonly IUserRepository        _users;
+        private readonly IServerInfoService        _serverInfoService;
+        private readonly ICommunityQueueService    _queue;
+        private readonly ICommunityState           _state;
+        private readonly IUserRepository           _users;
+        private readonly ILogger<CommunityService> _logger;
 
-        public CommunityService(IServerInfoService     serverInfoService,
-                                ICommunityQueueService queue,
-                                IUserRepository        users,
-                                ICommunityState        state)
+        public CommunityService(IServerInfoService        serverInfoService,
+                                ICommunityQueueService    queue,
+                                IUserRepository           users,
+                                ICommunityState           state,
+                                ILogger<CommunityService> logger)
         {
             _serverInfoService = serverInfoService ?? throw new ArgumentNullException(nameof(serverInfoService));
             _queue             = queue             ?? throw new ArgumentNullException(nameof(queue));
             _users             = users             ?? throw new ArgumentNullException(nameof(users));
             _state             = state             ?? throw new ArgumentNullException(nameof(state));
+            _logger            = logger            ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Community> UpdateCommunity(Models.Community community, CancellationToken cancellationToken)
         {
             Community updatedCommunity = await CreateUpdatedCommunity(community, cancellationToken);
+            _logger.LogDebug("updated community {@UpdatedCommunity}", updatedCommunity);
 
             await _state.UpdateLastCommunities(updatedCommunity);
 

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using ServerStarter.Server.Data.Repositories;
 using ServerStarter.Server.Services;
 using ServerStarter.Server.util;
@@ -17,13 +18,15 @@ namespace ServerStarter.Server.Controllers
     [Route("api/[controller]")]
     public class CommunitiesController : ControllerBase
     {
-        private readonly ICommunityRepository _repository;
-        private readonly ICommunityService    _service;
+        private readonly ICommunityRepository           _repository;
+        private readonly ICommunityService              _service;
+        private readonly ILogger<CommunitiesController> _logger;
 
-        public CommunitiesController(ICommunityRepository repository, ICommunityService service)
+        public CommunitiesController(ICommunityRepository repository, ICommunityService service, ILogger<CommunitiesController> logger)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _service    = service    ?? throw new ArgumentNullException(nameof(service));
+            _logger     = logger     ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
@@ -32,16 +35,25 @@ namespace ServerStarter.Server.Controllers
             var communities = await _repository.Get();
 
             return await communities
-                         .Select(community => _service.UpdateCommunity(community, ct))
+                         .Select(community =>
+                                 {
+                                     using (_logger.BeginScope("Community {@CommunityId}", community.Id))
+                                     {
+                                         return _service.UpdateCommunity(community, ct);
+                                     }
+                                 })
                          .Sequence();
         }
 
         [HttpGet("{id}")]
         public async Task<Community> Get(Guid id, CancellationToken ct)
         {
-            var community = await _repository.Get(id);
+            using (_logger.BeginScope("Community {@CommunityId}", id))
+            {
+                var community = await _repository.Get(id);
 
-            return await _service.UpdateCommunity(community, ct);
+                return await _service.UpdateCommunity(community, ct);
+            }
         }
     }
 }
