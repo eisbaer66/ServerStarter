@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ServerStarter.Server.Services;
@@ -40,30 +41,46 @@ namespace ServerStarter.Server.WorkerServices
 
             _taskQueue.QueueBackgroundWorkItem(async c =>
             {
-                _logger.LogDebug("outer CommunityQueueUpdate-workitem started");
-                using IServiceScope    outerScope         = _serviceProvider.CreateScope();
-                ICommunityQueueService queue              = outerScope.ServiceProvider.GetRequiredService<ICommunityQueueService>();
-                var                    waitingCommunities = await queue.GetWaitingCommunityIds();
-                foreach (var community in waitingCommunities)
+                try
                 {
-                    _taskQueue.QueueBackgroundWorkItem(async c =>
-                                                       {
-                                                           using (_logger.BeginScope("Community {@CommunityId}", community.Id))
-                                                           {
-                                                               _logger.LogTrace("inner CommunityQueueUpdate-workitem started");
-                                                               using IServiceScope scope   = _serviceProvider.CreateScope();
-                                                               var                 service = scope.ServiceProvider.GetRequiredService<ICommunityService>();
+                    _logger.LogDebug("outer CommunityQueueUpdate-workitem started");
 
-                                                               await service.UpdateCommunity(community, StoppingToken);
-                                                               _logger.LogTrace("inner CommunityQueueUpdate-workitem finished");
-                                                           }
-                                                       });
+                    await SetupCommunityUpdates();
+
+                    _logger.LogDebug("outer CommunityQueueUpdate-workitem finished");
+                    _logger.LogInformation("finished CommunityQueueUpdate");
                 }
-
-                _logger.LogDebug("outer CommunityQueueUpdate-workitem finished");
-                _logger.LogInformation("finished CommunityQueueUpdate");
-                _running = false;
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Error occurred updating CommunityQueues");
+                }
+                finally
+                {
+                    _running = false;
+                }
             });
+        }
+
+        private async Task SetupCommunityUpdates()
+        {
+            using IServiceScope    outerScope         = _serviceProvider.CreateScope();
+            ICommunityQueueService queue              = outerScope.ServiceProvider.GetRequiredService<ICommunityQueueService>();
+            var                    waitingCommunities = await queue.GetWaitingCommunityIds();
+            foreach (var community in waitingCommunities)
+            {
+                _taskQueue.QueueBackgroundWorkItem(async c =>
+                                                   {
+                                                       using (_logger.BeginScope("Community {@CommunityId}", community.Id))
+                                                       {
+                                                           _logger.LogTrace("inner CommunityQueueUpdate-workitem started");
+                                                           using IServiceScope scope   = _serviceProvider.CreateScope();
+                                                           var                 service = scope.ServiceProvider.GetRequiredService<ICommunityService>();
+
+                                                           await service.UpdateCommunity(community, StoppingToken);
+                                                           _logger.LogTrace("inner CommunityQueueUpdate-workitem finished");
+                                                       }
+                                                   });
+            }
         }
     }
 }

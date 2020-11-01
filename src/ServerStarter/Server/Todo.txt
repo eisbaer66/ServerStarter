@@ -1,6 +1,12 @@
 ﻿
 desktop notifications?
 
+CommunityQueueUpdate
+ timeouts
+ exceptions
+ polly?
+
+
 only scroll chat 
 discord preview
 servername next to queued-icon
