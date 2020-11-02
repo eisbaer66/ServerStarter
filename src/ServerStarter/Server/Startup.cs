@@ -199,7 +199,8 @@ namespace ServerStarter.Server
                                                       });
             services.AddSingleton<IServerInfoQueries>(c => c.GetRequiredService<CachingServerInfoQueries>());
             services.AddSingleton<IServerInfoCache, CachingServerInfoQueries>();
-            services.AddHostedService<CommunityQueueUpdate>();
+            services.AddScoped<ICommunityUpdateService, CommunityUpdateService>();
+            services.AddHostedService<CommunityQueueUpdateWorker>();
             services.AddHostedService<QueuedHostedService>();
 
             services.AddTransient<ICommunityRepository, CommunityRepository>();
