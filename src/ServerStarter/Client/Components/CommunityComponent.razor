@@ -3,8 +3,10 @@
 @using Microsoft.Extensions.Logging
 @using ServerStarter.Shared
 @using System.Timers
+@using ServerStarter.Server
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime
 @inject ILogger<CommunityComponent> Logger
 @implements IDisposable
@@ -52,16 +54,16 @@
         <ul>
             @foreach (var server in Community.Servers.OrderByDescending(s => s.CurrentPlayers))
             {
-            <li>
-                @server.Name (<a href="@GetConnectLink(server)" target="_blank">@server.Ip</a>): @server.CurrentPlayers
-            </li>
+                <li>
+                    @server.Name (<a href="@GetConnectLink(server)" target="_blank">@server.Ip</a>): @server.CurrentPlayers
+                </li>
             }
         </ul>
     </div>
 
     @if (joined)
     {
-        
+
         <div class="chatMembers col-sm-12 col-lg-12 col-xl-2 m-t-10">
             queued players:
             <ul id="chatMemberList">
@@ -94,7 +96,7 @@
 <audio preload="auto" id="startSound1" src="assets/sounds/Announcer_am_gamestarting04.wav"></audio>
 <audio preload="auto" id="startSound2" src="assets/sounds/Announcer_am_gamestarting05.wav"></audio>
 <audio preload="auto" id="startSound3" src="assets/sounds/Announcer_am_roundstart04.wav"></audio>
-    
+
 @if (showPopup)
 {
     <div class="modal" tabindex="-1" style="display:block" role="dialog">
@@ -248,36 +250,72 @@
             await JsRuntime.InvokeAsync<string>("Play", id);
         }
 
-        if (QueueSettings.AutomaticJoinEnabled)
+        if (await UserIsPlayingOnServer(PreferredServer))
         {
-            _autoJoinTime = DateTime.UtcNow.AddSeconds(QueueSettings.AutomaticJoinDelayInSeconds);
-            if (DateTime.UtcNow >= _autoJoinTime)
-            {
-                Logger.LogTrace("auto-joining immediately");
-                await JoinGame(PreferredServer);
-                return;
-            }
+            Logger.LogInformation("user is already playing on {PreferredServerIp}. leaving queue", PreferredServer.Ip);
+            await LeaveQueue();
+        }
+        else
+            await ShowPopup();
 
-            _timer = new Timer(1000)
-            {
-                AutoReset = true,
-            };
-            _timer.Elapsed += async (sender, args) =>
-            {
-                Logger.LogTrace("checking auto-join");
+        StateHasChanged();
+    }
 
-                if (DateTime.UtcNow >= _autoJoinTime)
-                {
-                    Logger.LogTrace("auto-joining");
-                    await JoinGame(PreferredServer);
-                }
-                StateHasChanged();
-            };
-            _timer.Enabled = true;
+    private async Task ShowPopup()
+    {
+        if (!QueueSettings.AutomaticJoinEnabled)
+        {
+            showPopup = true;
+            return;
         }
 
+        _autoJoinTime = DateTime.UtcNow.AddSeconds(QueueSettings.AutomaticJoinDelayInSeconds);
+        if (DateTime.UtcNow >= _autoJoinTime)
+        {
+            Logger.LogTrace("auto-joining immediately");
+            await JoinGame(PreferredServer);
+            return;
+        }
+
+        SetupAutoJoinUpdates();
+
         showPopup = true;
-        StateHasChanged();
+    }
+
+    private void SetupAutoJoinUpdates()
+    {
+        _timer = new Timer(1000)
+                 {
+                     AutoReset = true,
+                 };
+        _timer.Elapsed += async (sender, args) =>
+                                {
+                                    Logger.LogTrace("checking auto-join");
+
+                                    if (DateTime.UtcNow >= _autoJoinTime)
+                                    {
+                                        Logger.LogTrace("auto-joining");
+                                        await JoinGame(PreferredServer);
+                                    }
+
+                                    StateHasChanged();
+                                };
+        _timer.Enabled = true;
+    }
+
+    private async Task<bool> UserIsPlayingOnServer(CommunityServer preferredServer)
+    {
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var claim = user.FindFirst(IcebearClaimTypes.SteamId);
+        if (claim == null)
+        {
+            Logger.LogError("{SteamIdClaimType} claim not found. user is considered to not be playing on any server", IcebearClaimTypes.SteamId);
+            return false;
+        }
+
+        return PreferredServer.Players.Select(p => p.SteamId.ToString()).Contains(claim.Value);
     }
 
     private void DisableAutoJoinTimer()
