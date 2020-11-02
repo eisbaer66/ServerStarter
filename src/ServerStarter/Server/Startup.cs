@@ -66,13 +66,18 @@ namespace ServerStarter.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<ApplicationDbContext>((sp, options) =>
                                                         {
                                                             var databaseSettings = new DatabaseSettings();
                                                             Configuration.GetSection("Database").Bind(databaseSettings);
 
-                                                            DatabaseSettingItem database = databaseSettings.Get("ServerStarter");
+                                                            var itemLogger = sp.GetRequiredService<ILogger<DatabaseSettingItem>>();
+                                                            foreach (var item in databaseSettings.Databases.Values)
+                                                            {
+                                                                item.Logger = itemLogger;
+                                                            }
 
+                                                            DatabaseSettingItem database = databaseSettings.Get("ServerStarter");
                                                             database.Configure(options);
                                                         });
             services.AddTransient<DbSet<ApplicationUser>>(c => c.GetService<ApplicationDbContext>().Users);

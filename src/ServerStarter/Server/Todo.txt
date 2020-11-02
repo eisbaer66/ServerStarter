@@ -1,4 +1,6 @@
-﻿
+﻿remain login between container recreation
+
+dont auto join players already on the server
 desktop notifications?
 
 CommunityQueueUpdate
