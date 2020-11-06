@@ -133,8 +133,19 @@
 }
 
 @code {
+
     [Parameter]
-    public Community Community { get; set; }
+    public Community Community
+    {
+        get => _community;
+        set
+        {
+            if (_community != null && value != null && _community.Updated >= value.Updated)
+                return;
+
+            _community = value;
+        }
+    }
 
     [Parameter]
     public HubConnection HubConnection { get; set; }
@@ -165,6 +176,7 @@
     private string messageInput;
     private DateTime _autoJoinTime;
     private Timer _timer;
+    private Community _community;
 
     private int SecondsTillAutoJoin => Math.Max(0, (int)(_autoJoinTime - DateTime.UtcNow).TotalSeconds);
 
@@ -285,21 +297,21 @@
     private void SetupAutoJoinUpdates()
     {
         _timer = new Timer(1000)
-                 {
-                     AutoReset = true,
-                 };
+        {
+            AutoReset = true,
+        };
         _timer.Elapsed += async (sender, args) =>
-                                {
-                                    Logger.LogTrace("checking auto-join");
+        {
+            Logger.LogTrace("checking auto-join");
 
-                                    if (DateTime.UtcNow >= _autoJoinTime)
-                                    {
-                                        Logger.LogTrace("auto-joining");
-                                        await JoinGame(PreferredServer);
-                                    }
+            if (DateTime.UtcNow >= _autoJoinTime)
+            {
+                Logger.LogTrace("auto-joining");
+                await JoinGame(PreferredServer);
+            }
 
-                                    StateHasChanged();
-                                };
+            StateHasChanged();
+        };
         _timer.Enabled = true;
     }
 

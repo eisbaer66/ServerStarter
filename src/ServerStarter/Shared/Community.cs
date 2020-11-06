@@ -13,6 +13,7 @@ namespace ServerStarter.Shared
         public int                    MinimumPlayers { get; set; }
         public IList<CommunityServer> Servers        { get; set; }
         public IList<CommunityPlayer> QueuedPlayers  { get; set; }
+        public DateTime               Updated        { get; set; }
 
         protected bool Equals(Community other)
         {

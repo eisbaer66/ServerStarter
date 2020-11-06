@@ -101,6 +101,7 @@ namespace ServerStarter.Server.Services
                        WaitingPlayers = waitingPlayers.Count,
                        Servers        = servers.ToList(),
                        QueuedPlayers  = queuedCommunityPlayers,
+                       Updated        = DateTime.UtcNow,
                    };
         }
 

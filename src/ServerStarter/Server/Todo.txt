@@ -1,6 +1,4 @@
 ﻿
-only update Community in component if newer
-
 desktop notifications?
  which event?
  actions?
