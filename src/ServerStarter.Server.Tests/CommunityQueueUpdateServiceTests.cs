@@ -9,6 +9,8 @@ using NSubstitute.ExceptionExtensions;
 using NUnit.Framework;
 using Serilog;
 using Serilog.Core;
+using ServerStarter.Server.Data.Repositories;
+using ServerStarter.Server.Hubs;
 using ServerStarter.Server.Models;
 using ServerStarter.Server.Services;
 using ServerStarter.Server.WorkerServices;
@@ -24,18 +26,20 @@ namespace ServerStarter.Server.Tests
                                                                UpdateCommunitiesMaxDuration = TimeSpan.FromSeconds(30)
                                                            };
 
-        private IServiceProvider                _serviceProvider;
-        private ILogger<CommunityUpdateService> _logger;
-        private IServerInfoCache                _cache;
-        private ICommunityQueueService          _communityQueueService;
-        private ICommunityService               _communityService;
+        private IServiceProvider                     _serviceProvider;
+        private ILogger<CommunityUpdateService>      _logger;
+        private IServerInfoCache                     _cache;
+        private ICommunityRepository                 _communityRepository;
+        private ICommunityService                    _communityService;
+        private IHubConnectionSource<CommunitiesHub> _hubConnections;
 
         [SetUp]
         public void Setup()
         {
             _cache                 = Substitute.For<IServerInfoCache>();
-            _communityQueueService = Substitute.For<ICommunityQueueService>();
+            _communityRepository = Substitute.For<ICommunityRepository>();
             _communityService      = Substitute.For<ICommunityService>();
+            _hubConnections        = Substitute.For<IHubConnectionSource<CommunitiesHub>>();
 
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.NUnitOutput()
@@ -50,10 +54,11 @@ namespace ServerStarter.Server.Tests
         [Test]
         public async Task ExceptionInCacheGetsSwallowed()
         {
+            _hubConnections.UsersConnected().Returns(true);
             _cache.When(c => c.Reset())
                   .Throw(new Exception("Test"));
 
-            var update = new CommunityUpdateService(_logger, _cache, _communityQueueService, _communityService, _timingSettings);
+            var update = new CommunityUpdateService(_logger, _cache, _communityRepository, _communityService, _timingSettings, _hubConnections);
 
             await update.UpdateCommunities(CancellationToken.None);
 
@@ -61,17 +66,31 @@ namespace ServerStarter.Server.Tests
         }
 
         [Test]
+        public async Task ExceptionInHubConnectionGetsSwallowed()
+        {
+            _hubConnections.When(c => c.UsersConnected())
+                           .Throw(new Exception("Test"));
+
+            var update = new CommunityUpdateService(_logger, _cache, _communityRepository, _communityService, _timingSettings, _hubConnections);
+
+            await update.UpdateCommunities(CancellationToken.None);
+
+            _hubConnections.Received().UsersConnected();
+        }
+
+        [Test]
         public async Task ExceptionInCommunityQueueServiceGetsSwallowed()
         {
-            _communityQueueService.When(c => c.GetWaitingCommunityIds())
+            _hubConnections.UsersConnected().Returns(true);
+            _communityRepository.When(c => c.Get())
                                   .Throw(new Exception("Test"));
 
-            var update = new CommunityUpdateService(_logger, _cache, _communityQueueService, _communityService, _timingSettings);
+            var update = new CommunityUpdateService(_logger, _cache, _communityRepository, _communityService, _timingSettings, _hubConnections);
 
             await update.UpdateCommunities(CancellationToken.None);
 
             _cache.Received().Reset();
-            await _communityQueueService.Received().GetWaitingCommunityIds();
+            await _communityRepository.Received().Get();
         }
 
         [Test]
@@ -87,16 +106,17 @@ namespace ServerStarter.Server.Tests
                               {
                                   community
                               };
-            _communityQueueService.GetWaitingCommunityIds().Returns(communities);
+            _hubConnections.UsersConnected().Returns(true);
+            _communityRepository.Get().Returns(communities);
             _communityService.When(c => c.UpdateCommunity(community, cancellationToken))
                              .Throw(new Exception("Test"));
 
-            var update = new CommunityUpdateService(_logger, _cache, _communityQueueService, _communityService, _timingSettings);
+            var update = new CommunityUpdateService(_logger, _cache, _communityRepository, _communityService, _timingSettings, _hubConnections);
 
             await update.UpdateCommunities(cancellationToken);
 
             _cache.Received().Reset();
-            await _communityQueueService.Received().GetWaitingCommunityIds();
+            await _communityRepository.Received().Get();
             await _communityService.Received().UpdateCommunity(community, cancellationToken);
         }
 
@@ -122,7 +142,8 @@ namespace ServerStarter.Server.Tests
                                   community,
                                   community2,
                               };
-            _communityQueueService.GetWaitingCommunityIds().Returns(communities);
+            _hubConnections.UsersConnected().Returns(true);
+            _communityRepository.Get().Returns(communities);
             _communityService.When(c => c.UpdateCommunity(community, cancellationToken))
                              .Throw(new Exception("Test"));
             _communityService.UpdateCommunity(community2, cancellationToken).Returns(async (ci) =>
@@ -131,12 +152,12 @@ namespace ServerStarter.Server.Tests
                                                                                         return updatedCommunity;
                                                                                     });
 
-            var update = new CommunityUpdateService(_logger, _cache, _communityQueueService, _communityService, _timingSettings);
+            var update = new CommunityUpdateService(_logger, _cache, _communityRepository, _communityService, _timingSettings, _hubConnections);
 
             await update.UpdateCommunities(cancellationToken);
 
             _cache.Received().Reset();
-            await _communityQueueService.Received().GetWaitingCommunityIds();
+            await _communityRepository.Received().Get();
             await _communityService.Received().UpdateCommunity(community, cancellationToken);
             await _communityService.Received().UpdateCommunity(community2, cancellationToken);
         }
@@ -158,21 +179,22 @@ namespace ServerStarter.Server.Tests
                               {
                                   community
                               };
-            _communityQueueService.GetWaitingCommunityIds().Returns(communities);
+            _hubConnections.UsersConnected().Returns(true);
+            _communityRepository.Get().Returns(communities);
             _communityService.UpdateCommunity(community, cancellationToken).Returns(async (ci) =>
                                                                                     {
                                                                                         await Task.Delay(20, cancellationToken);
                                                                                         return updatedCommunity;
                                                                                     });
 
-            var update = new CommunityUpdateService(_logger, _cache, _communityQueueService, _communityService, _timingSettings);
+            var update = new CommunityUpdateService(_logger, _cache, _communityRepository, _communityService, _timingSettings, _hubConnections);
 
             update.UpdateCommunities(cancellationToken);
             update.UpdateCommunities(cancellationToken);
             update.UpdateCommunities(cancellationToken);
 
             _cache.Received(1).Reset();
-            await _communityQueueService.Received(1).GetWaitingCommunityIds();
+            await _communityRepository.Received(1).Get();
             await _communityService.Received(1).UpdateCommunity(community, cancellationToken);
         }
 
@@ -193,14 +215,15 @@ namespace ServerStarter.Server.Tests
                               {
                                   community
                               };
-            _communityQueueService.GetWaitingCommunityIds().Returns(communities);
+            _hubConnections.UsersConnected().Returns(true);
+            _communityRepository.Get().Returns(communities);
             _communityService.UpdateCommunity(community, cancellationToken).Returns(async (ci) =>
                                                                                     {
                                                                                         await Task.Delay(20, cancellationToken);
                                                                                         return updatedCommunity;
                                                                                     });
 
-            var update = new CommunityUpdateService(_logger, _cache, _communityQueueService, _communityService, _timingSettings);
+            var update = new CommunityUpdateService(_logger, _cache, _communityRepository, _communityService, _timingSettings, _hubConnections);
 
             update.UpdateCommunities(cancellationToken);
             update.UpdateCommunities(cancellationToken);
@@ -209,8 +232,28 @@ namespace ServerStarter.Server.Tests
             await Task.Delay(80, cancellationToken);
 
             _cache.Received(2).Reset();
-            await _communityQueueService.Received(2).GetWaitingCommunityIds();
+            await _communityRepository.Received(2).Get();
             await _communityService.Received(2).UpdateCommunity(community, cancellationToken);
+        }
+
+        [Test]
+        public async Task SkipsExecutionIfNoHubConnectionIsFound()
+        {
+            var cancellationToken = CancellationToken.None;
+
+            var community = new Community
+                            {
+                                Id = Guid.NewGuid(),
+                            };
+            _hubConnections.UsersConnected().Returns(false);
+
+            var update = new CommunityUpdateService(_logger, _cache, _communityRepository, _communityService, _timingSettings, _hubConnections);
+
+            await update.UpdateCommunities(cancellationToken);
+
+            _cache.Received(0).Reset();
+            await _communityRepository.Received(0).Get();
+            await _communityService.Received(0).UpdateCommunity(community, cancellationToken);
         }
     }
 }

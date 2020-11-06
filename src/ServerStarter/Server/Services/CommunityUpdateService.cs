@@ -3,6 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Polly;
+using ServerStarter.Server.Data.Repositories;
+using ServerStarter.Server.Hubs;
 using ServerStarter.Server.ZarloAdapter;
 
 namespace ServerStarter.Server.Services
@@ -14,24 +16,27 @@ namespace ServerStarter.Server.Services
 
     public class CommunityUpdateService : ICommunityUpdateService
     {
-        private readonly IAsyncPolicy                    _policy;
-        private readonly IAsyncPolicy                    _communityPolicy;
-        private readonly IServerInfoCache                _cache;
-        private readonly ICommunityQueueService          _queue;
-        private readonly ICommunityService               _service;
-        private readonly ILogger<CommunityUpdateService> _logger;
+        private readonly IAsyncPolicy                         _policy;
+        private readonly IAsyncPolicy                         _communityPolicy;
+        private readonly IServerInfoCache                     _cache;
+        private readonly ICommunityRepository                 _repository;
+        private readonly ICommunityService                    _service;
+        private readonly ILogger<CommunityUpdateService>      _logger;
+        private readonly IHubConnectionSource<CommunitiesHub> _connectionSource;
 
-        public CommunityUpdateService(ILogger<CommunityUpdateService> logger,
-                                      IServerInfoCache                cache,
-                                      ICommunityQueueService          queue,
-                                      ICommunityService               service,
-                                      ITimingSettings                 timingSettings)
+        public CommunityUpdateService(ILogger<CommunityUpdateService>      logger,
+                                      IServerInfoCache                     cache,
+                                      ICommunityRepository                 repository,
+                                      ICommunityService                    service,
+                                      ITimingSettings                      timingSettings,
+                                      IHubConnectionSource<CommunitiesHub> connectionSource)
         {
             if (timingSettings == null) throw new ArgumentNullException(nameof(timingSettings));
-            _logger  = logger  ?? throw new ArgumentNullException(nameof(logger));
-            _cache   = cache   ?? throw new ArgumentNullException(nameof(cache));
-            _queue   = queue   ?? throw new ArgumentNullException(nameof(queue));
-            _service = service ?? throw new ArgumentNullException(nameof(service));
+            _logger           = logger           ?? throw new ArgumentNullException(nameof(logger));
+            _cache            = cache            ?? throw new ArgumentNullException(nameof(cache));
+            _repository       = repository       ?? throw new ArgumentNullException(nameof(repository));
+            _service          = service          ?? throw new ArgumentNullException(nameof(service));
+            _connectionSource = connectionSource ?? throw new ArgumentNullException(nameof(connectionSource));
 
             _policy = Policy.WrapAsync(Policy.Handle<Exception>()
                                              .FallbackAsync(async ct => { },
@@ -49,20 +54,31 @@ namespace ServerStarter.Server.Services
             await _policy.ExecuteAsync(async () =>
                                        {
                                            _logger.LogInformation("running CommunityQueueUpdate");
-                                           _cache.Reset();
 
-                                           _logger.LogDebug("outer CommunityQueueUpdate-workitem started");
-                                           await SetupCommunityUpdates(cancellationToken);
-                                           _logger.LogDebug("outer CommunityQueueUpdate-workitem finished");
+                                           await UpdateCommunitiesIfNeeded(cancellationToken);
 
                                            _logger.LogInformation("finished CommunityQueueUpdate");
                                        });
         }
 
-        private async Task SetupCommunityUpdates(CancellationToken cancellationToken)
+        private async Task UpdateCommunitiesIfNeeded(CancellationToken cancellationToken)
         {
-            var waitingCommunities = await _queue.GetWaitingCommunityIds();
-            foreach (var community in waitingCommunities)
+            if (!_connectionSource.UsersConnected())
+            {
+                _logger.LogInformation("no user is connected. skipping update of communities");
+                return;
+            }
+            
+            _logger.LogDebug("outer CommunityQueueUpdate-workitem started");
+            await UpdateCommunitiesInternal(cancellationToken);
+            _logger.LogDebug("outer CommunityQueueUpdate-workitem finished");
+        }
+
+        private async Task UpdateCommunitiesInternal(CancellationToken cancellationToken)
+        {
+            _cache.Reset();
+            var communities = await _repository.Get();
+            foreach (var community in communities)
             {
                 using (_logger.BeginScope("Community {@CommunityId}", community.Id))
                 {

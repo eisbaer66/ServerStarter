@@ -23,22 +23,31 @@
     }
     else
     {
-    <EditForm Model="@settings" class="d-flex flex-column">
-    @*OnValidSubmit="@SettingsSpeichern"*@
-        <DataAnnotationsValidator />
-    
-        <label>
-            <InputCheckbox id="playsounds" @bind-Value="settings.PlaySounds"></InputCheckbox>
-            Play sounds
-        </label>
-        <label>
-            <InputCheckbox id="automaticJoinEnabled" @bind-Value="settings.AutomaticJoinEnabled"></InputCheckbox>
-            automatically join,<InputNumber id="automaticJoinDelay" class="shortInline" @bind-Value="settings.AutomaticJoinDelayInSeconds"></InputNumber> seconds after server is ready to play
-        </label>
+        <EditForm Model="@settings" class="d-flex flex-column">
+            @*OnValidSubmit="@SettingsSpeichern"*@
+            <DataAnnotationsValidator />
 
-        <ValidationSummary />
-        @*<button type="submit">Submit</button>*@
-    </EditForm>
+            <label>
+                <InputCheckbox id="playsounds" @bind-Value="settings.PlaySounds"></InputCheckbox>
+                Play sounds
+            </label>
+            <label>
+                <InputCheckbox id="automaticJoinEnabled" @bind-Value="settings.AutomaticJoinEnabled"></InputCheckbox>
+                automatically join,<InputNumber id="automaticJoinDelay" class="shortInline" @bind-Value="settings.AutomaticJoinDelayInSeconds"></InputNumber> seconds after server is ready to play
+            </label>
+
+            <ValidationSummary />
+            @*<button type="submit">Submit</button>*@
+        </EditForm>
+
+        @if (HubConnection?.State == HubConnectionState.Connected)
+        {
+            <figure class="queuedIcon dark" /> <span>updating automatically</span>
+        }
+        else
+        {
+            <figure class="queuedIcon dark stopped" /> <span>Unable to update. Please reload the page.</span>
+        }
 
         <div class="container">
             @foreach (var community in communities)

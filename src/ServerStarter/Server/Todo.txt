@@ -1,8 +1,5 @@
 ﻿
-update all communities
- if anyone is connected to CommunityHub
- connection status display
-
+only update Community in component if newer
 
 desktop notifications?
  which event?

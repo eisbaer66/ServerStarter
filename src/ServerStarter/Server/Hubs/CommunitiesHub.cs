@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -14,16 +13,17 @@ namespace ServerStarter.Server.Hubs
     {
         private readonly ICommunityQueueService               _queue;
         private readonly ILogger<CommunitiesHub>              _logger;
-        private readonly IDictionary<string, HashSet<string>> _connections = new Dictionary<string, HashSet<string>>();
         private readonly IHubApm<CommunitiesHub>              _apm;
         private readonly IMessaging                           _messaging;
+        private readonly IHubConnectionSource<CommunitiesHub> _connections;
 
-        public CommunitiesHub(ICommunityQueueService queue, ILogger<CommunitiesHub> logger, IHubApm<CommunitiesHub> apm, IMessaging messaging)
+        public CommunitiesHub(ICommunityQueueService queue, ILogger<CommunitiesHub> logger, IHubApm<CommunitiesHub> apm, IMessaging messaging, IHubConnectionSource<CommunitiesHub> connections)
         {
-            _queue     = queue     ?? throw new ArgumentNullException(nameof(queue));
-            _logger    = logger    ?? throw new ArgumentNullException(nameof(logger));
-            _apm       = apm       ?? throw new ArgumentNullException(nameof(apm));
-            _messaging = messaging ?? throw new ArgumentNullException(nameof(messaging));
+            _queue       = queue       ?? throw new ArgumentNullException(nameof(queue));
+            _logger      = logger      ?? throw new ArgumentNullException(nameof(logger));
+            _apm         = apm         ?? throw new ArgumentNullException(nameof(apm));
+            _messaging   = messaging   ?? throw new ArgumentNullException(nameof(messaging));
+            _connections = connections ?? throw new ArgumentNullException(nameof(connections));
 
             messaging.UserJoined += UserJoinedQueue;
             messaging.UserLeft   += UserLeftQueue;
@@ -115,7 +115,7 @@ namespace ServerStarter.Server.Hubs
             await base.OnConnectedAsync();
 
             string userId = Context.User.GetUserId();
-            AddConnection(userId);
+            _connections.AddConnection(userId, Context.ConnectionId);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, userId.ToString());
 
@@ -128,33 +128,12 @@ namespace ServerStarter.Server.Hubs
                 _logger.LogError(exception, "SignalR fatal disconnect");
 
             string userId = Context.User.GetUserId();
-            RemoveConnection(userId);
+            _connections.RemoveConnection(userId, Context.ConnectionId);
             await _queue.LeaveAllQueues(userId);
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId.ToString());
 
             await base.OnDisconnectedAsync(exception);
-        }
-
-        private void AddConnection(string userId)
-        {
-            if (!_connections.ContainsKey(userId))
-                _connections.Add(userId, new HashSet<string>());
-            _connections[userId].Add(Context.ConnectionId);
-        }
-
-        private void RemoveConnection(string userId)
-        {
-            if (!_connections.ContainsKey(userId))
-                return;
-            if (!_connections[userId].Contains(Context.ConnectionId))
-                return;
-
-            _connections[userId].Remove(Context.ConnectionId);
-            if (_connections[userId].Count != 0)
-                return;
-
-            _connections.Remove(userId);
         }
 
         private async Task RejoinQueue(string userId)
