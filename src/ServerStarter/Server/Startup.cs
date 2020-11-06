@@ -241,17 +241,25 @@ namespace ServerStarter.Server
                         logger.LogTrace("incoming Request {RequestProtocol} {RequestScheme} {RequestHost} {RequestContentLength} bytes of {RequestContentType} {@RequestHeaders}", ctx.Request.Protocol, ctx.Request.Scheme, ctx.Request.Host, ctx.Request.ContentLength, ctx.Request.ContentType, ctx.Request.Headers);
                         await next();
                     });
-            app.Use(async (ctx, next) =>
-                    {
-                        string scheme = Configuration["ServerStarters:Scheme"];
-                        if (ctx.Request.Scheme == "http" && !string.IsNullOrEmpty(scheme))
-                        {
-                            ctx.Request.Scheme = scheme;
-                        }
 
-                        ctx.Request.Host = new HostString(Configuration["ServerStarters:Host"]);
-                        await next();
-                    });
+            string scheme = Configuration["ServerStarters:Scheme"];
+            if (!string.IsNullOrEmpty(scheme))
+                app.Use(async (ctx, next) =>
+                        {
+                            if (ctx.Request.Scheme == "http")
+                            {
+                                ctx.Request.Scheme = scheme;
+                            }
+
+                            await next();
+                        });
+            string host = Configuration["ServerStarters:Host"];
+            if (!string.IsNullOrEmpty(host))
+                app.Use(async (ctx, next) =>
+                        {
+                            ctx.Request.Host = new HostString(host);
+                            await next();
+                        });
 
             IElasticSettings elasticSettings = app.ApplicationServices.GetRequiredService<IElasticSettings>();
             if (elasticSettings.AreSet() && elasticSettings.ApmEnabled)

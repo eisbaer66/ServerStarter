@@ -1,5 +1,13 @@
 ﻿
+update all communities
+ if anyone is connected to CommunityHub
+ connection status display
+
+
 desktop notifications?
+ which event?
+ actions?
+ https://github.com/BlazorExtensions/Notifications
 
 only scroll chat 
 discord preview

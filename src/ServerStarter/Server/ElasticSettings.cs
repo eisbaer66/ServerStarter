@@ -11,10 +11,17 @@
 
     public class ElasticSettings : IElasticSettings
     {
-        public string Url        { get; set; }
-        public string Username   { get; set; }
-        public string Password   { get; set; }
-        public bool   ApmEnabled { get; set; }
+        private string _indexFormat;
+        public  string Url         { get; set; }
+        public  string Username    { get; set; }
+        public  string Password    { get; set; }
+        public  bool   ApmEnabled  { get; set; }
+
+        public string IndexFormat
+        {
+            get => !string.IsNullOrEmpty(_indexFormat) ? _indexFormat : "logstash*";
+            set => _indexFormat = value;
+        }
 
         public bool AreSet()
         {

@@ -4,7 +4,6 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Elastic.CommonSchema.Serilog;
 using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Events;
@@ -36,9 +35,10 @@ namespace ServerStarter.Server
                                     config.WriteTo.Elasticsearch(new
                                                              ElasticsearchSinkOptions(new Uri(settings.Url))
                                                              {
-                                                                 CustomFormatter = new EcsTextFormatter(),
+                                                                 CustomFormatter = new EcsTextFormatterMetadata(),
                                                                  ModifyConnectionSettings =
-                                                                     c => c.BasicAuthentication(settings.Username, settings.Password)
+                                                                     c => c.BasicAuthentication(settings.Username, settings.Password),
+                                                                 IndexFormat = settings.IndexFormat,
                                                              });
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
