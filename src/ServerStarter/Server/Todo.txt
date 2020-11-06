@@ -6,7 +6,6 @@ desktop notifications?
 
 only scroll chat 
 discord preview
-servername next to queued-icon
 fix prefered server if ppup is open
 chat
  steam avatar/profile

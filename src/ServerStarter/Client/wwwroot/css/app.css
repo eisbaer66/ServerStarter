@@ -345,10 +345,11 @@ app {
         overflow: hidden;
     }
 
-        .community .players .label {
-            justify-content: center;
-            font-size: 0.6rem;
-        }
+    .community .servername {
+        margin-left: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+    }
 
     .community .btn-joinleave {
         height: 100%;
@@ -488,6 +489,7 @@ input.shortInline {
 }
 
 .queuedIcon {
+    flex: 0 0 auto;
     height: 1rem;
     width: 1rem;
     display: inline-block;

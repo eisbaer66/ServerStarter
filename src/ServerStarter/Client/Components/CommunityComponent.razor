@@ -13,23 +13,21 @@
 
 <div class="row community">
     <div class="col-sm-12 col-lg-4 col-xl-3">
-        <div class="row col-12">
+        <div class="d-flex flex-nowrap">
             <span class="name" data-toggle="tooltip" title="@Community.Name">@Community.Name</span>
         </div>
-        <div class="row col-12">
+        <div class="d-flex flex-nowrap">
             <span data-toggle="tooltip" title="@FullServers/@Community.Servers.Count full servers">@FullServers/@Community.Servers.Count full servers</span>
         </div>
-        <div class="row col-12">
+        <div class="d-flex flex-nowrap">
             @if (joined)
             {
                 <figure class="queuedIcon" />
+                <span class="servername" data-toggle="tooltip" title="queue for @PreferredServer.Name (@PreferredServer.Ip)">@PreferredServer.Name (<a href="@GetConnectLink(PreferredServer)" target="_blank">@PreferredServer.Ip</a>)</span>
             }
         </div>
     </div>
     <div class="col-sm-12 col-lg-5 col-xl-3 players">
-        <div class="row col-sm-6 col-lg-12 label">
-            <span data-toggle="tooltip" title="queue for @PreferredServer.Name (@PreferredServer.Ip)">@PreferredServer.Name (<a href="@GetConnectLink(PreferredServer)" target="_blank">@PreferredServer.Ip</a>)</span>
-        </div>
         <div class="row col-12">
             <span data-toggle="tooltip" title="@Community.CurrentPlayers players currently in-game">@Community.CurrentPlayers players currently in-game</span>
         </div>
