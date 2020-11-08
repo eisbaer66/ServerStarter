@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
 using AspNet.Security.OpenId.Steam;
@@ -175,10 +176,12 @@ namespace ServerStarter.Server
             Configuration.Bind("ServerStarters:Elastic", settings);
             services.AddSingleton<IElasticSettings>(settings);
 
-            services.AddSingleton<HttpClient>(c => new HttpClient()
-                                                   {
-                                                       BaseAddress = new Uri(Configuration["ServerStarters:ServerInfoBaseAddress"]),
-                                                   });
+            services.AddHttpClient(ServerInfoQueries.HttpClientName,
+                                   c =>
+                                   {
+                                       c.BaseAddress = new Uri(Configuration["ServerStarters:ServerInfoBaseAddress"]);
+                                       c.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+                                   });
             services.AddScoped<CommunitiesHub>();
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddSingleton<ICommunityState, CommunityState>();

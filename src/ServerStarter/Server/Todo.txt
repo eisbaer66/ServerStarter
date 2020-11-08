@@ -5,6 +5,7 @@ cache GetQueuedPlayers seperatly?
 managedCache
  keyfactory
  duration
+nuget updates
 
 desktop notifications?
  which event?

@@ -11,13 +11,14 @@ namespace Zarlo.Stats
 {
     public class ServerInfoQueries : IServerInfoQueries
     {
+        public const     string                     HttpClientName = "ZarloServerInfoApi";
         private readonly ILogger<ServerInfoQueries> _logger;
-        private readonly HttpClient                 _client;
+        private readonly IHttpClientFactory         _clientFactory;
 
-        public ServerInfoQueries(ILogger<ServerInfoQueries> logger, HttpClient client)
+        public ServerInfoQueries(ILogger<ServerInfoQueries> logger, IHttpClientFactory clientFactory)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _logger        = logger        ?? throw new ArgumentNullException(nameof(logger));
+            _clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
         }
 
         public async Task<Server[]> GetServers(CancellationToken cancellationToken)
@@ -32,9 +33,10 @@ namespace Zarlo.Stats
 
         public async Task<T> GetJson<T>(string url, CancellationToken cancellationToken)
         {
-            var response = await _client.GetAsync(url, cancellationToken);
-            string json = await response.Content.ReadAsStringAsync();
-            _logger.LogTrace("received {RawJson} from GET {Url} with {BaseAddress}", json, url, _client.BaseAddress);
+            var client   = _clientFactory.CreateClient(HttpClientName);
+            var response = await client.GetAsync(url, cancellationToken);
+            var json     = await response.Content.ReadAsStringAsync();
+            _logger.LogTrace("received {RawJson} from GET {Url} with {BaseAddress}", json, url, client.BaseAddress);
             return JsonConvert.DeserializeObject<T>(json);
         }
     }
