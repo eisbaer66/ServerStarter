@@ -4,7 +4,6 @@ cache GetQueuedPlayers seperatly?
 managedCache
  keyfactory
  duration
-nuget updates
 
 desktop notifications?
  which event?
@@ -22,6 +21,7 @@ save queuesettings per user
  incl userdata
 
 move UseAllElasticApm behinde UseStaticFiles?
+ elasticsearch 8.4 datastreams?
 background updates
  throw out inactive connections? timeout?
   poke to see if gamer is still there
