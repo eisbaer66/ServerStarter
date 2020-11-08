@@ -1,5 +1,4 @@
 ﻿
-! HttpClient
 initialize Agent before first request?
 cache GetQueuedPlayers seperatly?
 managedCache

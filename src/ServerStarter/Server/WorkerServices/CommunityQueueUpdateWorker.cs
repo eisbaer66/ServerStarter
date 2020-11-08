@@ -21,7 +21,7 @@ namespace ServerStarter.Server.WorkerServices
         }
 
         protected override string Name            => nameof(CommunityQueueUpdateWorker);
-        protected override string TransactionName => "update CommunityQueue";
+        protected override string TransactionName => "update player numbers";
         protected override string TransactionType => ApiConstants.TypeExternal;
         protected override async Task Execute(IServiceProvider serviceProvider, CancellationToken cancellationToken)
         {
