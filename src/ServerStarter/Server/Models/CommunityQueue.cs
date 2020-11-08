@@ -62,7 +62,9 @@ namespace ServerStarter.Server.Models
         [Key]
         public Guid Id { get; set; }
 
+        [Required]
         public CommunityQueue  Queue { get; set; }
+        [Required]
         public ApplicationUser User  { get; set; }
     }
 }

@@ -16,33 +16,26 @@ namespace ServerStarter.Server.Services
 
     public class CommunityUpdateService : ICommunityUpdateService
     {
-        private readonly IAsyncPolicy                         _policy;
-        private readonly IAsyncPolicy                         _communityPolicy;
-        private readonly IServerInfoCache                     _cache;
-        private readonly ICommunityRepository                 _repository;
-        private readonly ICommunityService                    _service;
-        private readonly ILogger<CommunityUpdateService>      _logger;
-        private readonly IHubConnectionSource<CommunitiesHub> _connectionSource;
+        private readonly IAsyncPolicy                    _communityPolicy;
+        private readonly IServerInfoCache                _serverInfoCache;
+        private readonly ICommunityServiceCache          _cache;
+        private readonly ICommunityRepository            _repository;
+        private readonly ICommunityService               _service;
+        private readonly ILogger<CommunityUpdateService> _logger;
 
-        public CommunityUpdateService(ILogger<CommunityUpdateService>      logger,
-                                      IServerInfoCache                     cache,
-                                      ICommunityRepository                 repository,
-                                      ICommunityService                    service,
-                                      ITimingSettings                      timingSettings,
-                                      IHubConnectionSource<CommunitiesHub> connectionSource)
+        public CommunityUpdateService(ILogger<CommunityUpdateService> logger,
+                                      IServerInfoCache                serverInfoCache,
+                                      ICommunityRepository            repository,
+                                      ICommunityService               service,
+                                      ITimingSettings                 timingSettings,
+                                      ICommunityServiceCache          cache)
         {
-            if (timingSettings == null) throw new ArgumentNullException(nameof(timingSettings));
-            _logger           = logger           ?? throw new ArgumentNullException(nameof(logger));
-            _cache            = cache            ?? throw new ArgumentNullException(nameof(cache));
-            _repository       = repository       ?? throw new ArgumentNullException(nameof(repository));
-            _service          = service          ?? throw new ArgumentNullException(nameof(service));
-            _connectionSource = connectionSource ?? throw new ArgumentNullException(nameof(connectionSource));
+            _logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
+            _serverInfoCache = serverInfoCache ?? throw new ArgumentNullException(nameof(serverInfoCache));
+            _repository      = repository      ?? throw new ArgumentNullException(nameof(repository));
+            _service         = service         ?? throw new ArgumentNullException(nameof(service));
+            _cache           = cache           ?? throw new ArgumentNullException(nameof(cache));
 
-            _policy = Policy.WrapAsync(Policy.Handle<Exception>()
-                                             .FallbackAsync(async ct => { },
-                                                            async e => _logger.LogError(e, "Error occurred updating CommunityQueues")),
-                                       Policy.BulkheadAsync(1, 1, async ct => _logger.LogWarning("skipped running CommunityQueueUpdate, because it is already running")),
-                                       Policy.TimeoutAsync(timingSettings.UpdateCommunitiesMaxDuration));
             _communityPolicy = Policy.WrapAsync(Policy.Handle<Exception>()
                                                       .FallbackAsync(async ct => { },
                                                                      async e => _logger.LogError(e, "Error occurred updating Community")),
@@ -51,32 +44,12 @@ namespace ServerStarter.Server.Services
 
         public async Task UpdateCommunities(CancellationToken cancellationToken)
         {
-            await _policy.ExecuteAsync(async () =>
-                                       {
-                                           _logger.LogInformation("running CommunityQueueUpdate");
-
-                                           await UpdateCommunitiesIfNeeded(cancellationToken);
-
-                                           _logger.LogInformation("finished CommunityQueueUpdate");
-                                       });
-        }
-
-        private async Task UpdateCommunitiesIfNeeded(CancellationToken cancellationToken)
-        {
-            if (!_connectionSource.UsersConnected())
-            {
-                _logger.LogInformation("no user is connected. skipping update of communities");
-                return;
-            }
-            
-            _logger.LogDebug("outer CommunityQueueUpdate-workitem started");
             await UpdateCommunitiesInternal(cancellationToken);
-            _logger.LogDebug("outer CommunityQueueUpdate-workitem finished");
         }
 
         private async Task UpdateCommunitiesInternal(CancellationToken cancellationToken)
         {
-            _cache.Reset();
+            _serverInfoCache.Reset();
             var communities = await _repository.Get();
             foreach (var community in communities)
             {
@@ -86,7 +59,8 @@ namespace ServerStarter.Server.Services
                                                         {
                                                             _logger.LogTrace("inner CommunityQueueUpdate-workitem started");
 
-                                                            await _service.UpdateCommunity(community, cancellationToken);
+                                                            var updatedCommunity = await _service.UpdateCommunity(community, cancellationToken);
+                                                            _cache.Set(updatedCommunity);
 
                                                             _logger.LogTrace("inner CommunityQueueUpdate-workitem finished");
                                                         });

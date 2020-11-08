@@ -1,13 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -23,10 +18,8 @@ using AspNet.Security.OpenId.Steam;
 using ClacksMiddleware.Extensions;
 using Elastic.Apm;
 using Elastic.Apm.Api;
-using Elastic.Apm.AspNetCore;
 using Elastic.Apm.Helpers;
 using Elastic.Apm.NetCoreAll;
-using IdentityServer4.Hosting.LocalApiAuthentication;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -37,7 +30,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Serilog;
-using ServerStarter.Server.Controllers;
 using ServerStarter.Server.Data;
 using ServerStarter.Server.Data.Repositories;
 using ServerStarter.Server.Data.Repositories.Queues;
@@ -175,6 +167,10 @@ namespace ServerStarter.Server
             Configuration.Bind("ServerStarters:Timings", timingSettings);
             services.AddSingleton<ITimingSettings>(timingSettings);
 
+            ManagedTimedHostedWorkerSettings managedTimedHostedWorkerSettings = new ManagedTimedHostedWorkerSettings();
+            Configuration.Bind("ServerStarters:ManagedTimedHostedWorker", managedTimedHostedWorkerSettings);
+            services.AddSingleton<IManagedTimedHostedWorkerSettings>(managedTimedHostedWorkerSettings);
+
             var settings = new ElasticSettings();
             Configuration.Bind("ServerStarters:Elastic", settings);
             services.AddSingleton<IElasticSettings>(settings);
@@ -187,25 +183,55 @@ namespace ServerStarter.Server
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddSingleton<ICommunityState, CommunityState>();
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<ICommunityQueueRepository, CommunityQueueRepository>();
+            services.AddScoped<CommunityQueueRepository, CommunityQueueRepository>();
+            services.AddScoped<ICommunityQueueRepository>(c =>
+                         {
+                             var repository = c.GetRequiredService<CommunityQueueRepository>();
+                             var dbContext  = c.GetRequiredService<ApplicationDbContext>();
+                             return new GetAllQueuesCommunityQueueRepositoryCache(repository, dbContext);
+                         });
             services.AddScoped<ICommunityQueueService, CommunityQueueService>();
             services.AddSingleton<CachingServerInfoQueries>(c =>
                                                       {
                                                           IMemoryCache cache = c.GetRequiredService<IMemoryCache>();
-                                                          ITimingSettings settings = c.GetRequiredService<ITimingSettings>();
                                                           IServerInfoQueries queries = c.GetRequiredService<ServerInfoQueries>();
                                                           ILogger<CachingServerInfoQueries> logger = c.GetRequiredService<ILogger<CachingServerInfoQueries>>();
-                                                          return new CachingServerInfoQueries(cache, settings, queries, logger);
+                                                          return new CachingServerInfoQueries(cache, timingSettings, queries, logger);
                                                       });
             services.AddSingleton<IServerInfoQueries>(c => c.GetRequiredService<CachingServerInfoQueries>());
             services.AddSingleton<IServerInfoCache, CachingServerInfoQueries>();
             services.AddSingleton<IHubConnectionSource<CommunitiesHub>, HubConnectionSource<CommunitiesHub>>();
-            services.AddScoped<ICommunityUpdateService, CommunityUpdateService>();
+            services.AddScoped<ICommunityUpdateService>(sp =>
+                                                        {
+                                                            ILogger<CommunityUpdateService> logger          = sp.GetRequiredService<ILogger<CommunityUpdateService>>();
+                                                            IServerInfoCache                serverInfoCache = sp.GetRequiredService<IServerInfoCache>();
+                                                            ICommunityRepository            repository      = sp.GetRequiredService<ICommunityRepository>();
+                                                            ICommunityService               service         = sp.GetRequiredService<CommunityService>();
+                                                            ICommunityServiceCache          cache           = sp.GetRequiredService<ICommunityServiceCache>();
+                                                            return new CommunityUpdateService(logger, serverInfoCache, repository, service, timingSettings, cache);
+                                                        });
             services.AddHostedService<CommunityQueueUpdateWorker>();
             services.AddHostedService<QueuedHostedService>();
+            services.AddHostedService<CommunityCacheUpdateWorker>();
 
-            services.AddTransient<ICommunityRepository, CommunityRepository>();
-            services.AddTransient<ICommunityService, CommunityService>();
+            services.AddTransient<CommunityRepository, CommunityRepository>();
+            services.AddScoped<InMemoryCommunityRepositoryCache>(cp =>
+                                                                 {
+                                                                     ICommunityRepository repository = cp.GetRequiredService<CommunityRepository>();
+                                                                     IMemoryCache         cache      = cp.GetRequiredService<IMemoryCache>();
+                                                                     return new InMemoryCommunityRepositoryCache(repository, cache, timingSettings);
+                                                                 });
+            services.AddScoped<ICommunityRepositoryCache>(cp => cp.GetRequiredService<InMemoryCommunityRepositoryCache>());
+            services.AddScoped<ICommunityRepository>(cp => cp.GetRequiredService<InMemoryCommunityRepositoryCache>());
+            services.AddTransient<CommunityService>();
+            services.AddScoped<InMemoryCommunityServiceCache>(cp =>
+                                                              {
+                                                                  CommunityService service = cp.GetRequiredService<CommunityService>();
+                                                                  IMemoryCache     cache   = cp.GetRequiredService<IMemoryCache>();
+                                                                  return new InMemoryCommunityServiceCache(service, cache, timingSettings);
+                                                              });
+            services.AddScoped<ICommunityServiceCache>(cp => cp.GetRequiredService<InMemoryCommunityServiceCache>());
+            services.AddScoped<ICommunityService>(cp => cp.GetRequiredService<InMemoryCommunityServiceCache>());
             services.AddTransient<ServerInfoService>();
             services.AddTransient<IServerInfoService, ExceptionSwallowingServerInfoService>(sp =>
                                                                                             {
@@ -266,7 +292,7 @@ namespace ServerStarter.Server
             if (elasticSettings.AreSet() && elasticSettings.ApmEnabled)
             {
                 app.UseAllElasticApm(Configuration);
-
+                
                 //don't create transactions for
                 //- static files,
                 //- blazor-framework

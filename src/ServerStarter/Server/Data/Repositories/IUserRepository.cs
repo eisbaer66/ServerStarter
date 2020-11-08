@@ -9,7 +9,6 @@ namespace ServerStarter.Server.Data.Repositories
 {
     public interface IUserRepository
     {
-        Task<IList<ApplicationUser>> GetForSteamIds(IEnumerable<long> playingSteamIds);
         Task<ApplicationUser>        FindAsync(string                 userId);
     }
 
@@ -20,13 +19,6 @@ namespace ServerStarter.Server.Data.Repositories
         public UserRepository(ApplicationDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-        }
-
-        public async Task<IList<ApplicationUser>> GetForSteamIds(IEnumerable<long> playingSteamIds)
-        {
-            return await _context.Users
-                .Where(u => playingSteamIds.Contains(u.SteamId))
-                .ToListAsync();
         }
 
         public async Task<ApplicationUser> FindAsync(string userId)

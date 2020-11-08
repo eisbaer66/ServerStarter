@@ -1,4 +1,11 @@
 ﻿
+! HttpClient
+initialize Agent before first request?
+cache GetQueuedPlayers seperatly?
+managedCache
+ keyfactory
+ duration
+
 desktop notifications?
  which event?
  actions?
@@ -6,6 +13,8 @@ desktop notifications?
 
 only scroll chat 
 discord preview
+ prerender
+  https://github.com/DevExpress/Blazor/tree/master/tools/DevExpress.Blazor.DocumentMetadata
 fix prefered server if ppup is open
 chat
  steam avatar/profile

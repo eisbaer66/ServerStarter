@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ServerStarter.Server.Data;
 using ServerStarter.Server.Data.Repositories;
@@ -104,22 +102,6 @@ namespace ServerStarter.Server.Services
                 return new ApplicationUser[0];
 
             return queue.Entries.Select(e => e.User).ToList();
-        }
-
-        public IList<ApplicationUser> GetWaitingPlayers(IList<ApplicationUser> queuedUsers, IEnumerable<ApplicationUser> playingUsers)
-        {
-            IList<ApplicationUser> users       = new List<ApplicationUser>();
-            var                    playingLookup = playingUsers
-                                                   .Select(t => t.Id)
-                                                   .ToHashSet();
-            foreach (var user in queuedUsers)
-            {
-                if (playingLookup.Contains(user.Id))
-                    continue;
-                users.Add(user);
-            }
-
-            return users;
         }
 
         public async Task<Community[]> GetWaitingCommunityIds()

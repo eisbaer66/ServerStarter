@@ -6,7 +6,7 @@ using ServerStarter.Server.Models;
 
 namespace ServerStarter.Server.Data.Repositories.Queues
 {
-    class InMemoryCommunityQueueRepositoryCache : ICommunityQueueRepository
+    class InMemoryCommunityQueueRepository : ICommunityQueueRepository
     {
         readonly IDictionary<Guid, CommunityQueue> _queues = new Dictionary<Guid, CommunityQueue>();
 

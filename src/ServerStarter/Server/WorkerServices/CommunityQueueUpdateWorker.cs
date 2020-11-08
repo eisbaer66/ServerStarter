@@ -1,32 +1,32 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Elastic.Apm.Api;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ServerStarter.Server.Hubs;
 using ServerStarter.Server.Services;
 
 namespace ServerStarter.Server.WorkerServices
 {
-    public class CommunityQueueUpdateWorker : TimedHostedService
+    public class CommunityQueueUpdateWorker : ManagedTimedHostedWorker
     {
-        private readonly IServiceProvider        _serviceProvider;
-        private readonly IBackgroundTaskQueue    _taskQueue;
-
-        public CommunityQueueUpdateWorker(ILogger<CommunityQueueUpdateWorker> logger,
-                                          IServiceProvider                    serviceProvider,
-                                          IBackgroundTaskQueue                taskQueue,
-                                          ITimingSettings                     settings) : base(logger, settings.Interval)
+        public CommunityQueueUpdateWorker(ILogger<CommunityQueueUpdateWorker>  logger,
+                                          IServiceProvider                     serviceProvider,
+                                          IBackgroundTaskQueue                 taskQueue,
+                                          IManagedTimedHostedWorkerSettings    managedSettings,
+                                          IHubConnectionSource<CommunitiesHub> connectionSource)
+            : base(taskQueue, logger, managedSettings, serviceProvider, connectionSource)
         {
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            _taskQueue       = taskQueue       ?? throw new ArgumentNullException(nameof(taskQueue));
         }
 
-        protected override void DoWork(object state)
+        protected override string Name            => nameof(CommunityQueueUpdateWorker);
+        protected override string TransactionName => "update CommunityQueue";
+        protected override string TransactionType => ApiConstants.TypeExternal;
+        protected override async Task Execute(IServiceProvider serviceProvider, CancellationToken cancellationToken)
         {
-            _taskQueue.QueueBackgroundWorkItem(async c =>
-                                               {
-                                                   using IServiceScope outerScope    = _serviceProvider.CreateScope();
-                                                   var                 updateService = outerScope.ServiceProvider.GetRequiredService<ICommunityUpdateService>();
-                                                   await updateService.UpdateCommunities(c);
-                                               });
+            var updateService = serviceProvider.GetRequiredService<ICommunityUpdateService>();
+            await updateService.UpdateCommunities(cancellationToken);
         }
     }
 }

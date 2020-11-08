@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ServerStarter.Server.Data.Repositories;
-//using Microsoft.EntityFrameworkCore;
 using ServerStarter.Server.Models;
 using ServerStarter.Server.util;
 using ServerStarter.Shared;
@@ -25,22 +22,19 @@ namespace ServerStarter.Server.Services
         private readonly IServerInfoService        _serverInfoService;
         private readonly ICommunityQueueService    _queue;
         private readonly ICommunityState           _state;
-        private readonly IUserRepository           _users;
         private readonly ILogger<CommunityService> _logger;
 
         public CommunityService(IServerInfoService        serverInfoService,
                                 ICommunityQueueService    queue,
-                                IUserRepository           users,
                                 ICommunityState           state,
                                 ILogger<CommunityService> logger)
         {
             _serverInfoService = serverInfoService ?? throw new ArgumentNullException(nameof(serverInfoService));
             _queue             = queue             ?? throw new ArgumentNullException(nameof(queue));
-            _users             = users             ?? throw new ArgumentNullException(nameof(users));
             _state             = state             ?? throw new ArgumentNullException(nameof(state));
             _logger            = logger            ?? throw new ArgumentNullException(nameof(logger));
         }
-
+        
         public async Task<Community> UpdateCommunity(Models.Community community, CancellationToken cancellationToken)
         {
             Community updatedCommunity = await CreateUpdatedCommunity(community, cancellationToken);
@@ -70,7 +64,7 @@ namespace ServerStarter.Server.Services
                                          .WhenAllList();
 
             var queuedPlayers  = await _queue.GetQueuedPlayers(community.Id);
-            var waitingPlayers = await GetWaitingPlayers(queuedPlayers, servers);
+            var waitingPlayers = FilterWaitingPlayers(queuedPlayers, servers);
             var queuedCommunityPlayers = queuedPlayers.Select(p => new CommunityPlayer
                                                                    {
                                                                        Name = p.Name,
@@ -105,13 +99,14 @@ namespace ServerStarter.Server.Services
                    };
         }
 
-        private async Task<IList<ApplicationUser>> GetWaitingPlayers(IList<ApplicationUser> queuedUsers, IList<CommunityServer> servers)
+        private IList<ApplicationUser> FilterWaitingPlayers(IList<ApplicationUser> queuedUsers, IList<CommunityServer> servers)
         {
             var playingSteamIds = servers
                                   .SelectMany(s => s.Players)
-                                  .Select(p => p.SteamId);
-            var playingUsers = await _users.GetForSteamIds(playingSteamIds);
-            return _queue.GetWaitingPlayers(queuedUsers, playingUsers);
+                                  .Select(p => p.SteamId)
+                                  .ToHashSet();
+            var waitingPlayers = queuedUsers.Where(user => !playingSteamIds.Contains(user.SteamId)).ToList();
+            return waitingPlayers;
         }
     }
 }
