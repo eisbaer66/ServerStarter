@@ -42,7 +42,6 @@ namespace ServerStarter.Server.Hubs
                 string groupName = args.CommunityId.ToString();
                 string name      = Context.User.GetName();
                 await Clients.Group(groupName).SendAsync("UserJoined", groupName, name);
-                await Clients.NotifyCommunityChange(groupName);
             }
             catch (Exception e)
             {
@@ -57,7 +56,6 @@ namespace ServerStarter.Server.Hubs
                 string groupName = args.CommunityId.ToString();
                 string name      = Context.User.GetName();
                 await Clients.Group(groupName).SendAsync("UserLeft", groupName, name);
-                await Clients.NotifyCommunityChange(groupName);
             }
             catch (Exception e)
             {
@@ -89,8 +87,6 @@ namespace ServerStarter.Server.Hubs
 
                                  await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
                                  await _queue.Join(communityId, userId);
-
-                                 await Clients.GroupExcept(userId.ToString(), Context.ConnectionId).SendAsync("JoinQueue", communityId);
                              });
         }
 
@@ -105,8 +101,6 @@ namespace ServerStarter.Server.Hubs
 
                                  await _queue.Leave(communityId, userId);
                                  await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
-
-                                 await Clients.GroupExcept(userId.ToString(), Context.ConnectionId).SendAsync("LeaveQueue", groupName);
                              });
         }
 
