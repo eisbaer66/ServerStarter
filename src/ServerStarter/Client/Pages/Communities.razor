@@ -87,25 +87,33 @@
             }
 
 
-            Action<HttpConnectionOptions> ConfigureHttpConnection()
+            void ConfigureHttpConnection(HttpConnectionOptions options)
             {
-                return options =>
+                options.AccessTokenProvider = async () =>
                 {
-                    options.AccessTokenProvider = async () =>
-                    {
-                        var result = await AccessTokenProvider.RequestAccessToken();
-                        AccessToken token;
-                        bool tryGetToken = result.TryGetToken(out token);
-                        if (!tryGetToken)
-                            return null;
-                        return token.Value;
-                    };
+                    var result = await AccessTokenProvider.RequestAccessToken();
+                    AccessToken token;
+                    bool tryGetToken = result.TryGetToken(out token);
+                    if (!tryGetToken)
+                        return null;
+                    return token.Value;
                 };
             }
 
             HubConnection = new HubConnectionBuilder()
-                .WithUrl(NavigationManager
-                             .ToAbsoluteUri("/hubs/communities"), ConfigureHttpConnection())
+                .WithUrl(NavigationManager.ToAbsoluteUri("/hubs/communities"), ConfigureHttpConnection)
+                .WithAutomaticReconnect(new []
+                                        {
+                                            TimeSpan.Zero,
+                                            TimeSpan.FromSeconds(1),
+                                            TimeSpan.FromSeconds(2),
+                                            TimeSpan.FromSeconds(2),
+                                            TimeSpan.FromSeconds(5),
+                                            TimeSpan.FromSeconds(10),
+                                            TimeSpan.FromSeconds(10),
+                                            TimeSpan.FromSeconds(30),
+                                            TimeSpan.FromSeconds(60),
+                                        })
                 .Build();
 
             HubConnection.On<Guid>("JoinQueue", async (communityId) =>
