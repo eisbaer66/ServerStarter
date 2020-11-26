@@ -295,33 +295,7 @@ namespace ServerStarter.Server
             if (elasticSettings.AreSet() && elasticSettings.ApmEnabled)
             {
                 app.UseAllElasticApm(Configuration);
-                
-                //don't create transactions for
-                //- static files,
-                //- blazor-framework
-                //gonna get easier with 1.7 of Elastic.Apm.AspNetCore, see (TransactionIgnoreUrls)
-                WildcardMatcher[] matchers = new string[]
-                                                  {
-                                                      "/VAADIN/*",
-                                                      "/heartbeat*",
-                                                      "/favicon.ico",
-                                                      "*.js",
-                                                      "*.css",
-                                                      "*.jpg",
-                                                      "*.jpeg",
-                                                      "*.png",
-                                                      "*.gif",
-                                                      "*.webp",
-                                                      "*.svg",
-                                                      "*.woff",
-                                                      "*.woff2",
 
-                                                      "*.json",
-                                                      "*.wav",
-                                                      "/_framework/*",
-                                                  }
-                    .Select(WildcardMatcher.ValueOf)
-                    .ToArray();
                 string GetHeader(IDictionary<string, string> dict, string key)
                 {
                     if (dict == null)
@@ -337,10 +311,6 @@ namespace ServerStarter.Server
                                     if (GetHeader(request?.Headers, "Connection") == "upgrade" &&
                                         GetHeader(request?.Headers, "Upgrade") == "websocket" &&
                                         GetHeader(t?.Custom, "icebear.HubApm") != "true")
-                                        return null;
-
-                                    var pathName       = request?.Url?.PathName;
-                                    if (pathName != null && matchers.Any(m => m.Matches(pathName)))
                                         return null;
                                     return t;
                                 });
