@@ -14,40 +14,48 @@ namespace ServerStarter.Server.Migrations.MySql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.7")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64)
+                .HasAnnotation("ProductVersion", "5.0.0");
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.DeviceFlowCodes", b =>
                 {
                     b.Property<string>("UserCode")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4");
 
                     b.Property<string>("ClientId")
                         .IsRequired()
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4");
 
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Data")
                         .IsRequired()
-                        .HasColumnType("longtext CHARACTER SET utf8mb4")
-                        .HasMaxLength(50000);
+                        .HasMaxLength(50000)
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4");
 
                     b.Property<string>("DeviceCode")
                         .IsRequired()
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4");
 
                     b.Property<DateTime?>("Expiration")
                         .IsRequired()
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("SessionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4");
+
                     b.Property<string>("SubjectId")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4");
 
                     b.HasKey("UserCode");
 
@@ -62,39 +70,52 @@ namespace ServerStarter.Server.Migrations.MySql
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.PersistedGrant", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4");
 
                     b.Property<string>("ClientId")
                         .IsRequired()
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4");
+
+                    b.Property<DateTime?>("ConsumedTime")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Data")
                         .IsRequired()
-                        .HasColumnType("longtext CHARACTER SET utf8mb4")
-                        .HasMaxLength(50000);
+                        .HasMaxLength(50000)
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4");
 
                     b.Property<DateTime?>("Expiration")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("SessionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4");
+
                     b.Property<string>("SubjectId")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4")
-                        .HasMaxLength(50);
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4");
 
                     b.HasKey("Key");
 
                     b.HasIndex("Expiration");
 
                     b.HasIndex("SubjectId", "ClientId", "Type");
+
+                    b.HasIndex("SubjectId", "SessionId", "Type");
 
                     b.ToTable("PersistedGrants");
                 });
@@ -109,18 +130,18 @@ namespace ServerStarter.Server.Migrations.MySql
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("Name")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4");
 
                     b.Property<string>("NormalizedName")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasName("RoleNameIndex");
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles");
                 });
@@ -243,8 +264,8 @@ namespace ServerStarter.Server.Migrations.MySql
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("Email")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
@@ -259,12 +280,12 @@ namespace ServerStarter.Server.Migrations.MySql
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("NormalizedEmail")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4");
 
                     b.Property<string>("NormalizedUserName")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
@@ -285,17 +306,17 @@ namespace ServerStarter.Server.Migrations.MySql
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("UserName")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
-                        .HasName("EmailIndex");
+                        .HasDatabaseName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasName("UserNameIndex");
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers");
                 });
@@ -345,7 +366,7 @@ namespace ServerStarter.Server.Migrations.MySql
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("QueueId")
+                    b.Property<Guid>("QueueId")
                         .HasColumnType("char(36)");
 
                     b.Property<string>("UserId")
@@ -467,17 +488,25 @@ namespace ServerStarter.Server.Migrations.MySql
                     b.HasOne("ServerStarter.Server.Models.Community", "Community")
                         .WithMany()
                         .HasForeignKey("CommunityId");
+
+                    b.Navigation("Community");
                 });
 
             modelBuilder.Entity("ServerStarter.Server.Models.CommunityQueueEntry", b =>
                 {
                     b.HasOne("ServerStarter.Server.Models.CommunityQueue", "Queue")
                         .WithMany("Entries")
-                        .HasForeignKey("QueueId");
+                        .HasForeignKey("QueueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ServerStarter.Server.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.Navigation("Queue");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ServerStarter.Server.Models.CommunityServer", b =>
@@ -494,6 +523,18 @@ namespace ServerStarter.Server.Migrations.MySql
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ServerStarter.Server.Models.Community", b =>
+                {
+                    b.Navigation("Servers");
+                });
+
+            modelBuilder.Entity("ServerStarter.Server.Models.CommunityQueue", b =>
+                {
+                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

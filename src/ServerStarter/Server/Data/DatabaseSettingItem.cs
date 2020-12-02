@@ -29,11 +29,12 @@ namespace ServerStarter.Server.Data
                                          });
                     break;
                 case "MySQL":
-                    options.UseMySql(ConnectionString, builder =>
-                                                       {
-                                                           builder.ServerVersion(Meta)
-                                                                  .RetryOnFailure(this);
-                                                       });
+                    options.UseMySql(ConnectionString,
+                                     ServerVersion.FromString(Meta),
+                                     builder =>
+                                     {
+                                         builder.RetryOnFailure(this);
+                                     });
                     break;
             }
         }

@@ -30,7 +30,7 @@ namespace ServerStarter.Server.Data
         {
         }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseMySql("Data Source=my.db", builder => builder.ServerVersion("10.3.15-MariaDB-1"));
+            => options.UseMySql("Data Source=my.db", ServerVersion.FromString("10.3.15-MariaDB-1"));
     }
     class MsSqlDbContext : ApplicationDbContext
     {
