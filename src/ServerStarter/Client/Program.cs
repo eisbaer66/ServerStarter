@@ -17,7 +17,7 @@ namespace ServerStarter.Client
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             //builder.Logging.SetMinimumLevel(LogLevel.Trace);
 
-            builder.RootComponents.Add<App>("app");
+            builder.RootComponents.Add<App>("#app");
 
             builder.Services.AddHttpClient("ServerStarter.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
                 .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
