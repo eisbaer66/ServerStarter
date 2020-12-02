@@ -7,7 +7,7 @@ namespace ServerStarter.Server.Migrations.MySql
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("DELETE FROM [dbo].[CommunityQueueEntry] WHERE [QueueId] IS NULL OR [UserId] IS NULL");
+            migrationBuilder.Sql("DELETE FROM `CommunityQueueEntry` WHERE `QueueId` IS NULL OR `UserId` IS NULL");
             migrationBuilder.DropForeignKey(
                 name: "FK_CommunityQueueEntry_CommunitiesQueues_QueueId",
                 table: "CommunityQueueEntry");

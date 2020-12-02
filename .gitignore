@@ -342,3 +342,4 @@ healthchecksdb
 /serverstarter.tar
 /src/ServerStarter/Server/Logs
 /src/ServerStarter/Server/signing
+*.sqlite

@@ -42,4 +42,14 @@ namespace ServerStarter.Server.Data
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=aspnet-ServerStarter.Server-EA1545A0-EB79-480A-9D38-989950E652AB;Integrated Security=SSPI;");
     }
+    class SqliteDbContext : ApplicationDbContext
+    {
+        public SqliteDbContext() : base(new DbContextOptions<SqliteDbContext>(),
+                                        new OptionsManager<OperationalStoreOptions>(new OptionsFactory<OperationalStoreOptions>(new IConfigureOptions<OperationalStoreOptions>[0],
+                                                                                        new IPostConfigureOptions<OperationalStoreOptions>[0])))
+        {
+        }
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+            => options.UseSqlite("Data Source=db.sqlite");
+    }
 }

@@ -36,6 +36,9 @@ namespace ServerStarter.Server.Data
                                          builder.RetryOnFailure(this);
                                      });
                     break;
+                case "SQLite":
+                    options.UseSqlite(ConnectionString);
+                    break;
             }
         }
     }

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
+using ServerStarter.Server.Data;
 using ServerStarter.Server.Logging;
 
 namespace ServerStarter.Server
@@ -16,7 +17,10 @@ namespace ServerStarter.Server
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args)
+                .Build()
+                .MigrateDatabase<ApplicationDbContext>()
+                .Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
