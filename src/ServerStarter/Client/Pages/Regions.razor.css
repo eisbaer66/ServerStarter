@@ -1,0 +1,36 @@
+﻿h1 {
+    font-size: 4rem;
+    line-height: normal;
+}
+
+.container {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+}
+.head {
+    font-family: 'TF2Build';
+    line-height: normal;
+}
+.loading {
+    margin: 50px;
+}
+.regions {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+}
+    .regions .seperator {
+        width: 3px;
+        margin: 0px 30px;
+        background-color: var(--highlightcolor);
+    }
+    .regions .seperator:last-child {
+        display: none;
+    }
+.indicator {
+    margin-top: 50px;
+}
+.description {
+    margin-top: 50px;
+}

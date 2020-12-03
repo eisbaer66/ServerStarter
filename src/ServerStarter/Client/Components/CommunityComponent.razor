@@ -9,6 +9,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JsRuntime
 @inject ILogger<CommunityComponent> Logger
+@inject QueueSettings QueueSettings
 @implements IDisposable
 
 <div class="row community">
@@ -147,12 +148,6 @@
 
     [Parameter]
     public HubConnection HubConnection { get; set; }
-
-    [Parameter]
-    public QueueSettings QueueSettings { get; set; }
-
-    [Parameter]
-    public EventCallback<QueueSettings> QueueSettingsChanged { get; set; }
 
     [Parameter]
     public EventCallback<CommunityServer> JoinedServer { get; set; }

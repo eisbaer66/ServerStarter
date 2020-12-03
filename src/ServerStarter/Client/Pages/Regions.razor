@@ -1,0 +1,122 @@
+@page "/regions"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.Logging
+@using ServerStarter.Client.Components
+@using ServerStarter.Shared
+@attribute [Authorize]
+@implements IDisposable
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IAccessTokenProvider AccessTokenProvider
+@inject ILogger<Communities> Logger
+@inject QueueSettings Settings
+
+
+<div class="container">
+
+    <div class="head">
+        <h1>choose your region</h1>
+
+        @if (_regions == null)
+        {
+            <p class="loading"load><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="regions">
+                @foreach (var region in _regions)
+                {
+                    <RegionComponent @ref="Childs" Region="region" HubConnection="HubConnection"></RegionComponent>
+
+                    <div class="seperator"></div>
+                }
+            </div>
+        }
+    </div>
+    
+    @if (HubConnection?.State == HubConnectionState.Connected)
+    {
+        <div class="indicator">
+            <figure class="queuedIcon"/>
+            <span>updating automatically</span>
+        </div>
+    }
+    else
+    {
+        <div class="indicator">
+            <figure class="queuedIcon stopped"/>
+            <span>Unable to update. Please reload the page.</span>
+        </div>
+    }
+    <EditForm Model="@Settings" class="d-flex flex-column">
+        @*OnValidSubmit="@SettingsSpeichern"*@
+        <DataAnnotationsValidator />
+
+        <label>
+            <InputCheckbox id="playsounds" @bind-Value="Settings.PlaySounds"></InputCheckbox>
+            Play sounds
+        </label>
+        <label>
+            <InputCheckbox id="automaticJoinEnabled" @bind-Value="Settings.AutomaticJoinEnabled"></InputCheckbox>
+            automatically join,<InputNumber id="automaticJoinDelay" class="shortInline" @bind-Value="Settings.AutomaticJoinDelayInSeconds"></InputNumber> seconds after server is ready to play
+        </label>
+
+        <ValidationSummary />
+        @*<button type="submit">Submit</button>*@
+    </EditForm>
+    <div class="description">
+        <DescriptionComponent></DescriptionComponent>
+    </div>
+
+</div>
+@code {
+    private readonly IList<RegionComponent> childs = new List<RegionComponent>();
+
+    private Region[] _regions;
+    private HubConnection HubConnection;
+
+    RegionComponent Childs
+    {
+        set { childs.Add(value); }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _regions = await Http.GetFromJsonAsync<Region[]>("api/Region");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+
+
+
+        HubConnection = new HubConnectionBuilder()
+            .WithDefaultConfig(AccessTokenProvider, NavigationManager)
+            .Build();
+
+        HubConnection.On<Guid>("JoinQueue", async (communityId) =>
+        {
+            RegionComponent community = childs.FirstOrDefault(c => c.Region.Id == communityId);
+            if (community == null)
+            {
+                Logger.LogError("could not rejoin {CommunityId}, because it was not loaded", communityId);
+                return;
+            }
+
+            community.JoinRegion();
+        });
+        await HubConnection.StartAsync();
+    }
+
+    public void Dispose()
+    {
+        if (HubConnection != null)
+            _ = HubConnection.DisposeAsync();
+    }
+
+}

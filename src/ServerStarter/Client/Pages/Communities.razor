@@ -3,7 +3,6 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using Microsoft.AspNetCore.Http.Connections.Client
 @using Microsoft.AspNetCore.SignalR.Client
-@using Microsoft.Extensions.DependencyInjection
 @using Microsoft.Extensions.Logging
 @using ServerStarter.Client.Components
 @using ServerStarter.Shared
@@ -13,7 +12,9 @@
 @inject NavigationManager NavigationManager
 @inject IAccessTokenProvider AccessTokenProvider
 @inject ILogger<Communities> Logger
+@inject QueueSettings Settings
 
+<h1>Welcome to the Server Starter <span class="devAlphaText">Alpha</span> Page.</h1>
 <DescriptionComponent></DescriptionComponent>
 
 <div class="communitiesContainer">
@@ -23,17 +24,17 @@
     }
     else
     {
-        <EditForm Model="@settings" class="d-flex flex-column">
+        <EditForm Model="@Settings" class="d-flex flex-column">
             @*OnValidSubmit="@SettingsSpeichern"*@
             <DataAnnotationsValidator />
 
             <label>
-                <InputCheckbox id="playsounds" @bind-Value="settings.PlaySounds"></InputCheckbox>
+                <InputCheckbox id="playsounds" @bind-Value="Settings.PlaySounds"></InputCheckbox>
                 Play sounds
             </label>
             <label>
-                <InputCheckbox id="automaticJoinEnabled" @bind-Value="settings.AutomaticJoinEnabled"></InputCheckbox>
-                automatically join,<InputNumber id="automaticJoinDelay" class="shortInline" @bind-Value="settings.AutomaticJoinDelayInSeconds"></InputNumber> seconds after server is ready to play
+                <InputCheckbox id="automaticJoinEnabled" @bind-Value="Settings.AutomaticJoinEnabled"></InputCheckbox>
+                automatically join,<InputNumber id="automaticJoinDelay" class="shortInline" @bind-Value="Settings.AutomaticJoinDelayInSeconds"></InputNumber> seconds after server is ready to play
             </label>
 
             <ValidationSummary />
@@ -42,17 +43,17 @@
 
         @if (HubConnection?.State == HubConnectionState.Connected)
         {
-            <figure class="queuedIcon dark" /> <span>updating automatically</span>
+            <figure class="queuedIcon" /> <span>updating automatically</span>
         }
         else
         {
-            <figure class="queuedIcon dark stopped" /> <span>Unable to update. Please reload the page.</span>
+            <figure class="queuedIcon stopped" /> <span>Unable to update. Please reload the page.</span>
         }
 
         <div class="container">
             @foreach (var community in communities)
             {
-                <CommunityComponent @ref="Childs" Community="community" HubConnection="HubConnection" @bind-QueueSettings="settings" JoinedServer="JoinedServer"></CommunityComponent>
+                <CommunityComponent @ref="Childs" Community="community" HubConnection="HubConnection" JoinedServer="JoinedServer"></CommunityComponent>
             }
         </div>
     }
@@ -61,12 +62,6 @@
     @code {
         private readonly IList<CommunityComponent> childs = new List<CommunityComponent>();
 
-        private QueueSettings settings = new QueueSettings
-                                         {
-                                             PlaySounds = true,
-                                             AutomaticJoinEnabled = true,
-                                             AutomaticJoinDelayInSeconds = 30,
-                                         };
         private Community[] communities;
         private HubConnection HubConnection;
 

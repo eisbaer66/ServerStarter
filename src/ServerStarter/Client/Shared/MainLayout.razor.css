@@ -10,7 +10,7 @@
 
 .main .top-row {
     background-color: var(--menucolortop);
-    border-bottom: 1px solid var(--bordercolor);
+    /*border-bottom: 1px solid var(--bordercolor);*/
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;

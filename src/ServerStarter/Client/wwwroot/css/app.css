@@ -31,18 +31,20 @@
 }
 
 :root {
+    --background: #393939;
     --menucolortop: #36312a;
     --menucolor: #332d27;
     --bordercolor: #786a63;
-    --fontcolorlight: #d7d7d7;
+    --fontcolorlight: #ECEACC;
+    --fontcolorlightSecondary: #BBB89B;
     --fontcolordark: #291e17;
-    --highlightcolor: #b05112;
-    --activecolor: #e06818;
+    --highlightcolor: #FF6E1E;
+    --activecolor: #FF5900;
     --lightbackgroundcolor: #d1c5b0;
     --secondarybuttonbackgroundcolor: #776B5F;
     --secondarybuttoncolor: #EDE2CC;
+    --joinbuttonBackground: #34851C;
     --discordUser: #338ECC;
-
     --devAlpha: #FF4D16;
 }
 
@@ -107,6 +109,8 @@
 
 html, body {
     font-family: 'TF2Secondary';
+    background-color: var(--background);
+    color: var(--fontcolorlight);
     scrollbar-color: var(--lightbackgroundcolor) var(--secondarybuttonbackgroundcolor);
 }
 
@@ -118,9 +122,13 @@ a, .btn-link {
         color: var(--activecolor);
     }
 
+img.round {
+    border-radius: 50%;
+}
+
 p.br {
     margin-bottom: 0px;
-} 
+}
 
 .btn-primary {
     color: #fff;

@@ -1,0 +1,32 @@
+﻿h2 {
+    font-size: 2rem;
+    line-height: normal;
+    margin-top: 10px;
+}
+
+.region {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    width: 200px;
+}
+    .region .secondary {
+        font-size: 2.3rem;
+        line-height: normal;
+        color: var(--fontcolorlightSecondary);
+    }
+.regionIcon {
+    max-height: 150px;
+    max-width: 150px;
+}
+.btn-joinleave {
+    height: 66px;
+    font-size: 3.5rem;
+    line-height: normal;
+    margin-top: 10px;
+    padding: 0 6px;
+    border-radius: 33px;
+    background-color: var(--joinbuttonBackground);
+    border-color: var(--joinbuttonBackground);
+    color: var(--fontcolorlight);
+}

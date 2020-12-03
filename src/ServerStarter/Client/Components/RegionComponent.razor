@@ -1,0 +1,89 @@
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.Logging
+@using ServerStarter.Shared
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject ILogger<RegionComponent> Logger
+@implements IDisposable
+
+<div class="region">
+    <div class="row">
+        <span class="name" data-toggle="tooltip" title="@Region.Name"><img class="regionIcon round" src="assets/img/scale.png" /></span>
+    </div>
+    <div class="row">
+        <span class="name" data-toggle="tooltip" title="@Region.Name"><h2>@Region.Name</h2></span>
+    </div>
+    <div class="row secondary">
+        <span data-toggle="tooltip" title="@Region.CurrentPlayers playing">@Region.CurrentPlayers playing</span>
+    </div>
+    <div class="row secondary">
+        <span data-toggle="tooltip" title="@Region.WaitingPlayers in queue">@Region.WaitingPlayers in queue</span>
+    </div>
+    <button class="btn btn-themed btn-joinleave w-100" @onclick="JoinRegion" disabled="@(!IsConnected)">join!</button>
+</div>
+
+@code {
+
+    private Region _region;
+    [Parameter]
+    public Region Region
+    {
+        get => _region;
+        set
+        {
+            if (_region != null && value != null && _region.Updated >= value.Updated)
+                return;
+
+            _region = value;
+        }
+    }
+
+    [Parameter]
+    public HubConnection HubConnection { get; set; }
+    
+    private readonly List<IDisposable> _resources = new List<IDisposable>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _resources.Add(HubConnection.On<string>("Changed", async (communityId) =>
+        {
+            if (communityId != Region.Id.ToString())
+                return;
+
+            await LoadRegion();
+        }));
+    }
+
+    private async Task LoadRegion()
+    {
+        try
+        {
+            Region = await Http.GetFromJsonAsync<Region>("api/Region/" + Region.Id);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+
+        StateHasChanged();
+    }
+
+    public void JoinRegion()
+    {
+        NavigationManager.NavigateTo("community/"+Region.Id);
+    }
+
+    public bool IsConnected =>
+        HubConnection.State == HubConnectionState.Connected;
+
+    public void Dispose()
+    {
+        foreach (var s in _resources)
+        {
+            s.Dispose();
+        }
+        _resources.Clear();
+    }
+
+}

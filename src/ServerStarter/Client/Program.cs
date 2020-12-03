@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ServerStarter.Shared;
 
 namespace ServerStarter.Client
 {
@@ -19,20 +20,27 @@ namespace ServerStarter.Client
 
             builder.RootComponents.Add<App>("#app");
 
-            builder.Services.AddHttpClient("ServerStarter.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
-                .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+            var services = builder.Services;
+            services.AddHttpClient("ServerStarter.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+                             .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
             // Supply HttpClient instances that include access tokens when making requests to the server project
-            builder.Services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServerStarter.ServerAPI"));
+            services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServerStarter.ServerAPI"));
 
-            builder.Services.AddApiAuthorization<RemoteAuthenticationState, UserAccount>()
-                   .AddAccountClaimsPrincipalFactory<RemoteAuthenticationState, UserAccount, CustomAccountClaimsPrincipalFactory>();
-            builder.Services.AddOidcAuthentication<RemoteAuthenticationState, UserAccount>(options =>
-                                                   {
-                                                       builder.Configuration.Bind("Local", options.ProviderOptions);
-                                                       options.UserOptions.NameClaim = ClaimTypes.Name;
-                                                   })
-                   .AddAccountClaimsPrincipalFactory<RemoteAuthenticationState, UserAccount, CustomAccountClaimsPrincipalFactory>();
+            services.AddApiAuthorization<RemoteAuthenticationState, UserAccount>()
+                             .AddAccountClaimsPrincipalFactory<RemoteAuthenticationState, UserAccount, CustomAccountClaimsPrincipalFactory>();
+            services.AddOidcAuthentication<RemoteAuthenticationState, UserAccount>(options =>
+                                                                                            {
+                                                                                                builder.Configuration.Bind("Local", options.ProviderOptions);
+                                                                                                options.UserOptions.NameClaim = ClaimTypes.Name;
+                                                                                            })
+                             .AddAccountClaimsPrincipalFactory<RemoteAuthenticationState, UserAccount, CustomAccountClaimsPrincipalFactory>();
+            services.AddSingleton(new QueueSettings
+                                  {
+                                      PlaySounds                  = true,
+                                      AutomaticJoinEnabled        = true,
+                                      AutomaticJoinDelayInSeconds = 30,
+                                  });
 
             await builder.Build().RunAsync();
         }
