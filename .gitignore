@@ -343,3 +343,4 @@ healthchecksdb
 /src/ServerStarter/Server/Logs
 /src/ServerStarter/Server/signing
 *.sqlite
+/redesign
