@@ -1,10 +1,12 @@
 ﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.Logging
+@using ServerStarter.Client.Hubs
 @using ServerStarter.Shared
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject ILogger<RegionComponent> Logger
+@inject IQueueService QueueService
 @implements IDisposable
 
 <div class="region">
@@ -39,24 +41,43 @@
         }
     }
 
-    [Parameter]
-    public HubConnection HubConnection { get; set; }
-    
     private readonly List<IDisposable> _resources = new List<IDisposable>();
 
     protected override async Task OnInitializedAsync()
     {
-        _resources.Add(HubConnection.On<string>("Changed", async (communityId) =>
-        {
-            if (communityId != Region.Id.ToString())
-                return;
+        QueueService.Init(new StateEvents
+                                         {
+                                             Joined = async id =>
+                                                      {
+                                                          if (id != Region.Id)
+                                                              return;
 
-            await LoadRegion();
-        }));
+    //TODO disable Join button ?
+                                                          //StateHasChanged();
+                                                      },
+                                             Left = async id =>
+                                                      {
+                                                          if (id != Region.Id)
+                                                              return;
+
+    //TODO disable Join button ?
+                                                          //StateHasChanged();
+                                                      },
+                                         });
+
+        if (QueueService.IsJoined(Region.Id))
+        {
+    //TODO disable Join button ?
+    //StateHasChanged();
+        }
+        QueueService.OnCommunityChanged(async id => await CommunityChanged(id))
+                    .AddTo(_resources);
     }
 
-    private async Task LoadRegion()
+    private async Task CommunityChanged(Guid id)
     {
+        if (id != Region.Id)
+            return;
         try
         {
             Region = await Http.GetFromJsonAsync<Region>("api/Region/" + Region.Id);
@@ -71,12 +92,12 @@
 
     public async Task JoinRegion()
     {
-        await HubConnection.InvokeAsync("JoinGroup", Region.Id);
+        await QueueService.Join(Region.Id);
         NavigationManager.NavigateTo("region/"+Region.Id);
     }
 
     public bool IsConnected =>
-        HubConnection.State == HubConnectionState.Connected;
+        QueueService.State == HubConnectionState.Connected;
 
     public void Dispose()
     {

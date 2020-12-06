@@ -1,8 +1,16 @@
 ﻿window.uiFunctions = {
     focusElement: function (element) {
+        if (!element)
+            return;
+        if (!element.focus)
+            return;
         element.focus();
     },
     scrollElementIntoView: function (element) {
+        if (!element)
+            return;
+        if (!element.scrollIntoView)
+            return;
         element.scrollIntoView();
     }
 }

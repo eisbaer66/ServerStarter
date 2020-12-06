@@ -5,14 +5,15 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.Logging
 @using ServerStarter.Client.Components
+@using ServerStarter.Client.Hubs
 @using ServerStarter.Shared
 @attribute [Authorize]
-@implements IDisposable
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject IAccessTokenProvider AccessTokenProvider
 @inject ILogger<Communities> Logger
 @inject QueueSettings Settings
+@inject IQueueService QueueService
 
 <h1>Welcome to the Server Starter <span class="devAlphaText">Alpha</span> Page.</h1>
 <DescriptionComponent></DescriptionComponent>
@@ -41,7 +42,7 @@
             @*<button type="submit">Submit</button>*@
         </EditForm>
 
-        @if (HubConnection?.State == HubConnectionState.Connected)
+        @if (QueueService.State == HubConnectionState.Connected)
         {
             <figure class="queuedIcon" /> <span>updating automatically</span>
         }
@@ -51,57 +52,35 @@
         }
 
         <div class="container">
-            <CommunityComponent @ref="child" Community="community" HubConnection="HubConnection" JoinedServer="JoinedServer"></CommunityComponent>
+            <CommunityComponent @ref="child" Community="community" JoinedServer="JoinedServer"></CommunityComponent>
         </div>
     }
 </div>
 
-    @code {
-        private CommunityComponent child;
+@code {
+    private CommunityComponent child;
 
-        private Community community;
-        private HubConnection HubConnection;
+    private Community community;
 
-        [Parameter]
-        public string Id { get; set; }
+    [Parameter]
+    public string Id { get; set; }
 
-        protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
+    {
+        try
         {
-            try
-            {
-                community = await Http.GetFromJsonAsync<Community>("api/Communities/" + Id);
-            }
-            catch (AccessTokenNotAvailableException exception)
-            {
-                exception.Redirect();
-            }
-
-            HubConnection = new HubConnectionBuilder()
-                .WithDefaultConfig(AccessTokenProvider, NavigationManager)
-                .Build();
-
-            HubConnection.On<Guid>("JoinQueue", async (communityId) =>
-            {
-                if (child == null)
-                {
-                    Logger.LogError("could not rejoin {CommunityId}, because it was not loaded", communityId);
-                    return;
-                }
-
-                await child.JoinQueue();
-            });
-            await HubConnection.StartAsync();
+            community = await Http.GetFromJsonAsync<Community>("api/Communities/" + Id);
+            await QueueService.Init();
         }
-
-        public void Dispose()
+        catch (AccessTokenNotAvailableException exception)
         {
-            if (HubConnection != null)
-                _ = HubConnection.DisposeAsync();
+            exception.Redirect();
         }
-
-        private async Task JoinedServer(CommunityServer server)
-        {
-            await child.LeaveQueue();
-        }
-
     }
+
+    private async Task JoinedServer(CommunityServer server)
+    {
+        await child.LeaveQueue();
+    }
+
+}

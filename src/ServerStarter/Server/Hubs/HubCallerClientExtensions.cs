@@ -8,10 +8,6 @@ namespace ServerStarter.Server.Hubs
     {
         public static async Task NotifyCommunityChange(this IHubClients<IClientProxy> clients, Guid communityId)
         {
-            await NotifyCommunityChange(clients, communityId.ToString());
-        }
-        public static async Task NotifyCommunityChange(this IHubClients<IClientProxy> clients, string communityId)
-        {
             await clients.All.SendAsync("Changed", communityId);
         }
 

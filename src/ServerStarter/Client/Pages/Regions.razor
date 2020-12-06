@@ -3,8 +3,9 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.Logging
-@using ServerStarter.Client.Components
+@using ServerStarter.Client.Hubs
 @using ServerStarter.Shared
+@using ServerStarter.Client.Components
 @using RegionDto = ServerStarter.Shared.Region;
 @attribute [Authorize]
 @implements IDisposable
@@ -13,6 +14,7 @@
 @inject IAccessTokenProvider AccessTokenProvider
 @inject ILogger<Communities> Logger
 @inject QueueSettings Settings
+@inject IQueueService QueueService
 
 
 <div class="container">
@@ -29,7 +31,7 @@
             <div class="regions">
                 @foreach (var region in _regions)
                 {
-                    <RegionComponent @ref="Childs" Region="region" HubConnection="HubConnection"></RegionComponent>
+                    <RegionComponent Region="region"></RegionComponent>
 
                     <div class="seperator"></div>
                 }
@@ -37,7 +39,7 @@
         }
     </div>
     
-    @if (HubConnection?.State == HubConnectionState.Connected)
+    @if (QueueService.State == HubConnectionState.Connected)
     {
         <div class="indicator">
             <figure class="queuedIcon"/>
@@ -73,51 +75,25 @@
 
 </div>
 @code {
-    private readonly IList<RegionComponent> childs = new List<RegionComponent>();
 
     private RegionDto[] _regions;
-    private HubConnection HubConnection;
-
-    RegionComponent Childs
-    {
-        set { childs.Add(value); }
-    }
 
     protected override async Task OnInitializedAsync()
+    {
+        await LoadRegions();
+    }
+
+    private async Task LoadRegions()
     {
         try
         {
             _regions = await Http.GetFromJsonAsync<RegionDto[]>("api/Region");
+            await QueueService.Init();
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
-
-
-
-        HubConnection = new HubConnectionBuilder()
-            .WithDefaultConfig(AccessTokenProvider, NavigationManager)
-            .Build();
-
-        HubConnection.On<Guid>("JoinQueue", async (communityId) =>
-        {
-            RegionComponent regionComponent = childs.FirstOrDefault(c => c.Region.Id == communityId);
-            if (regionComponent == null)
-            {
-                Logger.LogError("could not rejoin {CommunityId}, because it was not loaded", communityId);
-                return;
-            }
-
-            await regionComponent.JoinRegion();
-        });
-        await HubConnection.StartAsync();
-    }
-
-    public void Dispose()
-    {
-        if (HubConnection != null)
-            _ = HubConnection.DisposeAsync();
     }
 
 }

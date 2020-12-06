@@ -3,6 +3,7 @@
 @using Microsoft.Extensions.Logging
 @using ServerStarter.Shared
 @using System.Timers
+@using ServerStarter.Client.Hubs
 @using ServerStarter.Server
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
@@ -10,6 +11,7 @@
 @inject IJSRuntime JsRuntime
 @inject ILogger<CommunityComponent> Logger
 @inject QueueSettings QueueSettings
+@inject IQueueService QueueService
 @implements IDisposable
 
 <div class="row community">
@@ -83,7 +85,7 @@
                     </ul>
                 </div>
                 <div class="controls">
-                    <input @ref="messageInputReference" @bind="messageInput" size="50" @onkeyup="KeyUp"/>
+                    <input @ref="messageInputReference" @bind="messageInput" size="50" @onkeyup="KeyUp" />
                     <button class="btn btn-themed" @onclick="Send" disabled="@(!IsConnected)">Send</button>
                 </div>
             </div>
@@ -147,9 +149,6 @@
     }
 
     [Parameter]
-    public HubConnection HubConnection { get; set; }
-
-    [Parameter]
     public EventCallback<CommunityServer> JoinedServer { get; set; }
 
     ElementReference messageInputReference;
@@ -165,6 +164,7 @@
 
     private bool showPopup = false;
     private bool joined = false;
+    private bool _rendered = false;
 
     private string messageInput;
     private DateTime _autoJoinTime;
@@ -203,13 +203,48 @@
 
     protected override async Task OnInitializedAsync()
     {
-        subscription.Add(HubConnection.On<string>("Changed", async (communityId) =>
-        {
-            if (communityId != Community.Id.ToString())
-                return;
+        QueueService.OnCommunityChanged(async (communityId) =>
+                                              {
+                                                  if (communityId != Community.Id)
+                                                      return;
 
-            await LoadCommunity();
-        }));
+                                                  await LoadCommunity();
+                                              })
+                    .AddTo(subscription);
+
+        QueueService.Init(new StateEvents
+                          {
+                              Joined = async (communityId) =>
+                                             {
+                                                 if (communityId != Community.Id)
+                                                     return;
+
+                                                 await JoinQueue();
+                                             },
+                              Left = async (communityId) =>
+                                           {
+                                               if (communityId != Community.Id)
+                                                   return;
+
+                                               await LeaveQueue();
+                                           },
+                          })
+                    .AddTo(subscription);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+
+        if (_rendered)
+            return;
+        _rendered = true;
+
+        if (!QueueService.IsJoined(Community.Id))
+            return;
+
+        await JoinQueue();
     }
 
     private async Task LoadCommunity()
@@ -351,46 +386,56 @@
 
     public async Task JoinQueue()
     {
+        if (!_rendered)
+            return;
         if (joined)
             return;
-
-        groupSubscription.Add(HubConnection.On<string, string, string>("MessageReceived", async (communityId, user, message) =>
-        {
-            if (communityId != Community.Id.ToString())
-                return;
-
-            var encodedMsg = $"{user}: {message}";
-            await AddMessage(encodedMsg);
-        }));
-
-        groupSubscription.Add(HubConnection.On<string, string>("UserJoined", async (communityId, user) =>
-        {
-            if (communityId != Community.Id.ToString())
-                return;
-
-            var encodedMsg = $"{user} joined the queue";
-            await AddMessage(encodedMsg);
-        }));
-
-        groupSubscription.Add(HubConnection.On<string, string>("UserLeft", async (communityId, user) =>
-        {
-            if (communityId != Community.Id.ToString())
-                return;
-
-            var encodedMsg = $"{user} left the queue";
-            await AddMessage(encodedMsg);
-        }));
-
-        groupSubscription.Add(HubConnection.On<Guid>("LeaveQueue", async (communityId) =>
-        {
-            if (communityId != Community.Id)
-                return;
-
-            await LeaveQueue();
-        }));
-
-        await HubConnection.InvokeAsync("JoinGroup", Community.Id);
         joined = true;
+        
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var currentUser = authState.User;
+    //if (user == currentUser.Claims.FirstOrDefault(c => c.Type == IcebearClaimTypes.SteamId)?.Value)
+        var identityName = currentUser.Identity?.Name;
+
+        var events = new QueueEvents
+        {
+            Name = "CommunityComponent" + Community.Id,
+            MessageReceived = async (communityId, user, message) =>
+            {
+                if (communityId != Community.Id.ToString())
+                    return;
+
+                var encodedMsg = $"{user}: {message}";
+                await AddMessage(encodedMsg);
+            },
+            UserJoined = async (communityId, user) =>
+            {
+                if (communityId != Community.Id.ToString())
+                    return;
+
+                if (user == identityName)
+                    return;
+
+                var encodedMsg = $"{user} joined the queue";
+                await AddMessage(encodedMsg);
+            },
+            UserLeft = async (communityId, user) =>
+            {
+                if (communityId != Community.Id.ToString())
+                    return;
+
+                var encodedMsg = $"{user} left the queue";
+                await AddMessage(encodedMsg);
+            },
+        };
+        (await QueueService.RegisterQueueEvents(events))
+                    .AddTo(groupSubscription);
+
+
+        await QueueService.Join(Community.Id);
+        var encodedMsg = $"{identityName} joined the queue";
+        await AddMessage(encodedMsg);
         StateHasChanged();
         await FocusInput();
 
@@ -410,8 +455,6 @@
             return;
         DisableAutoJoinTimer();
 
-        await HubConnection.InvokeAsync("LeaveGroup", Community.Id);
-
         foreach (var subscription in groupSubscription)
         {
             subscription.Dispose();
@@ -424,13 +467,15 @@
         showPopup = false;
         StateHasChanged();
 
+
+        await QueueService.Leave(Community.Id);
         await LoadCommunity();
     }
 
     async Task Send()
     {
         if (!string.IsNullOrEmpty(messageInput))
-            await HubConnection.SendAsync("SendMessage", Community.Id, messageInput);
+            await QueueService.SendMessage(Community.Id, messageInput);
 
         messageInput = string.Empty;
 
@@ -453,11 +498,18 @@
             await Send();
     }
 
-    public bool IsConnected =>
-        HubConnection.State == HubConnectionState.Connected;
+    public bool IsConnected => QueueService.State == HubConnectionState.Connected;
 
     public void Dispose()
     {
+        _rendered = false;
+
+        foreach (var s in groupSubscription)
+        {
+            s.Dispose();
+        }
+        groupSubscription.Clear();
+
         foreach (var s in subscription)
         {
             s.Dispose();

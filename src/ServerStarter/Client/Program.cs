@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ServerStarter.Client.Hubs;
 using ServerStarter.Shared;
 
 namespace ServerStarter.Client
@@ -41,6 +42,7 @@ namespace ServerStarter.Client
                                       AutomaticJoinEnabled        = true,
                                       AutomaticJoinDelayInSeconds = 30,
                                   });
+            services.AddScoped<IQueueService, QueueService>();
 
             await builder.Build().RunAsync();
         }
