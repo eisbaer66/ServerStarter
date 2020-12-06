@@ -69,9 +69,10 @@
         StateHasChanged();
     }
 
-    public void JoinRegion()
+    public async Task JoinRegion()
     {
-        NavigationManager.NavigateTo("community/"+Region.Id);
+        await HubConnection.InvokeAsync("JoinGroup", Region.Id);
+        NavigationManager.NavigateTo("region/"+Region.Id);
     }
 
     public bool IsConnected =>

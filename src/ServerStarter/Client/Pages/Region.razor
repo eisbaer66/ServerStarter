@@ -1,0 +1,107 @@
+@page "/region/{id}"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.AspNetCore.Http.Connections.Client
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.Logging
+@using ServerStarter.Client.Components
+@using ServerStarter.Shared
+@attribute [Authorize]
+@implements IDisposable
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IAccessTokenProvider AccessTokenProvider
+@inject ILogger<Communities> Logger
+@inject QueueSettings Settings
+
+<h1>Welcome to the Server Starter <span class="devAlphaText">Alpha</span> Page.</h1>
+<DescriptionComponent></DescriptionComponent>
+
+<div class="communitiesContainer">
+    @if (community == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <EditForm Model="@Settings" class="d-flex flex-column">
+            @*OnValidSubmit="@SettingsSpeichern"*@
+            <DataAnnotationsValidator />
+
+            <label>
+                <InputCheckbox id="playsounds" @bind-Value="Settings.PlaySounds"></InputCheckbox>
+                Play sounds
+            </label>
+            <label>
+                <InputCheckbox id="automaticJoinEnabled" @bind-Value="Settings.AutomaticJoinEnabled"></InputCheckbox>
+                automatically join,<InputNumber id="automaticJoinDelay" class="shortInline" @bind-Value="Settings.AutomaticJoinDelayInSeconds"></InputNumber> seconds after server is ready to play
+            </label>
+
+            <ValidationSummary />
+            @*<button type="submit">Submit</button>*@
+        </EditForm>
+
+        @if (HubConnection?.State == HubConnectionState.Connected)
+        {
+            <figure class="queuedIcon" /> <span>updating automatically</span>
+        }
+        else
+        {
+            <figure class="queuedIcon stopped" /> <span>Unable to update. Please reload the page.</span>
+        }
+
+        <div class="container">
+            <CommunityComponent @ref="child" Community="community" HubConnection="HubConnection" JoinedServer="JoinedServer"></CommunityComponent>
+        </div>
+    }
+</div>
+
+    @code {
+        private CommunityComponent child;
+
+        private Community community;
+        private HubConnection HubConnection;
+
+        [Parameter]
+        public string Id { get; set; }
+
+        protected override async Task OnInitializedAsync()
+        {
+            try
+            {
+                community = await Http.GetFromJsonAsync<Community>("api/Communities/" + Id);
+            }
+            catch (AccessTokenNotAvailableException exception)
+            {
+                exception.Redirect();
+            }
+
+            HubConnection = new HubConnectionBuilder()
+                .WithDefaultConfig(AccessTokenProvider, NavigationManager)
+                .Build();
+
+            HubConnection.On<Guid>("JoinQueue", async (communityId) =>
+            {
+                if (child == null)
+                {
+                    Logger.LogError("could not rejoin {CommunityId}, because it was not loaded", communityId);
+                    return;
+                }
+
+                await child.JoinQueue();
+            });
+            await HubConnection.StartAsync();
+        }
+
+        public void Dispose()
+        {
+            if (HubConnection != null)
+                _ = HubConnection.DisposeAsync();
+        }
+
+        private async Task JoinedServer(CommunityServer server)
+        {
+            await child.LeaveQueue();
+        }
+
+    }
