@@ -26,6 +26,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -40,9 +43,12 @@ using ServerStarter.Server.Identity.AuthPolicies;
 using ServerStarter.Server.Identity.AuthPolicies.JoinedQueue;
 using ServerStarter.Server.Models;
 using ServerStarter.Server.Services;
+using ServerStarter.Server.Settings;
+using ServerStarter.Server.util;
 using ServerStarter.Server.WorkerServices;
 using ServerStarter.Server.ZarloAdapter;
 using Zarlo.Stats;
+using CacheControlHeaderValue = Microsoft.Net.Http.Headers.CacheControlHeaderValue;
 
 namespace ServerStarter.Server
 {
@@ -141,9 +147,27 @@ namespace ServerStarter.Server
             services.AddTransient<IProfileService, ProfileService>();
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>());
 
-            services.AddSignalR();
+            services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper>(factory =>
+                                           {
+                                               var actionContext = factory.GetRequiredService<IActionContextAccessor>().ActionContext;
+                                               return factory.GetRequiredService<IUrlHelperFactory>().GetUrlHelper(actionContext);
+                                           });
 
-            services.AddControllersWithViews();
+            services.AddSignalR();
+            
+            var httpCacheSettings = new HttpCacheSettings();
+            Configuration.Bind("ServerStarters:HttpCache", httpCacheSettings);
+            services.AddSingleton<IHttpCacheSettings>(httpCacheSettings);
+
+            services.AddControllersWithViews(options =>
+                                             {
+                                                 foreach (var profile in httpCacheSettings.Profiles)
+                                                 {
+                                                     options.CacheProfiles.Add(profile.Key, profile.Value);
+                                                 }
+                                             });
             services.AddRazorPages();
 
             services.AddResponseCompression(opts =>
@@ -335,7 +359,9 @@ namespace ServerStarter.Server
 
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
-            app.UseStaticFiles();
+
+            var httpCacheSettings = app.ApplicationServices.GetRequiredService<IHttpCacheSettings>();
+            app.AddStaticFilesWithCache(httpCacheSettings);
 
             app.UseRouting();
 

@@ -36,8 +36,8 @@ namespace ServerStarter.Server.ZarloAdapter
             var players = (await _queries.GetOnlinePlayers(cancellationToken))
                                 .Where(p => p.ServerId == serverId)
                                 .Where(p => p.SteamId > 0)
-                                .Select(p => new ServerPlayer
-                                             {
+                                .Select(p => new Player
+                                {
                                                  SteamId = p.SteamId,
                                              })
                                 .ToList();
@@ -51,7 +51,12 @@ namespace ServerStarter.Server.ZarloAdapter
 
     public class ServerInfo
     {
-        public int MaxPlayers { get; set; }
-        public IList<ServerPlayer> Players { get; set; } = new List<ServerPlayer>();
+        public int           MaxPlayers { get; set; }
+        public IList<Player> Players    { get; set; } = new List<Player>();
+    }
+
+    public class Player
+    {
+        public long SteamId { get; set; }
     }
 }

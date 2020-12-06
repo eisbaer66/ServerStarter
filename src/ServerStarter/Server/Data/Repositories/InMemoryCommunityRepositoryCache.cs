@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using ServerStarter.Server.Models;
@@ -49,6 +50,16 @@ namespace ServerStarter.Server.Data.Repositories
                                                  {
                                                      e.AbsoluteExpirationRelativeToNow = _timingSettings.CommunityCacheDuration;
                                                      return await _repository.Get(id);
+                                                 });
+        }
+
+        public async Task<File> GetIcon(Guid id, CancellationToken ct)
+        {
+            return await _cache.GetOrCreateAsync(CacheKey + "Icon" + id,
+                                                 async e =>
+                                                 {
+                                                     e.AbsoluteExpirationRelativeToNow = _timingSettings.CommunityHeaderImageCacheDuration;
+                                                     return await _repository.GetIcon(id, ct);
                                                  });
         }
 

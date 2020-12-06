@@ -94,8 +94,8 @@ namespace ServerStarter.Server.Tests
                             {
                                 Id = Guid.NewGuid(),
                             };
-            var updatedCommunity = new Shared.Community
-                                   {
+            var updatedCommunity = new CommunityUpdate
+            {
                                        Id = Guid.NewGuid(),
                                    };
             var community2 = new Community

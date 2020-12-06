@@ -35,11 +35,12 @@ namespace ServerStarter.Server.Controllers
             var communities = await _repository.Get();
 
             return await communities
-                         .Select(community =>
+                         .Select(async community =>
                                  {
                                      using (_logger.BeginScope("Community {@CommunityId}", community.Id))
                                      {
-                                         return _service.UpdateCommunity(community, ct);
+                                         var update = await _service.UpdateCommunity(community, ct);
+                                         return update.ToDto();
                                      }
                                  })
                          .Sequence();
@@ -52,7 +53,20 @@ namespace ServerStarter.Server.Controllers
             {
                 var community = await _repository.Get(id);
 
-                return await _service.UpdateCommunity(community, ct);
+                var update = await _service.UpdateCommunity(community, ct);
+                return update.ToDto();
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("{id}/icon")]
+        [ResponseCache(CacheProfileName = CacheProfileName.StaticFiles)]
+        public async Task<FileContentResult> GetIcon(Guid id, CancellationToken ct)
+        {
+            using (_logger.BeginScope("CommunityIcon {@CommunityId}", id))
+            {
+                var icon = await _repository.GetIcon(id, ct);
+                return File(icon.Bytes, icon.ContentType);
             }
         }
     }

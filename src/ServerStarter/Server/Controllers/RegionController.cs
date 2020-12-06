@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ServerStarter.Server.Data.Repositories;
+using ServerStarter.Server.Models;
 using ServerStarter.Server.Services;
 using ServerStarter.Server.util;
 using ServerStarter.Shared;
@@ -21,12 +22,17 @@ namespace ServerStarter.Server.Controllers
         private readonly ICommunityRepository      _repository;
         private readonly ICommunityService         _service;
         private readonly ILogger<RegionController> _logger;
+        private readonly IUrlHelper                _urlHelper;
 
-        public RegionController(ICommunityRepository repository, ICommunityService service, ILogger<RegionController> logger)
+        public RegionController(ICommunityRepository repository, 
+                                ICommunityService service, 
+                                ILogger<RegionController> logger, 
+                                IUrlHelper urlHelper)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _service    = service    ?? throw new ArgumentNullException(nameof(service));
             _logger     = logger     ?? throw new ArgumentNullException(nameof(logger));
+            _urlHelper  = urlHelper  ?? throw new ArgumentNullException(nameof(urlHelper));
         }
 
         [HttpGet]
@@ -60,8 +66,9 @@ namespace ServerStarter.Server.Controllers
             }
         }
 
-        private static Region CreateOverview(Community updatedCommunity)
+        private Region CreateOverview(CommunityUpdate updatedCommunity)
         {
+            var        iconUrl = _urlHelper.Action("GetIcon", "Communities", new {id =updatedCommunity.Id});
             return new Region
                    {
                        Id             = updatedCommunity.Id,
@@ -70,7 +77,8 @@ namespace ServerStarter.Server.Controllers
                        WaitingPlayers = updatedCommunity.WaitingPlayers,
                        CurrentPlayers = updatedCommunity.Servers
                                                         .Select(s => s.CurrentPlayers)
-                                                        .Sum()
+                                                        .Sum(),
+                       IconUrl = iconUrl,
                    };
         }
     }

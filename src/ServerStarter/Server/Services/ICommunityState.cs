@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
-using ServerStarter.Shared;
+using ServerStarter.Server.Models;
 
 namespace ServerStarter.Server.Services
 {
     public interface ICommunityState
     {
-        Task UpdateLastCommunities(Community community);
+        Task UpdateLastCommunities(CommunityUpdate community);
     }
 }

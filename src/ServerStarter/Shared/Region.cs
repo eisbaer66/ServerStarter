@@ -9,6 +9,7 @@ namespace ServerStarter.Shared
         public int      CurrentPlayers { get; set; }
         public int      WaitingPlayers { get; set; }
         public DateTime Updated        { get; set; }
+        public string   IconUrl        { get; set; }
 
         protected bool Equals(Community other)
         {

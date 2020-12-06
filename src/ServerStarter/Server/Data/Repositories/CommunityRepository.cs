@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using ServerStarter.Server.Models;
+using ServerStarter.Shared;
 
 namespace ServerStarter.Server.Data.Repositories
 {
@@ -40,6 +43,20 @@ namespace ServerStarter.Server.Data.Repositories
                                                                  })
                                                     .FirstOrDefaultAsync(c => c.c.Id == id);
             return community.c;
+        }
+
+        public async Task<Models.File> GetIcon(Guid id, CancellationToken ct)
+        {
+            var file = await _context.Communities
+                                              .Where(c => c.Id == id)
+                                              .Select(c => new {c.HeaderImage, c.HeaderImageContentType})
+                                              .FirstOrDefaultAsync(ct);
+
+            return new File
+                   {
+                       Bytes = file.HeaderImage,
+                       ContentType = file.HeaderImageContentType,
+                   };
         }
     }
 }

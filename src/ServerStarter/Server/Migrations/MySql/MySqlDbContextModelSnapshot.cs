@@ -327,6 +327,12 @@ namespace ServerStarter.Server.Migrations.MySql
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<byte[]>("HeaderImage")
+                        .HasColumnType("longblob");
+
+                    b.Property<string>("HeaderImageContentType")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
                     b.Property<int>("MaximumPlayers")
                         .HasColumnType("int");
 

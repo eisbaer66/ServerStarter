@@ -333,6 +333,12 @@ namespace ServerStarter.Server.Migrations.SqlServer
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<byte[]>("HeaderImage")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("HeaderImageContentType")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("MaximumPlayers")
                         .HasColumnType("int");
 

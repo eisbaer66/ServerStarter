@@ -4,15 +4,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using ServerStarter.Server.Hubs;
-using ServerStarter.Shared;
+using ServerStarter.Server.Models;
 
 namespace ServerStarter.Server.Services
 {
     class CommunityState : ICommunityState
     {
-        private readonly IDictionary<Guid, Community> _lastCommunities = new Dictionary<Guid, Community>();
-        private readonly IHubContext<CommunitiesHub>  _hub;
-        private readonly ILogger<CommunityState>      _logger;
+        private readonly IDictionary<Guid, CommunityUpdate> _lastCommunities = new Dictionary<Guid, CommunityUpdate>();
+        private readonly IHubContext<CommunitiesHub>        _hub;
+        private readonly ILogger<CommunityState>            _logger;
 
         public CommunityState(IHubContext<CommunitiesHub> hub, ILogger<CommunityState> logger)
         {
@@ -20,7 +20,7 @@ namespace ServerStarter.Server.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task UpdateLastCommunities(Community updatedCommunity)
+        public async Task UpdateLastCommunities(CommunityUpdate updatedCommunity)
         {
             if (!_lastCommunities.ContainsKey(updatedCommunity.Id))
             {
@@ -31,7 +31,7 @@ namespace ServerStarter.Server.Services
                 return;
             }
 
-            Community lastCommunity = _lastCommunities[updatedCommunity.Id];
+            CommunityUpdate lastCommunity = _lastCommunities[updatedCommunity.Id];
 
             if (!lastCommunity.Equals(updatedCommunity))
             {
