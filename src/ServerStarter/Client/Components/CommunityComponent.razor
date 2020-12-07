@@ -5,6 +5,7 @@
 @using System.Timers
 @using ServerStarter.Client.Hubs
 @using ServerStarter.Server
+@using ServerStarter.Client.Identity
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -204,31 +205,31 @@
     protected override async Task OnInitializedAsync()
     {
         QueueService.OnCommunityChanged(async (communityId) =>
-                                              {
-                                                  if (communityId != Community.Id)
-                                                      return;
+        {
+            if (communityId != Community.Id)
+                return;
 
-                                                  await LoadCommunity();
-                                              })
+            await LoadCommunity();
+        })
                     .AddTo(subscription);
 
         QueueService.Init(new StateEvents
-                          {
-                              Joined = async (communityId) =>
-                                             {
-                                                 if (communityId != Community.Id)
-                                                     return;
+        {
+            Joined = async (communityId) =>
+            {
+                if (communityId != Community.Id)
+                    return;
 
-                                                 await JoinQueue();
-                                             },
-                              Left = async (communityId) =>
-                                           {
-                                               if (communityId != Community.Id)
-                                                   return;
+                await JoinQueue();
+            },
+            Left = async (communityId) =>
+            {
+                if (communityId != Community.Id)
+                    return;
 
-                                               await LeaveQueue();
-                                           },
-                          })
+                await LeaveQueue();
+            },
+        })
                     .AddTo(subscription);
     }
 
@@ -391,12 +392,10 @@
         if (joined)
             return;
         joined = true;
-        
+
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var currentUser = authState.User;
-    //if (user == currentUser.Claims.FirstOrDefault(c => c.Type == IcebearClaimTypes.SteamId)?.Value)
-        var identityName = currentUser.Identity?.Name;
+        var identityName = authState.User.GetName();
 
         var events = new QueueEvents
         {

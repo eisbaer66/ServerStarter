@@ -45,7 +45,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        QueueService.Init(new StateEvents
+        (await QueueService.Init(new StateEvents
                                          {
                                              Joined = async id =>
                                                       {
@@ -63,7 +63,8 @@
     //TODO disable Join button ?
                                                           //StateHasChanged();
                                                       },
-                                         });
+                                         }))
+            .AddTo(_resources);
 
         if (QueueService.IsJoined(Region.Id))
         {
