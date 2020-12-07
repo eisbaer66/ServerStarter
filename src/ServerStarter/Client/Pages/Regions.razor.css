@@ -1,6 +1,7 @@
 ﻿h1 {
     font-size: 4rem;
     line-height: normal;
+    text-align: center;
 }
 
 .container {
@@ -11,6 +12,7 @@
 .head {
     font-family: 'TF2Build';
     line-height: normal;
+    text-align: center;
 }
 .loading {
     margin: 50px;
