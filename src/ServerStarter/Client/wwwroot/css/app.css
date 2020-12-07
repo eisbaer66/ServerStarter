@@ -38,14 +38,19 @@
     --fontcolorlight: #ECEACC;
     --fontcolorlightSecondary: #BBB89B;
     --fontcolordark: #291e17;
-    --highlightcolor: #FF6E1E;
-    --activecolor: #FF5900;
+    --highlightcolor: #b05112;
+    --activecolor: #e06818;
     --lightbackgroundcolor: #d1c5b0;
     --secondarybuttonbackgroundcolor: #776B5F;
     --secondarybuttoncolor: #EDE2CC;
     --joinbuttonBackground: #34851C;
     --discordUser: #338ECC;
     --devAlpha: #FF4D16;
+}
+
+.bountyColor {
+    --highlightcolor: #FF6E1E;
+    --activecolor: #FF5900;
 }
 
 ::-webkit-scrollbar {
