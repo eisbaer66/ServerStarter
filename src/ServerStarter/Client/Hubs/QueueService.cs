@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
@@ -19,14 +21,17 @@ namespace ServerStarter.Client.Hubs
         Task                Leave(Guid                          communityId);
         Task<IDisposable>   RegisterQueueEvents(QueueEvents     events);
         Task                SendMessage(Guid                    communityId, string input);
+        IEnumerable<Guid>   GetJoined();
     }
 
     public class QueueService : IAsyncDisposable, IQueueService
     {
-        private readonly HubConnection      _hubConnection;
-        private readonly HashSet<Guid>      _joinedQueues = new HashSet<Guid>();
-        private readonly IList<QueueEvents> _queueEvents  = new List<QueueEvents>();
-        private readonly IList<StateEvents> _stateEvents  = new List<StateEvents>();
+        private static readonly SemaphoreSlim _stateEventsSemaphoreSlim = new SemaphoreSlim(1, 1);
+
+        private readonly        HubConnection      _hubConnection;
+        private readonly        HashSet<Guid>      _joinedQueues = new HashSet<Guid>();
+        private readonly        IList<QueueEvents> _queueEvents  = new List<QueueEvents>();
+        private readonly        IList<StateEvents> _stateEvents  = new List<StateEvents>();
 
         public async Task<HubConnection> GetConnection()
         {
@@ -82,8 +87,17 @@ namespace ServerStarter.Client.Hubs
         public async Task<IDisposable> Init(StateEvents events)
         {
             await EnsureConnectionIsStarted();
+
+            await _stateEventsSemaphoreSlim.WaitAsync();
             _stateEvents.Add(events);
-            return new DisposeAction(() => { _stateEvents.Remove(events); });
+            _stateEventsSemaphoreSlim.Release();
+
+            return new DisposeAction(() =>
+            {
+                _stateEventsSemaphoreSlim.Wait();
+                _stateEvents.Remove(events);
+                _stateEventsSemaphoreSlim.Release();
+            });
         }
 
         public async Task<IDisposable> RegisterQueueEvents(QueueEvents events)
@@ -97,6 +111,11 @@ namespace ServerStarter.Client.Hubs
         {
             var connection = await GetConnection();
             await connection.SendAsync("SendMessage", communityId, input);
+        }
+
+        public IEnumerable<Guid> GetJoined()
+        {
+            return _joinedQueues.ToArray();
         }
 
         private IDisposable OnJoinQueue(Func<Guid, Task> callback)
@@ -148,10 +167,13 @@ namespace ServerStarter.Client.Hubs
             await connection.InvokeAsync("JoinGroup", communityId);
             
             _joinedQueues.Add(communityId);
+
+            await _stateEventsSemaphoreSlim.WaitAsync();
             foreach (var e in _stateEvents)
             {
                 await e.Joined(communityId);
             }
+            _stateEventsSemaphoreSlim.Release();
         }
 
         public async Task Leave(Guid communityId)
@@ -163,10 +185,12 @@ namespace ServerStarter.Client.Hubs
             var connection = await GetConnection();
             await connection.InvokeAsync("LeaveGroup", communityId);
 
+            await _stateEventsSemaphoreSlim.WaitAsync();
             foreach (var e in _stateEvents)
             {
                 await e.Left(communityId);
             }
+            _stateEventsSemaphoreSlim.Release();
         }
 
         private async Task EnsureConnectionIsStarted()

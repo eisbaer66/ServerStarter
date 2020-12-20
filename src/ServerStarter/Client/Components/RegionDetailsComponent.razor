@@ -1,0 +1,490 @@
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.Logging
+@using ServerStarter.Shared
+@using System.Timers
+@using Microsoft.AspNetCore.Components.WebAssembly.Infrastructure
+@using ServerStarter.Client.Hubs
+@using ServerStarter.Server
+@using ServerStarter.Client.Identity
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JsRuntime
+@inject ILogger<CommunityComponent> Logger
+@inject QueueSettings QueueSettings
+@inject IQueueService QueueService
+@implements IDisposable
+
+<div class="row community">
+    <div class="col-sm-12 col-lg-2 col-xl-2">
+        <span class="name" data-toggle="tooltip" title="@Community.Name"><img class="regionIcon round" src="@Community.IconUrl" /></span>
+    </div>
+    <div class="col-sm-12 col-lg-10 col-xl-10 head">
+        <p> game will begin with @Community.MinimumPlayers players</p>
+        <p class="mb-1"> waiting for @NeededPlayers players to join</p>
+        <p> <a class="inviteafriend" @onclick="InviteAFriend">invite a friend! (copyable link to queue)</a></p>
+    </div>
+
+    <div class="chatMembers col-sm-12 col-lg-12 col-xl-2 m-t-10">
+        queued players:
+        <ul id="chatMemberList">
+            @foreach (var player in Community.QueuedPlayers)
+            {
+                <li>@player.Name</li>
+            }
+        </ul>
+    </div>
+    <div class="col-sm-12 col-lg-12 col-xl-10 m-t-10">
+        <div class="chat">
+            <div class="messages">
+                <ul id="messagesList">
+                    @foreach (var message in messages)
+                    {
+                        <li @ref="lastMessageElement"><span class="timestamp">@message.Timestamp</span><span>@message.Text</span></li>
+                    }
+                </ul>
+            </div>
+            <div class="controls">
+                <input @ref="messageInputReference" @bind="messageInput" size="50" @onkeyup="KeyUp" />
+                <button class="btn btn-themed" @onclick="Send" disabled="@(!IsConnected)">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<audio preload="auto" id="startSound0" src="assets/sounds/Announcer_am_gamestarting02.wav"></audio>
+<audio preload="auto" id="startSound1" src="assets/sounds/Announcer_am_gamestarting04.wav"></audio>
+<audio preload="auto" id="startSound2" src="assets/sounds/Announcer_am_gamestarting05.wav"></audio>
+<audio preload="auto" id="startSound3" src="assets/sounds/Announcer_am_roundstart04.wav"></audio>
+
+@if (showPopup)
+{
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content modal-content-themed">
+                <div class="modal-header">
+                    <h3 class="modal-title">@PreferredServer.Name ready to play</h3>
+                    <button type="button" class="close"
+                            @onclick="ClosePopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    server @PreferredServer.Name  with @PreferredServer.CurrentPlayers playing at the moment is ready to start
+
+                    <div class="buttons">
+                        <button class="btn btn-themed secondary"
+                                @onclick="ClosePopup">
+                            Leave
+                        </button>
+                        <button class="btn btn-themed primary"
+                                @onclick="() => JoinGame(PreferredServer)">
+                            Join
+                            @if (QueueSettings.AutomaticJoinEnabled)
+                            {
+                                <span>(@SecondsTillAutoJoin sec.)</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Community Community
+    {
+        get => _community;
+        set
+        {
+            if (_community != null && value != null && _community.Updated >= value.Updated)
+                return;
+
+            _community = value;
+        }
+    }
+
+    [Parameter]
+    public EventCallback<CommunityServer> JoinedServer { get; set; }
+
+    ElementReference messageInputReference;
+    ElementReference lastMessageElement;
+
+    private readonly List<Message> messages = new List<Message>();
+
+    private readonly List<IDisposable> subscription = new List<IDisposable>();
+
+    private readonly List<IDisposable> groupSubscription = new List<IDisposable>();
+
+    private readonly Random _random = new Random();
+
+    private bool showPopup = false;
+    private bool _rendered = false;
+
+    private string messageInput;
+    private DateTime _autoJoinTime;
+    private Timer _timer;
+    private Community _community;
+
+    private int SecondsTillAutoJoin => Math.Max(0, (int)(_autoJoinTime - DateTime.UtcNow).TotalSeconds);
+
+    private int NeededPlayers
+    {
+        get
+        {
+            int neededPlayers = Community.MinimumPlayers - Community.CurrentPlayers - Community.WaitingPlayers;
+            if (neededPlayers < 0)
+                return 0;
+
+            return neededPlayers;
+        }
+    }
+
+    private int FullServers
+    {
+        get
+        {
+            return Community.Servers.Count(s => s.ConsideredFull);
+        }
+    }
+
+    private CommunityServer PreferredServer
+    {
+        get
+        {
+            return Community.Servers.FirstOrDefault(s => s.PreferredForQueue);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        QueueService.OnCommunityChanged(async (communityId) =>
+        {
+            if (communityId != Community.Id)
+                return;
+
+            await LoadCommunity();
+        })
+                    .AddTo(subscription);
+
+        QueueService.Init(new StateEvents
+        {
+            Joined = async (communityId) =>
+            {
+                if (communityId != Community.Id)
+                    return;
+
+                await JoinQueue();
+            },
+            Left = async (communityId) =>
+            {
+                if (communityId != Community.Id)
+                    return;
+
+                await LeaveQueue();
+            },
+        })
+                    .AddTo(subscription);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+
+        if (_rendered)
+            return;
+        _rendered = true;
+
+        if (!QueueService.IsJoined(Community.Id))
+            return;
+
+        await JoinQueue();
+    }
+
+    private async Task LoadCommunity()
+    {
+        try
+        {
+            Community = await Http.GetFromJsonAsync<Community>("api/Communities/" + Community.Id);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+
+        StateHasChanged();
+
+        await CheckPlayability();
+    }
+
+    private async Task CheckPlayability()
+    {
+        int playerPool = Community.CurrentPlayers + Community.WaitingPlayers;
+        if (playerPool >= Community.MinimumPlayers)
+            await Notify();
+    }
+
+    private async Task Notify()
+    {
+        if (showPopup)
+            return;
+
+        if (PreferredServer == null)
+        {
+            Logger.LogError("could not find fitting server for players in {Community}", Community);
+            return;     //TODO Callback for zarlo?
+        }
+
+        if (QueueSettings.PlaySounds)
+        {
+            string id = "startSound" + _random.Next(4);
+            await JsRuntime.InvokeAsync<string>("Play", id);
+        }
+
+        if (await UserIsPlayingOnServer(PreferredServer))
+        {
+            Logger.LogInformation("user is already playing on {PreferredServerIp}. leaving queue", PreferredServer.Ip);
+            await LeaveQueue();
+        }
+        else
+            await ShowPopup();
+
+        StateHasChanged();
+    }
+
+    private async Task ShowPopup()
+    {
+        if (!QueueSettings.AutomaticJoinEnabled)
+        {
+            showPopup = true;
+            return;
+        }
+
+        _autoJoinTime = DateTime.UtcNow.AddSeconds(QueueSettings.AutomaticJoinDelayInSeconds);
+        if (DateTime.UtcNow >= _autoJoinTime)
+        {
+            Logger.LogTrace("auto-joining immediately");
+            await JoinGame(PreferredServer);
+            return;
+        }
+
+        SetupAutoJoinUpdates();
+
+        showPopup = true;
+    }
+
+    private void SetupAutoJoinUpdates()
+    {
+        _timer = new Timer(1000)
+        {
+            AutoReset = true,
+        };
+        _timer.Elapsed += async (sender, args) =>
+        {
+            Logger.LogTrace("checking auto-join");
+
+            if (DateTime.UtcNow >= _autoJoinTime)
+            {
+                Logger.LogTrace("auto-joining");
+                await JoinGame(PreferredServer);
+            }
+
+            StateHasChanged();
+        };
+        _timer.Enabled = true;
+    }
+
+    private async Task<bool> UserIsPlayingOnServer(CommunityServer preferredServer)
+    {
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var claim = user.FindFirst(IcebearClaimTypes.SteamId);
+        if (claim == null)
+        {
+            Logger.LogError("{SteamIdClaimType} claim not found. user is considered to not be playing on any server", IcebearClaimTypes.SteamId);
+            return false;
+        }
+
+        return PreferredServer.Players.Select(p => p.SteamId.ToString()).Contains(claim.Value);
+    }
+
+    private void DisableAutoJoinTimer()
+    {
+        if (_timer == null)
+            return;
+
+        _timer.Enabled = false;
+        _timer.Dispose();
+        _timer = null;
+    }
+
+    public async Task ClosePopup()
+    {
+        await LeaveQueue();
+    }
+
+    public async Task JoinGame(CommunityServer server)
+    {
+        DisableAutoJoinTimer();
+
+        string link = GetConnectLink(server);
+        await JsRuntime.InvokeAsync<string>("openNewWindow", link);
+
+        if (JoinedServer.HasDelegate)
+            await JoinedServer.InvokeAsync(server);
+    }
+
+    public async Task JoinQueue()
+    {
+        if (!_rendered)
+            return;
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var identityName = authState.User.GetName();
+
+        var events = new QueueEvents
+        {
+            Name = "CommunityComponent" + Community.Id,
+            MessageReceived = async (communityId, user, message) =>
+            {
+                if (communityId != Community.Id.ToString())
+                    return;
+
+                var encodedMsg = $"{user}: {message}";
+                await AddMessage(encodedMsg);
+            },
+            UserJoined = async (communityId, user) =>
+            {
+                if (communityId != Community.Id.ToString())
+                    return;
+
+                if (user == identityName)
+                    return;
+
+                var encodedMsg = $"{user} joined the queue";
+                await AddMessage(encodedMsg);
+            },
+            UserLeft = async (communityId, user) =>
+            {
+                if (communityId != Community.Id.ToString())
+                    return;
+
+                var encodedMsg = $"{user} left the queue";
+                await AddMessage(encodedMsg);
+            },
+        };
+        (await QueueService.RegisterQueueEvents(events))
+                    .AddTo(groupSubscription);
+
+
+        await QueueService.Join(Community.Id);
+        var encodedMsg = $"{identityName} joined the queue";
+        await AddMessage(encodedMsg);
+        StateHasChanged();
+        await FocusInput();
+
+        await LoadCommunity();
+    }
+
+    async Task AddMessage(string msg)
+    {
+        messages.Add(new Message("[" + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + "]", msg));
+        StateHasChanged();
+        await ScrollToLastMessage();
+    }
+
+    public async Task LeaveQueue()
+    {
+        DisableAutoJoinTimer();
+
+        foreach (var subscription in groupSubscription)
+        {
+            subscription.Dispose();
+        }
+        groupSubscription.Clear();
+
+        messages.Clear();
+        messageInput = string.Empty;
+        showPopup = false;
+        StateHasChanged();
+
+
+        await QueueService.Leave(Community.Id);
+        await LoadCommunity();
+    }
+
+    async Task Send()
+    {
+        if (!string.IsNullOrEmpty(messageInput))
+            await QueueService.SendMessage(Community.Id, messageInput);
+
+        messageInput = string.Empty;
+
+        await FocusInput();
+    }
+
+    private async Task InviteAFriend()
+    {
+        await JsRuntime.InvokeVoidAsync("uiFunctions.prompt", string.Empty, "Yo, join me for some balanced fun in TF2: " + NavigationManager.Uri);
+    }
+
+    private async Task FocusInput()
+    {
+        await JsRuntime.InvokeVoidAsync("uiFunctions.focusElement", messageInputReference);
+    }
+
+    private async Task ScrollToLastMessage()
+    {
+        await JsRuntime.InvokeVoidAsync("uiFunctions.scrollElementIntoView", lastMessageElement);
+    }
+
+    async Task KeyUp(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+            await Send();
+    }
+
+    public bool IsConnected => QueueService.State == HubConnectionState.Connected;
+
+    public void Dispose()
+    {
+        _rendered = false;
+
+        foreach (var s in groupSubscription)
+        {
+            s.Dispose();
+        }
+        groupSubscription.Clear();
+
+        foreach (var s in subscription)
+        {
+            s.Dispose();
+        }
+        subscription.Clear();
+
+        LeaveQueue();
+    }
+
+    private string GetConnectLink(CommunityServer server)
+    {
+        return "steam://connect/" + server.Ip;
+    }
+
+    private class Message
+    {
+        public Message(string timestamp, string text)
+        {
+            Timestamp = timestamp ?? throw new ArgumentNullException(nameof(timestamp));
+            Text = text ?? throw new ArgumentNullException(nameof(text));
+        }
+
+        public string Timestamp { get; set; }
+        public string Text { get; set; }
+    }
+
+}

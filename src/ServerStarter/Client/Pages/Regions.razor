@@ -30,9 +30,9 @@
             <div class="regions">
                 @foreach (var region in _regions)
                 {
-                    <RegionComponent Region="region"></RegionComponent>
-
-                    <div class="seperator"></div>
+                    <div class="region">
+                        <RegionComponent Region="region"></RegionComponent>
+                    </div>
                 }
             </div>
         }
@@ -68,18 +68,74 @@
         <ValidationSummary />
         @*<button type="submit">Submit</button>*@
     </EditForm>
-    <div class="description">
-        <DescriptionComponent></DescriptionComponent>
+    <div class="details">
+        @foreach (var community in _joinedRegions.Values)
+        {
+            <div class="region">
+                <RegionDetailsComponent @ref="Childs" Community="community" JoinedServer="JoinedServer"></RegionDetailsComponent>
+            </div>
+        }
     </div>
 
 </div>
 @code {
 
+    private bool _rendered;
     private RegionDto[] _regions;
+    private readonly IDictionary<Guid, Community> _joinedRegions = new Dictionary<Guid, Community>();
+    private readonly List<IDisposable> _resources = new List<IDisposable>();
+
+    private readonly IList<RegionDetailsComponent> childs = new List<RegionDetailsComponent>();
+    RegionDetailsComponent Childs
+    {
+        set { childs.Add(value); }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await LoadRegions();
+        (await QueueService.Init(new StateEvents
+                                 {
+                                     Joined = async id =>
+                                                    {
+                                                        if (_joinedRegions.ContainsKey(id))
+                                                            return;
+
+                                                        await JoinQueue(id);
+                                                    },
+                                     Left = async id =>
+                                                  {
+                                                      if (!_joinedRegions.ContainsKey(id))
+                                                          return;
+
+                                                      _joinedRegions.Remove(id);
+                                                      StateHasChanged();
+                                                  },
+                                 }))
+            .AddTo(_resources);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+
+        if (_rendered)
+            return;
+        _rendered = true;
+
+        foreach (Guid id in QueueService.GetJoined())
+        {
+            await JoinQueue(id);
+        }
+    }
+
+    private async Task JoinQueue(Guid id)
+    {
+        var community = await Http.GetFromJsonAsync<Community>("api/Communities/" + id);
+        _joinedRegions.Add(community.Id, community);
+
+        StateHasChanged();
     }
 
     private async Task LoadRegions()
@@ -93,6 +149,15 @@
         {
             exception.Redirect();
         }
+    }
+
+    private async Task JoinedServer(CommunityServer server)
+    {
+        foreach (RegionDetailsComponent component in childs)
+        {
+            await component.LeaveQueue();
+        }
+        _joinedRegions.Clear();
     }
 
 }

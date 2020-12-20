@@ -5,10 +5,14 @@
 }
 
 .region {
+    background-color: var(--menucolor);
+    padding: 10px;
+    border-radius: 5px;
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
-    width: 200px;
+    width: 250px;
+    margin: 0 30px;
 }
     .region .secondary {
         font-size: 2.3rem;
@@ -28,5 +32,16 @@
     border-radius: 33px;
     background-color: var(--joinbuttonBackground);
     border-color: var(--joinbuttonBackground);
+    color: var(--fontcolorlight);
+}
+.btn-cancel {
+    height: 66px;
+    font-size: 3.5rem;
+    line-height: normal;
+    margin-top: 10px;
+    padding: 0 6px;
+    border-radius: 33px;
+    background-color: var(--cancelbuttonBackground);
+    border-color: var(--cancelbuttonBackground);
     color: var(--fontcolorlight);
 }

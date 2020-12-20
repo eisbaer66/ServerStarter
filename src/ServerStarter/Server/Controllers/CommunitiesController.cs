@@ -21,12 +21,17 @@ namespace ServerStarter.Server.Controllers
         private readonly ICommunityRepository           _repository;
         private readonly ICommunityService              _service;
         private readonly ILogger<CommunitiesController> _logger;
+        private readonly IUrlHelper                     _urlHelper;
 
-        public CommunitiesController(ICommunityRepository repository, ICommunityService service, ILogger<CommunitiesController> logger)
+        public CommunitiesController(ICommunityRepository repository, 
+                                     ICommunityService service, 
+                                     ILogger<CommunitiesController> logger, 
+                                     IUrlHelper urlHelper)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _service    = service    ?? throw new ArgumentNullException(nameof(service));
             _logger     = logger     ?? throw new ArgumentNullException(nameof(logger));
+            _urlHelper  = urlHelper  ?? throw new ArgumentNullException(nameof(urlHelper));
         }
 
         [HttpGet]
@@ -39,8 +44,9 @@ namespace ServerStarter.Server.Controllers
                                  {
                                      using (_logger.BeginScope("Community {@CommunityId}", community.Id))
                                      {
-                                         var update = await _service.UpdateCommunity(community, ct);
-                                         return update.ToDto();
+                                         var update  = await _service.UpdateCommunity(community, ct);
+                                         var iconUrl = _urlHelper.Action("GetIcon", "Communities", new { id = update.Id });
+                                         return update.ToDto(iconUrl);
                                      }
                                  })
                          .Sequence();
@@ -53,8 +59,9 @@ namespace ServerStarter.Server.Controllers
             {
                 var community = await _repository.Get(id);
 
-                var update = await _service.UpdateCommunity(community, ct);
-                return update.ToDto();
+                var update  = await _service.UpdateCommunity(community, ct);
+                var iconUrl = _urlHelper.Action("GetIcon", "Communities", new { id = id });
+                return update.ToDto(iconUrl);
             }
         }
 

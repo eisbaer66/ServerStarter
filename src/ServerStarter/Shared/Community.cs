@@ -6,14 +6,15 @@ namespace ServerStarter.Shared
 {
     public class Community
     {
-        public        Guid                   Id             { get; set; }
-        public        string                 Name           { get; set; }
-        public        int                    CurrentPlayers { get; set; }
-        public        int                    WaitingPlayers { get; set; }
-        public        int                    MinimumPlayers { get; set; }
-        public        IList<CommunityServer> Servers        { get; set; }
-        public        IList<CommunityPlayer> QueuedPlayers  { get; set; }
-        public        DateTime               Updated        { get; set; }
+        public Guid                   Id             { get; set; }
+        public string                 Name           { get; set; }
+        public string                 IconUrl        { get; set; }
+        public int                    CurrentPlayers { get; set; }
+        public int                    WaitingPlayers { get; set; }
+        public int                    MinimumPlayers { get; set; }
+        public IList<CommunityServer> Servers        { get; set; }
+        public IList<CommunityPlayer> QueuedPlayers  { get; set; }
+        public DateTime               Updated        { get; set; }
     }
 
     public class CommunityPlayer

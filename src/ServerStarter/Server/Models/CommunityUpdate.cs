@@ -18,12 +18,13 @@ namespace ServerStarter.Server.Models
         public DateTime                     Updated        { get; set; }
 
 
-        public Shared.Community ToDto()
+        public Shared.Community ToDto(string iconUrl)
         {
             return new Shared.Community
                    {
                        Id             = Id,
                        Name           = Name,
+                       IconUrl        = iconUrl,
                        CurrentPlayers = CurrentPlayers,
                        WaitingPlayers = WaitingPlayers,
                        MinimumPlayers = MinimumPlayers,

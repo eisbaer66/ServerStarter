@@ -22,17 +22,9 @@
     flex-flow: row wrap;
     justify-content: center;
 }
-    .regions .seperator {
-        width: 3px;
-        margin: 0px 30px;
-        background-color: var(--highlightcolor);
-    }
-    .regions .seperator:last-child {
-        display: none;
-    }
 .indicator {
     margin-top: 50px;
 }
-.description {
+.details {
     margin-top: 50px;
 }

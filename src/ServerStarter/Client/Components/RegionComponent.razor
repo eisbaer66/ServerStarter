@@ -22,11 +22,20 @@
     <div class="row secondary">
         <span data-toggle="tooltip" title="@Region.WaitingPlayers in queue">@Region.WaitingPlayers in queue</span>
     </div>
-    <button class="btn btn-themed btn-joinleave w-100" @onclick="JoinRegion" disabled="@(!IsConnected)">join!</button>
+    @if (_joined)
+    {
+        <button class="btn btn-themed btn-cancel w-100" @onclick="LeaveRegion" disabled="@(!IsConnected)">cancel</button>
+    }
+    else
+    {
+        <button class="btn btn-themed btn-joinleave w-100" @onclick="JoinRegion" disabled="@(!IsConnected)">join!</button>
+    }
 </div>
 
 @code {
 
+    private bool _rendered = false;
+    private bool _joined;
     private Region _region;
     [Parameter]
     public Region Region
@@ -46,33 +55,45 @@
     protected override async Task OnInitializedAsync()
     {
         (await QueueService.Init(new StateEvents
-                                         {
-                                             Joined = async id =>
-                                                      {
-                                                          if (id != Region.Id)
-                                                              return;
+        {
+            Joined = async id =>
+            {
+                if (id != Region.Id)
+                    return;
 
-    //TODO disable Join button ?
-                                                          //StateHasChanged();
-                                                      },
-                                             Left = async id =>
-                                                      {
-                                                          if (id != Region.Id)
-                                                              return;
+                _joined = true;
+            },
+            Left = async id =>
+            {
+                if (id != Region.Id)
+                    return;
 
-    //TODO disable Join button ?
-                                                          //StateHasChanged();
-                                                      },
-                                         }))
+                _joined = false;
+            },
+        }))
             .AddTo(_resources);
 
         if (QueueService.IsJoined(Region.Id))
         {
-    //TODO disable Join button ?
-    //StateHasChanged();
+            _joined = true;
         }
         QueueService.OnCommunityChanged(async id => await CommunityChanged(id))
                     .AddTo(_resources);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+
+        if (_rendered)
+            return;
+        _rendered = true;
+
+        if (QueueService.IsJoined(Region.Id))
+        {
+            _joined = true;
+        }
     }
 
     private async Task CommunityChanged(Guid id)
@@ -94,7 +115,11 @@
     public async Task JoinRegion()
     {
         await QueueService.Join(Region.Id);
-        NavigationManager.NavigateTo("region/"+Region.Id);
+    }
+
+    public async Task LeaveRegion()
+    {
+        await QueueService.Leave(Region.Id);
     }
 
     public bool IsConnected =>

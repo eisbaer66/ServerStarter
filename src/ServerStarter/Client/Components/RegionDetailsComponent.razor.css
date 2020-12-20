@@ -1,0 +1,23 @@
+﻿.regionIcon {
+    max-height: 75px;
+    max-width: 75px;
+}
+
+.head {
+    font-family: 'TF2Build';
+    line-height: normal;
+    text-align: center;
+}
+    .head p {
+        font-size: 1.3rem;
+        width: 100%;
+        margin-bottom: 0px;
+    }
+    .head p a {
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+.inviteafriend {
+    color: var(--invitafriendColor);
+}
