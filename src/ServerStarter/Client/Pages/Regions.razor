@@ -19,11 +19,14 @@
 <div class="container">
 
     <div class="head">
+
+        <span class="name" data-toggle="tooltip" title="balance mod"><img class="banner" src="\assets\img\banner.png"/></span>
+
         <h1>choose your region</h1>
 
         @if (_regions == null)
         {
-            <p class="loading"load><em>Loading...</em></p>
+            <p class="loading" load><em>Loading...</em></p>
         }
         else
         {

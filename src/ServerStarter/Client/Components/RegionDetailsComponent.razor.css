@@ -1,6 +1,16 @@
 ﻿.regionIcon {
+    min-height: 75px;
     max-height: 75px;
-    max-width: 75px;
+}
+
+.regionIconBorder {
+    height: 75px;
+    width: 75px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .head {
