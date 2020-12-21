@@ -17,19 +17,19 @@
 @implements IDisposable
 
 <div class="row community">
-    <div class="col-sm-12 col-lg-2 col-xl-2">
+    <div class="col-6 col-lg-2 col-xl-2 order-0 order-lg-0 mb-1">
         <span class="name" data-toggle="tooltip" title="@Community.Name">
             <div class="regionIconBorder round">
                 <img class="regionIcon" src="@Community.IconUrl" />
             </div>
         </span>
     </div>
-    <div class="col-sm-12 col-lg-8 col-xl-8 head">
+    <div class="col-12 col-lg-8 col-xl-8 order-2 order-lg-1 head">
         <p> game will begin with @Community.MinimumPlayers players</p>
         <p class="mb-1"> waiting for @NeededPlayers players to join</p>
         <p> <a class="inviteafriend" @onclick="InviteAFriend">invite a friend! (copyable link to queue)</a></p>
     </div>
-    <div class="col-sm-12 col-lg-2 col-xl-2">
+    <div class="col-6 col-lg-2 col-xl-2 order-1 order-lg-2 mb-1">
         <span class="name" data-toggle="tooltip" title="balance mod">
             <div class="regionIconBorder round float-right">
                 <img class="regionIcon round" src="\assets\img\scale.png" />
@@ -37,7 +37,7 @@
         </span>
     </div>
 
-    <div class="chatMembers col-sm-12 col-lg-12 col-xl-2 m-t-10">
+    <div class="chatMembers col-12 col-lg-12 col-xl-2 order-2 m-t-10">
         queued players:
         <ul id="chatMemberList">
             @foreach (var player in Community.QueuedPlayers)
@@ -46,7 +46,7 @@
             }
         </ul>
     </div>
-    <div class="col-sm-12 col-lg-12 col-xl-10 m-t-10">
+    <div class="col-12 col-lg-12 col-xl-10 order-3 m-t-10">
         <div class="chat">
             <div class="messages">
                 <ul id="messagesList">
