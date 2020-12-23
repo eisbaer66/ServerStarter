@@ -129,7 +129,7 @@ a, .btn-link {
         color: var(--activecolor);
     }
 
-img.round {
+.round {
     border-radius: 50%;
 }
 
