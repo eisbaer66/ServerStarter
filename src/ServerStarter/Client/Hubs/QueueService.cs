@@ -178,6 +178,8 @@ namespace ServerStarter.Client.Hubs
 
         public async Task Leave(Guid communityId)
         {
+            await _stateEventsSemaphoreSlim.WaitAsync();
+
             if (!_joinedQueues.Contains(communityId))
                 return;
 
@@ -185,7 +187,6 @@ namespace ServerStarter.Client.Hubs
             var connection = await GetConnection();
             await connection.InvokeAsync("LeaveGroup", communityId);
 
-            await _stateEventsSemaphoreSlim.WaitAsync();
             foreach (var e in _stateEvents)
             {
                 await e.Left(communityId);

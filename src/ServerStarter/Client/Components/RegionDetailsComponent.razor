@@ -424,9 +424,7 @@
         showPopup = false;
         StateHasChanged();
 
-
         await QueueService.Leave(Community.Id);
-        await LoadCommunity();
     }
 
     async Task Send()
