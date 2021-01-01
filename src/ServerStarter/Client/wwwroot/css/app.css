@@ -48,6 +48,7 @@
     --cancelbuttonBackground: #808080;
     --discordUser: #338ECC;
     --devAlpha: #FF4D16;
+    --error: red;
 }
 
 .bountyColor {
@@ -135,6 +136,18 @@ a, .btn-link {
 
 p.br {
     margin-bottom: 0px;
+}
+
+span.error {
+    color: var(--error);
+}
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--background);
+    text-align: center;
 }
 
 .btn-primary {

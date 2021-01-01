@@ -44,6 +44,8 @@ namespace ServerStarter.Client
                                   });
             services.AddScoped<IQueueService, QueueService>();
 
+            services.AddSingleton(provider => provider.GetRequiredService<IConfiguration>().GetSection("Notes").Get<NotesConfiguration>());
+
             await builder.Build().RunAsync();
         }
     }

@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject NotesConfiguration NotesConfiguration
 
 <div class="page">
     <div class="sidebar">
@@ -16,3 +17,12 @@
         </div>
     </div>
 </div>
+    
+@if(NotesConfiguration.CreatorsTf)
+{ 
+    <footer>
+        <div class="creatorsAssetPackNote">
+            Note: Official Balance Mod servers uses the content pack from creators.tf. <span class="error">To avoid seeing errors</span> download the content from their launcher <a href="https://creators.tf/launcher" target="_blank">here</a>
+        </div>
+    </footer>
+}

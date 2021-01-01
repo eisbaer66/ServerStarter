@@ -6,6 +6,7 @@
 
 .main {
     flex: 1;
+    margin-bottom: 20px;
 }
 
 .main .top-row {
@@ -111,4 +112,9 @@
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
     }
+}
+
+.creatorsAssetPackNote {
+    font-size: 0.8em;
+    padding: 2px 0px;
 }
