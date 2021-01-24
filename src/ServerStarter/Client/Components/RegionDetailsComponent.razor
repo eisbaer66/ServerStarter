@@ -28,6 +28,7 @@
         <p> game will begin with @Community.MinimumPlayers players</p>
         <p class="mb-1"> waiting for @NeededPlayers players to join</p>
         <p> <a class="inviteafriend" @onclick="InviteAFriend">invite a friend! (copyable link to queue)</a></p>
+        <p> <a @onclick="JoinImmediately">or join immediately</a></p>
     </div>
     <div class="col-6 col-lg-2 col-xl-2 order-1 order-lg-2 mb-1">
         <span class="name" data-toggle="tooltip" title="balance mod">
@@ -435,6 +436,22 @@
         messageInput = string.Empty;
 
         await FocusInput();
+    }
+
+    private async Task<bool> JoinImmediately()
+    {
+        var server = Community.Servers
+                              .Where(s => s.CurrentPlayers < s.MaxPlayers)
+                              .OrderBy(s => s.CurrentPlayers)
+                              .FirstOrDefault();
+        if (server == null)
+        {
+            Logger.LogError("could not find server to join immediately (Community: {Community})", Community.Id);
+            return false;
+        }
+
+        await JoinGame(server);
+        return false;
     }
 
     private async Task InviteAFriend()

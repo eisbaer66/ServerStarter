@@ -130,6 +130,14 @@ a, .btn-link {
         color: var(--activecolor);
     }
 
+a:not([href]) {
+    color: var(--highlightcolor);
+}
+
+    a:not([href]):hover {
+        color: var(--activecolor);
+    }
+
 .round {
     border-radius: 50%;
 }

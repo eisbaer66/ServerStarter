@@ -30,3 +30,7 @@
 .inviteafriend {
     color: var(--invitafriendColor);
 }
+
+    .inviteafriend:hover {
+        color: var(--invitafriendColor);
+    }
