@@ -1,0 +1,58 @@
+﻿@using ServerStarter.Shared
+@using Microsoft.Extensions.Logging
+@using ServerStarter.Client.Hubs
+
+@inject IJSRuntime JsRuntime
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ILogger<JoinServerPopupComponent> Logger
+@inject QueueSettings QueueSettings
+@inject IQueueService QueueService
+
+
+<audio preload="auto" id="startSound0" src="assets/sounds/Announcer_am_gamestarting02.wav"></audio>
+<audio preload="auto" id="startSound1" src="assets/sounds/Announcer_am_gamestarting04.wav"></audio>
+<audio preload="auto" id="startSound2" src="assets/sounds/Announcer_am_gamestarting05.wav"></audio>
+<audio preload="auto" id="startSound3" src="assets/sounds/Announcer_am_roundstart04.wav"></audio>
+
+@if (ShowPopup)
+{
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content modal-content-themed">
+                <div class="modal-header">
+                    <h3 class="modal-title">@PreferredServer.Name ready to play</h3>
+                    <button type="button" class="close"
+                            @onclick="ClosePopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    server @PreferredServer.Name with @PreferredServer.CurrentPlayers playing at the moment is ready to start
+
+                    <div class="buttons">
+                        <button class="btn btn-themed secondary"
+                                @onclick="ClosePopup">
+
+                            @if (QueueSettings.AutomaticJoinEnabled && @SecondsTillAutoJoin > 0)
+                            {
+                                <span>Leave</span>
+                            }
+                            else
+                            {
+                                <span>Close</span>
+                            }
+                        </button>
+                        <button class="btn btn-themed primary"
+                                @onclick="JoinGame">
+                            Join
+                            @if (QueueSettings.AutomaticJoinEnabled && @SecondsTillAutoJoin > 0)
+                            {
+                                <span>(@SecondsTillAutoJoin sec.)</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

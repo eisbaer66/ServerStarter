@@ -6,32 +6,39 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.JSInterop;
+using ServerStarter.Shared;
 
 namespace ServerStarter.Client.Hubs
 {
     public interface IQueueService
     {
-        HubConnectionState? State { get; }
-        Task                Init();
-        Task<IDisposable>   Init(StateEvents                    events);
-        IDisposable         OnCommunityChanged(Func<Guid, Task> callback);
-        IDisposable         On<T>(string                        methodName, Func<T, Task> callback);
-        bool                IsJoined(Guid                       communityId);
-        Task                Join(Guid                           communityId);
-        Task                Leave(Guid                          communityId);
-        Task<IDisposable>   RegisterQueueEvents(QueueEvents     events);
-        Task                SendMessage(Guid                    communityId, string input);
-        IEnumerable<Guid>   GetJoined();
+        HubConnectionState?            State        { get; }
+        EventCallback<CommunityServer> JoinedServer { get; set; }
+        Task                           Init();
+        Task<IDisposable>              Init(StateEvents                    events);
+        IDisposable                    OnCommunityChanged(Func<Guid, Task> callback);
+        IDisposable                    On<T>(string                        methodName, Func<T, Task> callback);
+        bool                           IsJoined(Guid                       communityId);
+        Task                           Join(Guid                           communityId);
+        Task                           Leave(Guid                          communityId);
+        Task<IDisposable>              RegisterQueueEvents(QueueEvents     events);
+        Task                           SendMessage(Guid                    communityId, string input);
+        IEnumerable<Guid>              GetJoined();
+        Task                           JoinGame(CommunityServer            server);
+        Task                           JoinGameImmediately(CommunityServer server);
     }
 
     public class QueueService : IAsyncDisposable, IQueueService
     {
+        private readonly        IJSRuntime    _jsRuntime;
         private static readonly SemaphoreSlim _stateEventsSemaphoreSlim = new SemaphoreSlim(1, 1);
 
-        private readonly        HubConnection      _hubConnection;
-        private readonly        HashSet<Guid>      _joinedQueues = new HashSet<Guid>();
-        private readonly        IList<QueueEvents> _queueEvents  = new List<QueueEvents>();
-        private readonly        IList<StateEvents> _stateEvents  = new List<StateEvents>();
+        private readonly HubConnection                  _hubConnection;
+        private readonly HashSet<Guid>                  _joinedQueues = new HashSet<Guid>();
+        private readonly IList<QueueEvents>             _queueEvents  = new List<QueueEvents>();
+        private readonly IList<StateEvents>             _stateEvents  = new List<StateEvents>();
+        public           EventCallback<CommunityServer> JoinedServer { get; set; }
 
         public async Task<HubConnection> GetConnection()
         {
@@ -41,10 +48,11 @@ namespace ServerStarter.Client.Hubs
 
         public HubConnectionState? State => _hubConnection?.State;
 
-        public QueueService(IAccessTokenProvider accessTokenProvider, NavigationManager navigationManager)
+        public QueueService(IAccessTokenProvider accessTokenProvider, NavigationManager navigationManager, IJSRuntime jsRuntime)
         {
             if (accessTokenProvider == null) throw new ArgumentNullException(nameof(accessTokenProvider));
             if (navigationManager   == null) throw new ArgumentNullException(nameof(navigationManager));
+            _jsRuntime = jsRuntime ?? throw new ArgumentNullException(nameof(jsRuntime));
 
             _hubConnection = new HubConnectionBuilder()
                              .WithDefaultConfig(accessTokenProvider, navigationManager)
@@ -178,8 +186,6 @@ namespace ServerStarter.Client.Hubs
 
         public async Task Leave(Guid communityId)
         {
-            await _stateEventsSemaphoreSlim.WaitAsync();
-
             if (!_joinedQueues.Contains(communityId))
                 return;
 
@@ -187,11 +193,31 @@ namespace ServerStarter.Client.Hubs
             var connection = await GetConnection();
             await connection.InvokeAsync("LeaveGroup", communityId);
 
+            await _stateEventsSemaphoreSlim.WaitAsync();
             foreach (var e in _stateEvents)
             {
                 await e.Left(communityId);
             }
             _stateEventsSemaphoreSlim.Release();
+        }
+
+        public async Task JoinGameImmediately(CommunityServer server)
+        {
+            string link = GetConnectLink(server);
+            await _jsRuntime.InvokeAsync<string>("openNewWindow", link);
+        }
+
+        public async Task JoinGame(CommunityServer server)
+        {
+            await JoinGameImmediately(server);
+
+            if (JoinedServer.HasDelegate)
+                await JoinedServer.InvokeAsync(server);
+        }
+
+        private string GetConnectLink(CommunityServer server)
+        {
+            return "steam://connect/" + server.Ip;
         }
 
         private async Task EnsureConnectionIsStarted()

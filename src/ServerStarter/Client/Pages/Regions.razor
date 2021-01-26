@@ -38,7 +38,7 @@
             </div>
         }
     </div>
-    
+
     @if (QueueService.State == HubConnectionState.Connected)
     {
         <div class="indicator">
@@ -73,16 +73,19 @@
         @foreach (var community in _joinedRegions.Values)
         {
             <div class="region">
-                <RegionDetailsComponent @ref="Childs" Community="community" JoinedServer="JoinedServer"></RegionDetailsComponent>
+                <RegionDetailsComponent @ref="Childs" Community="community"></RegionDetailsComponent>
             </div>
         }
     </div>
 
 </div>
+<JoinServerPopupComponent @ref="_popup"></JoinServerPopupComponent>
+
 @code {
 
     private bool _rendered;
     private RegionDto[] _regions;
+    private JoinServerPopupComponent _popup;
     private readonly IDictionary<Guid, Community> _joinedRegions = new Dictionary<Guid, Community>();
     private readonly List<IDisposable> _resources = new List<IDisposable>();
 
@@ -96,24 +99,54 @@
     {
         await LoadRegions();
         (await QueueService.Init(new StateEvents
-                                 {
-                                     Joined = async id =>
-                                                    {
-                                                        if (_joinedRegions.ContainsKey(id))
-                                                            return;
+        {
+            Joined = async id =>
+            {
+                if (_joinedRegions.ContainsKey(id))
+                    return;
 
-                                                        await JoinQueue(id);
-                                                    },
-                                     Left = async id =>
-                                                  {
-                                                      if (!_joinedRegions.ContainsKey(id))
-                                                          return;
+                await JoinQueue(id);
+            },
+            Left = async id =>
+            {
+                if (!_joinedRegions.ContainsKey(id))
+                    return;
 
-                                                      _joinedRegions.Remove(id);
-                                                      StateHasChanged();
-                                                  },
-                                 }))
+                _joinedRegions.Remove(id);
+                StateHasChanged();
+            },
+        }))
             .AddTo(_resources);
+
+        QueueService.JoinedServer = new EventCallback<CommunityServer>(this, (Func<CommunityServer, Task>)JoinedServer);
+
+        QueueService.OnCommunityChanged(async communityId =>
+        {
+            if (!_joinedRegions.ContainsKey(communityId))
+                return;
+
+            Community community = null;
+            try
+            {
+                community = await Http.GetFromJsonAsync<Community>("api/Communities/" + communityId);
+            }
+            catch (AccessTokenNotAvailableException exception)
+            {
+                exception.Redirect();
+            }
+
+            _joinedRegions[communityId] = community;
+            await CheckPlayability(community);
+
+            StateHasChanged();
+        });
+    }
+
+    private async Task CheckPlayability(Community community)
+    {
+        int playerPool = community.CurrentPlayers + community.WaitingPlayers;
+        if (playerPool >= community.MinimumPlayers)
+            await _popup.Notify(community);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -160,5 +193,4 @@
         }
         _joinedRegions.Clear();
     }
-
 }

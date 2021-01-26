@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zarlo.Stats", "Zarlo.Stats\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zarlo.Stats.DummyApi", "Zarlo.Stats.DummyApi\Zarlo.Stats.DummyApi.csproj", "{970A1D57-4332-438B-903F-806924F4A191}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerStarter.Server.Tests", "ServerStarter.Server.Tests\ServerStarter.Server.Tests.csproj", "{D8F2C9AB-8292-49D5-9637-2BE542A77F17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerStarter.Server.Tests", "ServerStarter.Server.Tests\ServerStarter.Server.Tests.csproj", "{D8F2C9AB-8292-49D5-9637-2BE542A77F17}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
