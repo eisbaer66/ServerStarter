@@ -235,10 +235,7 @@
 
     private async Task<bool> JoinImmediately()
     {
-        var server = Community.Servers
-                              .Where(s => s.CurrentPlayers < s.MaxPlayers)
-                              .OrderBy(s => s.CurrentPlayers)
-                              .FirstOrDefault();
+        var server = Community.Servers.FirstOrDefault(s => s.PreferredForQueue);
         if (server == null)
         {
             Logger.LogError("could not find server to join immediately (Community: {Community})", Community.Id);
