@@ -22,6 +22,7 @@ namespace ServerStarter.Server.Data.Repositories
         {
             var dbcommunities = await _context.Communities
                                               .OrderBy(c => c.Order)
+                                              .Where(c => c.Servers.Count > 0)
                                               .Select(c => new
                                                            {
                                                                c       = c,
