@@ -1,5 +1,6 @@
-﻿using ServerStarter.Server.Models;
-using IdentityServer4.EntityFramework.Options;
+﻿using System;
+using Duende.IdentityServer.EntityFramework.Options;
+using ServerStarter.Server.Models;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -25,7 +26,13 @@ namespace ServerStarter.Server.Data
         {
         }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseMySql("Data Source=my.db", ServerVersion.FromString("10.3.15-MariaDB-1"));
+        {
+            var versionString = "10.3.15-MariaDB-1";
+            if (!ServerVersion.TryParse(versionString, out var serverVersion))
+                throw new InvalidOperationException($"{versionString} can not be parsed to ServerVersion");
+
+            options.UseMySql("Data Source=my.db", serverVersion);
+        }
     }
     class MsSqlDbContext : ApplicationDbContext
     {

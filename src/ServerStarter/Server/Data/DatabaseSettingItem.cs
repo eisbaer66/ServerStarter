@@ -29,8 +29,11 @@ namespace ServerStarter.Server.Data
                                          });
                     break;
                 case "MySQL":
+                    if (!ServerVersion.TryParse(Meta, out var serverVersion))
+                        throw new InvalidOperationException($"{Meta} can not be parsed to ServerVersion");
+
                     options.UseMySql(ConnectionString,
-                                     ServerVersion.FromString(Meta),
+                                     serverVersion,
                                      builder =>
                                      {
                                          builder.RetryOnFailure(this);

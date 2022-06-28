@@ -61,7 +61,7 @@ namespace ServerStarter.Server.Hubs
 
                 transaction.Context.Request = new Request(context.Request.Method, url)
                                               {
-                                                  Socket      = new Socket { Encrypted = context.Request.IsHttps, RemoteAddress = context.Connection?.RemoteIpAddress?.ToString() },
+                                                  Socket      = new Socket { RemoteAddress = context.Connection?.RemoteIpAddress?.ToString() },
                                                   HttpVersion = GetHttpVersion(context.Request.Protocol),
                                                   Headers     = GetHeaders(context.Request.Headers, Agent.Config)
                                               };

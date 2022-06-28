@@ -11,17 +11,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
 using AspNet.Security.OpenId.Steam;
 using ClacksMiddleware.Extensions;
+using Duende.IdentityServer.Services;
 using Elastic.Apm;
 using Elastic.Apm.Api;
-using Elastic.Apm.Helpers;
 using Elastic.Apm.NetCoreAll;
-using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -48,7 +46,6 @@ using ServerStarter.Server.util;
 using ServerStarter.Server.WorkerServices;
 using ServerStarter.Server.ZarloAdapter;
 using Zarlo.Stats;
-using CacheControlHeaderValue = Microsoft.Net.Http.Headers.CacheControlHeaderValue;
 
 namespace ServerStarter.Server
 {
